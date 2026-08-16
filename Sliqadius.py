@@ -398,9 +398,9 @@ def get_models():
 def choose_model():
     installed=get_models()
     preferred=[
-        "llama3.2:3b",
-        "llama3.2:1b",
-        "qwen2.5:3b",
+        "qwen3:4b",
+        "qwen3:4b",
+        "qwen3:4b",
         "qwen2.5:1.5b",
         "gemma3:4b",
         "phi4-mini",
@@ -409,7 +409,7 @@ def choose_model():
     for model in preferred:
         if model in installed:
             return model
-    return installed[0] if installed else "llama3.2:3b"
+    return installed[0] if installed else "qwen3:4b"
 
 MODEL=choose_model()
 
@@ -1767,6 +1767,8 @@ if __name__=="__main__":
     window.show()
 
     sys.exit(app.exec())
+
+
 
 
 
