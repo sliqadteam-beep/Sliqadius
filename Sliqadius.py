@@ -426,6 +426,37 @@ def find_vision_model():
             return model
     return None
 
+
+# ============================================================
+# SLIQADIUS WEB SEARCH
+# ============================================================
+def web_search(query):
+    try:
+        import requests,re,urllib.parse
+        url="https://html.duckduckgo.com/html/?q="+urllib.parse.quote(query)
+        r=requests.get(url,headers={"User-Agent":"Mozilla/5.0"},timeout=8)
+        r.raise_for_status()
+        results=[]
+        for m in re.finditer(r'class="result__a"[^>]*href="([^"]+)"[^>]*>(.*?)</a>',r.text,re.S):
+            link=re.sub("<.*?>","",m.group(1))
+            title=re.sub("<.*?>","",m.group(2))
+            title=title.replace("&amp;","&").replace("&quot;","\"")
+            if title and link:
+                results.append({"title":title,"url":link})
+            if len(results)>=5:
+                break
+        return results
+    except Exception as e:
+        return []
+
+def web_context(query):
+    results=web_search(query)
+    if not results:
+        return ""
+    text="INTERNET-SUCHERGEBNISSE:\n"
+    for i,x in enumerate(results,1):
+        text+=f"{i}. {x['title']}\nURL: {x['url']}\n"
+    return text
 def ask(question,model,history_data,callback=None,image_path=None):
 
     quick=quick_answer(question) if not image_path else None
@@ -1767,6 +1798,7 @@ if __name__=="__main__":
     window.show()
 
     sys.exit(app.exec())
+
 
 
 
