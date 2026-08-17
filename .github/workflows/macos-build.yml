@@ -65,13 +65,22 @@ jobs:
           name: macos-Apple Silicon
           path: dist
 
+      - name: Create combined macOS download
+        run: |
+          mkdir -p combined
+          cp dist/Sliqadius-macOS-Intel.zip combined/
+          cp dist/Sliqadius-macOS-Apple-Silicon.zip combined/
+          printf '%s\n' 'Sliqadius macOS' '' 'Intel: Sliqadius-macOS-Intel.zip' 'Apple Silicon (M1/M2/M3/M4): Sliqadius-macOS-Apple-Silicon.zip' > combined/README.txt
+          cd combined
+          zip -q ../dist/Sliqadius-macOS.zip README.txt Sliqadius-macOS-Intel.zip Sliqadius-macOS-Apple-Silicon.zip
+
       - name: Create or update macOS release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="macos-v1.0.0"
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" dist/Sliqadius-macOS-Intel.zip dist/Sliqadius-macOS-Apple-Silicon.zip --clobber --repo "$GITHUB_REPOSITORY"
+            gh release upload "$TAG" dist/Sliqadius-macOS.zip dist/Sliqadius-macOS-Intel.zip dist/Sliqadius-macOS-Apple-Silicon.zip --clobber --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$TAG" dist/Sliqadius-macOS-Intel.zip dist/Sliqadius-macOS-Apple-Silicon.zip --repo "$GITHUB_REPOSITORY" --title "Sliqadius macOS v1.0.0" --notes "Sliqadius für macOS. Intel- und Apple-Silicon-Build enthalten."
+            gh release create "$TAG" dist/Sliqadius-macOS.zip dist/Sliqadius-macOS-Intel.zip dist/Sliqadius-macOS-Apple-Silicon.zip --repo "$GITHUB_REPOSITORY" --title "Sliqadius macOS v1.0.0" --notes "Sliqadius für macOS. Der Hauptdownload enthält Intel- und Apple-Silicon-Builds."
           fi
