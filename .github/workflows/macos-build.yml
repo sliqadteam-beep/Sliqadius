@@ -1,0 +1,77 @@
+name: Build Sliqadius for macOS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Intel
+            runner: macos-13
+            asset: Sliqadius-macOS-Intel.zip
+          - name: Apple Silicon
+            runner: macos-14
+            asset: Sliqadius-macOS-Apple-Silicon.zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install PySide6 requests pyinstaller
+
+      - name: Build app
+        run: |
+          pyinstaller --noconfirm --clean --windowed --name Sliqadius Sliqadius.py
+          ditto -c -k --sequesterRsrc --keepParent dist/Sliqadius.app "dist/${{ matrix.asset }}"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.name }}
+          path: dist/${{ matrix.asset }}
+
+  release:
+    name: Publish macOS downloads
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Intel build
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-Intel
+          path: dist
+
+      - name: Download Apple Silicon build
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-Apple Silicon
+          path: dist
+
+      - name: Create or update macOS release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="macos-v1.0.0"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/Sliqadius-macOS-Intel.zip dist/Sliqadius-macOS-Apple-Silicon.zip --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" dist/Sliqadius-macOS-Intel.zip dist/Sliqadius-macOS-Apple-Silicon.zip --repo "$GITHUB_REPOSITORY" --title "Sliqadius macOS v1.0.0" --notes "Sliqadius für macOS. Intel- und Apple-Silicon-Build enthalten."
+          fi
