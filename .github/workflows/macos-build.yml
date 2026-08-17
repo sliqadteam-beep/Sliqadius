@@ -1,16 +1,19 @@
-name: Build Sliqadius for macOS
+name: Build and Release Sliqadius for macOS
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
-  workflow_dispatch:
+    paths:
+      - 'Sliqadius.py'
+      - '.github/workflows/macos-build.yml'
 
 permissions:
   contents: write
 
 jobs:
   build:
-    name: Build ${{ matrix.name }}
+    name: Build macOS ${{ matrix.name }}
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -22,34 +25,33 @@ jobs:
           - name: Apple Silicon
             runner: macos-14
             asset: Sliqadius-macOS-Apple-Silicon.zip
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install PySide6 requests pyinstaller
-
-      - name: Build app
+      - name: Check source
+        run: python -m py_compile Sliqadius.py
+      - name: Build application
         run: |
           pyinstaller --noconfirm --clean --windowed --name Sliqadius Sliqadius.py
+          test -d dist/Sliqadius.app
           ditto -c -k --sequesterRsrc --keepParent dist/Sliqadius.app "dist/${{ matrix.asset }}"
-
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-${{ matrix.name }}
           path: dist/${{ matrix.asset }}
+          if-no-files-found: error
 
   release:
-    name: Publish macOS downloads
+    name: Publish macOS release
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -58,29 +60,30 @@ jobs:
         with:
           name: macos-Intel
           path: dist
-
       - name: Download Apple Silicon build
         uses: actions/download-artifact@v4
         with:
           name: macos-Apple Silicon
           path: dist
-
-      - name: Create combined macOS download
+      - name: Create combined direct download
         run: |
-          mkdir -p combined
-          cp dist/Sliqadius-macOS-Intel.zip combined/
-          cp dist/Sliqadius-macOS-Apple-Silicon.zip combined/
-          printf '%s\n' 'Sliqadius macOS' '' 'Intel: Sliqadius-macOS-Intel.zip' 'Apple Silicon (M1/M2/M3/M4): Sliqadius-macOS-Apple-Silicon.zip' > combined/README.txt
+          mkdir -p combined/Sliqadius-macOS
+          cp dist/Sliqadius-macOS-Intel.zip combined/Sliqadius-macOS/
+          cp dist/Sliqadius-macOS-Apple-Silicon.zip combined/Sliqadius-macOS/
+          printf '%s\n' 'Sliqadius macOS' '' 'Intel: Sliqadius-macOS-Intel.zip' 'Apple Silicon (M1/M2/M3/M4): Sliqadius-macOS-Apple-Silicon.zip' '' 'Open the ZIP matching your Mac and move Sliqadius.app to Applications.' > combined/Sliqadius-macOS/README.txt
           cd combined
-          zip -q ../dist/Sliqadius-macOS.zip README.txt Sliqadius-macOS-Intel.zip Sliqadius-macOS-Apple-Silicon.zip
-
-      - name: Create or update macOS release
+          zip -qr ../dist/Sliqadius-macOS.zip Sliqadius-macOS
+      - name: Publish release assets
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="macos-v1.0.0"
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" dist/Sliqadius-macOS.zip dist/Sliqadius-macOS-Intel.zip dist/Sliqadius-macOS-Apple-Silicon.zip --clobber --repo "$GITHUB_REPOSITORY"
-          else
-            gh release create "$TAG" dist/Sliqadius-macOS.zip dist/Sliqadius-macOS-Intel.zip dist/Sliqadius-macOS-Apple-Silicon.zip --repo "$GITHUB_REPOSITORY" --title "Sliqadius macOS v1.0.0" --notes "Sliqadius für macOS. Der Hauptdownload enthält Intel- und Apple-Silicon-Builds."
-          fi
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "Sliqadius macOS v1.0.0" --notes "Sliqadius für macOS. Der Hauptdownload enthält Intel- und Apple-Silicon-Builds."
+          gh release upload "$TAG" dist/Sliqadius-macOS.zip dist/Sliqadius-macOS-Intel.zip dist/Sliqadius-macOS-Apple-Silicon.zip --clobber --repo "$GITHUB_REPOSITORY"
+      - name: Verify release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view macos-v1.0.0 --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx 'Sliqadius-macOS.zip'
+          gh release view macos-v1.0.0 --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx 'Sliqadius-macOS-Intel.zip'
+          gh release view macos-v1.0.0 --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx 'Sliqadius-macOS-Apple-Silicon.zip'
