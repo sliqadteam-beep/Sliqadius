@@ -1,4 +1,6 @@
 import sys, os, json, base64, mimetypes, requests, io
+import re
+from datetime import datetime, timedelta
 from PIL import Image, ImageOps
 from PySide6.QtCore import Qt, QThread, Signal, QSize, QUrl, QTimer, QPropertyAnimation, QEasingCurve
 from PySide6.QtGui import QFont, QPixmap, QDesktopServices
@@ -197,6 +199,7 @@ class ApiWorker(QThread):
                 )
 
             if response.status_code != 200:
+                # SLIQADIUS_RESET_INFO_V2
                 try:
                     err = response.json().get("error", {})
                     detail = err.get("message", response.text)
@@ -205,7 +208,21 @@ class ApiWorker(QThread):
                         detail = f"{code}: {detail}"
                 except Exception:
                     detail = response.text
-                raise RuntimeError(detail[:1000])
+
+                try:
+                    retry_after = (response.headers.get("retry-after") or "").strip()
+                    reset_tokens = (response.headers.get("x-ratelimit-reset-tokens") or "").strip()
+                    reset_requests = (response.headers.get("x-ratelimit-reset-requests") or "").strip()
+                    if retry_after:
+                        detail += f" [retry_after={retry_after}]"
+                    if reset_tokens:
+                        detail += f" [reset_tokens={reset_tokens}]"
+                    if reset_requests:
+                        detail += f" [reset_requests={reset_requests}]"
+                except Exception:
+                    pass
+
+                raise RuntimeError(detail[:1200])
 
             answer = response.json()["choices"][0]["message"]["content"]
             self.done.emit((answer or "").strip())
@@ -941,10 +958,76 @@ class ChatWindow(QMainWindow):
             )
         )
 
+        def _reset_text():
+            seconds = None
+
+            m = re.search(r"\[retry_after=([0-9.]+)\]", raw, re.I)
+            if m:
+                try:
+                    seconds = float(m.group(1))
+                except Exception:
+                    seconds = None
+
+            if seconds is None:
+                m = re.search(r"try again in\s+([0-9hms.]+)", raw, re.I)
+                if m:
+                    try:
+                        total = 0.0
+                        for value, unit in re.findall(r"([0-9.]+)([hms])", m.group(1), re.I):
+                            value = float(value)
+                            unit = unit.lower()
+                            if unit == "h":
+                                total += value * 3600
+                            elif unit == "m":
+                                total += value * 60
+                            else:
+                                total += value
+                        if total > 0:
+                            seconds = total
+                    except Exception:
+                        seconds = None
+
+            if seconds is None:
+                return ""
+
+            seconds = max(0, int(round(seconds)))
+            reset_at = datetime.now() + timedelta(seconds=seconds)
+
+            hours, rem = divmod(seconds, 3600)
+            minutes, secs = divmod(rem, 60)
+            parts = []
+            if hours:
+                parts.append(f"{hours} Std.")
+            if minutes:
+                parts.append(f"{minutes} Min.")
+            if secs or not parts:
+                parts.append(f"{secs} Sek.")
+
+            return " Zur\u00fcckgesetzt in " + " ".join(parts) + f" (ca. {reset_at.strftime('%H:%M:%S')} Uhr)."
+
+        reset_text = _reset_text()
+
         if no_tokens:
-            message = "\U0001fa99 Keine Tokens mehr. Kaufe mehr bzw. aktiviere den Developer-Plan in der Groq Console: https://console.groq.com  (Settings > Billing)"
+            if "blocked_api_access" in e or "spend limit" in e or "spending limit" in e or "billing hard limit" in e:
+                message = (
+                    "\U0001fa99 Keine Tokens bzw. kein nutzbares Budget mehr. "
+                    "Dein monatliches Groq-Ausgabenlimit wird am 1. des n\u00e4chsten Monats zur\u00fcckgesetzt. "
+                    "Du kannst das Limit auch vorher in der Groq Console erh\u00f6hen: "
+                    "https://console.groq.com/settings/billing"
+                )
+            else:
+                if not reset_text:
+                    reset_text = " Groq hat keine genaue Reset-Zeit mitgeliefert."
+                message = (
+                    "\U0001fa99 Keine Tokens mehr." + reset_text +
+                    " Kaufe mehr bzw. aktiviere den Developer-Plan in der Groq Console: "
+                    "https://console.groq.com/settings/billing"
+                )
         elif "rate limit" in e or "429" in e or "too many requests" in e:
-            message = "\u23f3 Sliqadius ist gerade stark ausgelastet. Versuch es in einem Moment noch einmal."
+            if reset_text:
+                message = "\u23f3 Token-Limit erreicht." + reset_text
+            else:
+                message = "\u23f3 Sliqadius ist gerade stark ausgelastet. Versuch es in einem Moment noch einmal."
         elif (
             "invalid api key" in e
             or "invalid_api_key" in e
