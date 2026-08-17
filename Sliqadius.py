@@ -1,4 +1,5 @@
-import sys, os, json, base64, mimetypes, requests
+import sys, os, json, base64, mimetypes, requests, io
+from PIL import Image, ImageOps
 from PySide6.QtCore import Qt, QThread, Signal, QSize, QUrl, QTimer, QPropertyAnimation, QEasingCurve
 from PySide6.QtGui import QFont, QPixmap, QDesktopServices
 from PySide6.QtWidgets import (
@@ -49,6 +50,62 @@ def save_chats(chats):
         pass
 
 
+def prepare_image_for_vision(path):
+    try:
+        with Image.open(path) as im:
+            im = ImageOps.exif_transpose(im)
+            if im.mode in ("RGBA", "LA"):
+                bg = Image.new("RGB", im.size, "white")
+                alpha = im.getchannel("A")
+                bg.paste(im.convert("RGB"), mask=alpha)
+                im = bg
+            elif im.mode not in ("RGB", "L"):
+                im = im.convert("RGB")
+
+            w, h = im.size
+            if w < 1 or h < 1:
+                raise RuntimeError("Invalid image size.")
+
+            if max(w, h) < 1400 and min(w, h) >= 180:
+                scale_up = min(1.6, 1800.0 / max(w, h))
+                if scale_up > 1.05:
+                    im = im.resize((max(1, int(w * scale_up)), max(1, int(h * scale_up))), Image.Resampling.LANCZOS)
+                    w, h = im.size
+
+            max_side = 3200
+            max_pixels = 8_000_000
+            scale = min(1.0, max_side / float(max(w, h)))
+            if w * h > max_pixels:
+                scale = min(scale, (max_pixels / float(w * h)) ** 0.5)
+            if scale < 1.0:
+                im = im.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.Resampling.LANCZOS)
+
+            if im.mode != "RGB":
+                im = im.convert("RGB")
+
+            target = 2_800_000
+            current = im
+            quality = 94
+            data = b""
+            for _ in range(8):
+                buf = io.BytesIO()
+                current.save(buf, format="JPEG", quality=quality, optimize=True, progressive=True, subsampling=0)
+                data = buf.getvalue()
+                if len(data) <= target:
+                    return data, "image/jpeg"
+                quality = max(82, quality - 3)
+                nw = max(900, int(current.width * 0.90))
+                nh = max(900, int(current.height * 0.90))
+                if (nw, nh) == current.size:
+                    break
+                current = current.resize((nw, nh), Image.Resampling.LANCZOS)
+
+            if data:
+                return data, "image/jpeg"
+            raise RuntimeError("Image could not be encoded.")
+    except Exception as exc:
+        raise RuntimeError("Image preparation failed: " + str(exc))
+
 class ApiWorker(QThread):
     done = Signal(str)
     failed = Signal(str)
@@ -73,24 +130,27 @@ class ApiWorker(QThread):
                 if not os.path.isfile(self.image_path):
                     raise RuntimeError("Das ausgewählte Bild wurde nicht gefunden.")
 
-                with open(self.image_path, "rb") as f:
-                    raw = f.read()
-
-                if len(raw) > 3_000_000:
-                    raise RuntimeError("Das Bild ist zu groß. Bitte wähle ein Bild unter etwa 3 MB.")
-
-                mime = mimetypes.guess_type(self.image_path)[0] or "image/jpeg"
+                raw, mime = prepare_image_for_vision(self.image_path)
                 encoded = base64.b64encode(raw).decode("ascii")
 
-                last_text = "Beschreibe und analysiere dieses Bild."
+                last_text = "Analysiere dieses Bild sehr sorgfaeltig und detailliert."
                 if payload_messages and payload_messages[-1].get("role") == "user":
                     last_text = payload_messages[-1].get("content") or last_text
                     payload_messages = payload_messages[:-1]
 
+                vision_instruction = (
+                    "Untersuche das Bild sehr sorgfaeltig. Erkenne relevante Objekte, "
+                    "kleine Details, sichtbaren Text, Zahlen, Fehlermeldungen, UI-Elemente, "
+                    "Diagramme und Beziehungen im Bild. Lies sichtbaren Text so exakt wie "
+                    "moeglich. Wenn etwas nicht sicher erkennbar ist, sage das offen statt "
+                    "zu raten. Beantworte danach die eigentliche Nutzerfrage vollstaendig. "
+                    "Nutzerfrage: " + last_text
+                )
+
                 payload_messages.append({
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": last_text},
+                        {"type": "text", "text": vision_instruction},
                         {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{encoded}"}},
                     ],
                 })
@@ -99,10 +159,42 @@ class ApiWorker(QThread):
                 "model": model,
                 "messages": payload_messages,
                 "temperature": 0.6,
-                "max_completion_tokens": 2048,
+                "max_completion_tokens": 2800,
             }
 
             response = requests.post(API_URL, headers=headers, json=payload, timeout=120)
+
+            # SLIQADIUS_RATE_RETRY
+            if response.status_code == 429:
+                import time, re
+                wait = 1.5
+                try:
+                    txt = response.text
+                    m = re.search(r"try again in ([0-9.]+)ms", txt, re.I)
+                    if m:
+                        wait = max(0.8, float(m.group(1)) / 1000.0 + 0.5)
+                    else:
+                        m = re.search(r"try again in ([0-9.]+)s", txt, re.I)
+                        if m:
+                            wait = max(1.0, float(m.group(1)) + 0.5)
+                except Exception:
+                    pass
+
+                try:
+                    payload["max_completion_tokens"] = min(
+                        int(payload.get("max_completion_tokens", 2800)),
+                        1800,
+                    )
+                except Exception:
+                    payload["max_completion_tokens"] = 1800
+
+                time.sleep(min(wait, 8.0))
+                response = requests.post(
+                    API_URL,
+                    headers=headers,
+                    json=payload,
+                    timeout=120,
+                )
 
             if response.status_code != 200:
                 try:
@@ -224,13 +316,13 @@ class MessageBubble(QFrame):
         self.role = role
         is_user = role == "user"
         self.setObjectName("userBubble" if is_user else "assistantBubble")
-        self.setMaximumWidth(760)
+        self.setMaximumWidth(800)
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
 
         if is_user:
             self.setStyleSheet("""
                 QFrame#userBubble {
-                    background:#303030;
+                    background:#2b2d31;
                     border:1px solid #3a3a3a;
                     border-radius:18px;
                 }
@@ -238,15 +330,12 @@ class MessageBubble(QFrame):
             """)
         else:
             self.setStyleSheet("""
-                QFrame#assistantBubble {
-                    background:transparent;
-                    border:none;
-                }
+                QFrame#assistantBubble { background:#242529; border:1px solid #303238; border-radius:20px; }
                 QLabel { color:#ededed; background:transparent; }
             """)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(17 if is_user else 5, 12, 17 if is_user else 5, 12)
+        layout.setContentsMargins(18, 14, 18, 14)
         layout.setSpacing(9)
 
         if image_path and os.path.isfile(image_path):
@@ -263,10 +352,13 @@ class MessageBubble(QFrame):
         label.setText(text or "")
         label.setWordWrap(True)
         label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        emoji_font = QFont("Segoe UI Emoji")
+        emoji_font.setPointSize(11)
+        label.setFont(emoji_font)
         label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
-        label.setMaximumWidth(720)
+        label.setMaximumWidth(760)
         label.setStyleSheet(
-            "font-size:14px;line-height:1.35;background:transparent;padding:0;margin:0;"
+            "font-size:15px;line-height:1.45;background:transparent;padding:0;margin:0;"
         )
         layout.addWidget(label)
 
@@ -314,18 +406,18 @@ class ChatWindow(QMainWindow):
 
     def build_ui(self):
         self.setStyleSheet("""
-            QMainWindow { background:#212121; color:#ececec; }
+            QMainWindow { background:#1f2023; color:#ececec; }
             QWidget { font-family:"Segoe UI"; font-size:13px; }
             QWidget#root, QWidget#content, QWidget#messagesHost, QWidget#bottomArea {
-                background:#212121;
+                background:#1f2023;
             }
             QFrame#sidebar {
-                background:#171717;
+                background:#151619;
                 border:none;
                 border-right:1px solid #242424;
             }
-            QLabel#brand { font-size:18px; font-weight:700; color:#f4f4f4; }
-            QLabel#welcome { font-size:30px; font-weight:650; color:#f2f2f2; }
+            QLabel#brand { font-size:20px; font-weight:700; color:#f6f6f7; }
+            QLabel#welcome { font-size:32px; font-weight:700; color:#f5f5f6; }
             QLabel#hint { font-size:13px; color:#8f9095; }
             QPushButton {
                 background:transparent; color:#d9d9d9; border:none;
@@ -333,9 +425,9 @@ class ChatWindow(QMainWindow):
             }
             QPushButton:hover { background:#242424; }
             QPushButton#newChat {
-                background:#202020; border:1px solid #2e2e2e; font-weight:600;
+                background:#202225; border:1px solid #303238; font-weight:600;
             }
-            QPushButton#newChat:hover { background:#292929; border:1px solid #393939; }
+            QPushButton#newChat:hover { background:#292c30; border:1px solid #42454b; }
             QListWidget {
                 background:transparent; border:none; color:#babcc1;
                 outline:none; padding:0;
@@ -346,7 +438,7 @@ class ChatWindow(QMainWindow):
             QListWidget::item:selected { background:#292929; color:white; }
             QListWidget::item:hover { background:#222222; }
             QScrollArea {
-                background:#212121; border:none;
+                background:#1f2023; border:none;
             }
             QScrollBar:vertical {
                 background:transparent; width:9px; margin:4px 1px 4px 0;
@@ -359,10 +451,10 @@ class ChatWindow(QMainWindow):
                 height:0; background:none;
             }
             QLineEdit#composer {
-                background:#2f2f2f; color:#f4f4f4; border:1px solid #3c3c3c;
+                background:#2a2c30; color:#f7f7f8; border:1px solid #3a3d43;
                 border-radius:25px; padding:14px 58px 14px 52px; font-size:14px;
             }
-            QLineEdit#composer:focus { border:1px solid #55565b; }
+            QLineEdit#composer:focus { border:1px solid #62666e; background:#2d2f34; }
             QPushButton#round {
                 background:#3a3a3a; color:#ededed; border:none; border-radius:18px;
                 padding:0; text-align:center; font-size:21px; font-weight:400;
@@ -389,7 +481,7 @@ class ChatWindow(QMainWindow):
 
         sidebar = QFrame()
         sidebar.setObjectName("sidebar")
-        sidebar.setFixedWidth(230)
+        sidebar.setFixedWidth(242)
 
         side = QVBoxLayout(sidebar)
         side.setContentsMargins(12, 15, 12, 14)
@@ -426,7 +518,7 @@ class ChatWindow(QMainWindow):
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.scroll.setFrameShape(QFrame.NoFrame)
-        self.scroll.viewport().setStyleSheet("background:#212121;border:none;")
+        self.scroll.viewport().setStyleSheet("background:#1f2023;border:none;")
 
         self.messages_host = QWidget()
         self.messages_host.setObjectName("messagesHost")
@@ -449,7 +541,7 @@ class ChatWindow(QMainWindow):
         center_row.addStretch()
 
         composer_panel = QWidget()
-        composer_panel.setMaximumWidth(820)
+        composer_panel.setMaximumWidth(860)
         composer_layout = QVBoxLayout(composer_panel)
         composer_layout.setContentsMargins(0, 0, 0, 0)
         composer_layout.setSpacing(7)
@@ -783,8 +875,8 @@ class ChatWindow(QMainWindow):
             "role": "system",
             "content": (
                 "Du bist Sliqadius, ein schneller, hilfreicher KI-Assistent. "
-                "Antworte klar und direkt. Antworte auf Deutsch, wenn der Nutzer Deutsch schreibt. "
-                "Gib niemals internes Chain-of-Thought aus."
+                "Antworte verständlich, vollständig und in angemessener Tiefe. Bei Erklärungen, Fragen, Programmierung, Hausaufgaben oder komplexeren Themen sollst du normalerweise mehrere hilfreiche Absätze liefern, wichtige Zusammenhänge erklären, sinnvolle Schritte nennen und bei Bedarf Beispiele geben. Beantworte alle wichtigen Teile der Frage und höre nicht unnötig früh auf. Kurze Antworten sind nur bei wirklich einfachen Fragen oder wenn der Nutzer ausdrücklich eine kurze Antwort möchte. Antworte auf Deutsch, wenn der Nutzer Deutsch schreibt. "
+                "Strukturiere längere Antworten übersichtlich mit Absätzen und, wenn hilfreich, Aufzählungen oder klaren Schritten. Bei Codefragen liefere vollständigen, verwendbaren Code und erkläre die wichtigsten Teile. Wiederhole dich nicht künstlich und erfinde keine Informationen. Gib niemals internes Chain-of-Thought aus."
             ),
         }]
 
@@ -828,7 +920,54 @@ class ChatWindow(QMainWindow):
         thinking.stop()
         thinking.deleteLater()
 
-        self.add_bubble("assistant", "Fehler: " + error)
+        raw = str(error or "")
+        e = raw.lower()
+
+        if "rate limit" in e or "429" in e or "too many requests" in e:
+            message = "\u23f3 Sliqadius ist gerade stark ausgelastet. Versuch es in einem Moment noch einmal."
+        elif (
+            "invalid api key" in e
+            or "invalid_api_key" in e
+            or "401" in e
+            or "authentication" in e
+            or "unauthorized" in e
+        ):
+            message = "\U0001f511 Dein Groq API-Key ist ung\u00fcltig oder abgelaufen. Klicke links auf 'API-Key \u00e4ndern' und trage einen g\u00fcltigen Key ein."
+        elif "billing" in e or "quota" in e or "insufficient" in e or "credits" in e:
+            message = "\U0001f4b3 F\u00fcr diesen Groq API-Key ist gerade kein verf\u00fcgbares Kontingent mehr vorhanden."
+        elif "timeout" in e or "timed out" in e or "read timed out" in e:
+            message = "\u231b Die Antwort dauert gerade ungew\u00f6hnlich lange. Versuch es bitte noch einmal."
+        elif (
+            "connection" in e
+            or "network" in e
+            or "name resolution" in e
+            or "dns" in e
+            or "failed to establish" in e
+        ):
+            message = "\U0001f4e1 Ich kann Groq gerade nicht erreichen. Pr\u00fcfe deine Internetverbindung und versuch es erneut."
+        elif "image" in e or "bild" in e or "jpeg" in e or "png" in e or "vision" in e:
+            message = "\U0001f5bc\ufe0f Ich konnte dieses Bild nicht richtig verarbeiten. Versuch ein anderes Bild oder einen Screenshot."
+        elif "model" in e and (
+            "not found" in e
+            or "unavailable" in e
+            or "decommission" in e
+            or "unsupported" in e
+        ):
+            message = "\U0001f916 Das KI-Modell ist gerade nicht verf\u00fcgbar. Versuch es in einem Moment erneut."
+        elif "400" in e or "bad request" in e:
+            message = "\u26a0\ufe0f Die Anfrage konnte gerade nicht verarbeitet werden. Formuliere sie etwas anders und versuch es erneut."
+        elif (
+            "500" in e
+            or "502" in e
+            or "503" in e
+            or "504" in e
+            or "server error" in e
+        ):
+            message = "\U0001f6e0\ufe0f Der KI-Server hat gerade ein Problem. Versuch es bitte gleich noch einmal."
+        else:
+            message = "\u26a0\ufe0f Etwas ist schiefgelaufen. Versuch es bitte noch einmal."
+
+        self.add_bubble("assistant", message)
 
         self.input.setEnabled(True)
         self.plus_btn.setEnabled(True)
@@ -836,7 +975,6 @@ class ChatWindow(QMainWindow):
         self.update_send_enabled()
         self.input.setFocus()
         self.scroll_to_bottom()
-
 
 def main():
     app = QApplication(sys.argv)
