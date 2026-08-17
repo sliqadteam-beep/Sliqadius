@@ -165,7 +165,7 @@ class ApiWorker(QThread):
             response = requests.post(API_URL, headers=headers, json=payload, timeout=120)
 
             # SLIQADIUS_RATE_RETRY
-            if response.status_code == 429:
+            if response.status_code == 429 and not any(x in response.text.lower() for x in ("tokens per day", "tpd", "requests per day", "rpd")):
                 import time, re
                 wait = 1.5
                 try:
@@ -198,7 +198,11 @@ class ApiWorker(QThread):
 
             if response.status_code != 200:
                 try:
-                    detail = response.json().get("error", {}).get("message", response.text)
+                    err = response.json().get("error", {})
+                    detail = err.get("message", response.text)
+                    code = err.get("code") or err.get("type") or ""
+                    if code:
+                        detail = f"{code}: {detail}"
                 except Exception:
                     detail = response.text
                 raise RuntimeError(detail[:1000])
@@ -923,7 +927,23 @@ class ChatWindow(QMainWindow):
         raw = str(error or "")
         e = raw.lower()
 
-        if "rate limit" in e or "429" in e or "too many requests" in e:
+        no_tokens = (
+            "blocked_api_access" in e
+            or "spend limit" in e
+            or "spending limit" in e
+            or "insufficient credits" in e
+            or "insufficient_credit" in e
+            or "credit balance" in e
+            or "billing hard limit" in e
+            or (
+                ("rate limit" in e or "429" in e or "too many requests" in e)
+                and ("tokens per day" in e or "tpd" in e)
+            )
+        )
+
+        if no_tokens:
+            message = "\U0001fa99 Keine Tokens mehr. Kaufe mehr bzw. aktiviere den Developer-Plan in der Groq Console: https://console.groq.com  (Settings > Billing)"
+        elif "rate limit" in e or "429" in e or "too many requests" in e:
             message = "\u23f3 Sliqadius ist gerade stark ausgelastet. Versuch es in einem Moment noch einmal."
         elif (
             "invalid api key" in e
@@ -934,7 +954,7 @@ class ChatWindow(QMainWindow):
         ):
             message = "\U0001f511 Dein Groq API-Key ist ung\u00fcltig oder abgelaufen. Klicke links auf 'API-Key \u00e4ndern' und trage einen g\u00fcltigen Key ein."
         elif "billing" in e or "quota" in e or "insufficient" in e or "credits" in e:
-            message = "\U0001f4b3 F\u00fcr diesen Groq API-Key ist gerade kein verf\u00fcgbares Kontingent mehr vorhanden."
+            message = "\U0001fa99 Keine Tokens bzw. kein nutzbares Groq-Kontingent mehr. Mehr Kapazit\u00e4t findest du in der Groq Console: https://console.groq.com  (Settings > Billing)"
         elif "timeout" in e or "timed out" in e or "read timed out" in e:
             message = "\u231b Die Antwort dauert gerade ungew\u00f6hnlich lange. Versuch es bitte noch einmal."
         elif (
