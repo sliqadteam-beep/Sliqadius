@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install PySide6 requests pyinstaller
+          python -m pip install PySide6 requests Pillow pyinstaller
       - name: Check source
         run: python -m py_compile Sliqadius.py
       - name: Build app
@@ -67,7 +67,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install PySide6 requests pyinstaller
+          python -m pip install PySide6 requests Pillow pyinstaller
       - name: Check source
         run: python -m py_compile Sliqadius.py
       - name: Build app
