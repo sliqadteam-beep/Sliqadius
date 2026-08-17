@@ -135,17 +135,19 @@ class ApiWorker(QThread):
                 raw, mime = prepare_image_for_vision(self.image_path)
                 encoded = base64.b64encode(raw).decode("ascii")
 
-                last_text = "Analysiere dieses Bild sehr sorgfaeltig und detailliert."
+                last_text = "Was ist auf diesem Bild zu sehen?"
                 if payload_messages and payload_messages[-1].get("role") == "user":
                     last_text = payload_messages[-1].get("content") or last_text
                     payload_messages = payload_messages[:-1]
 
                 vision_instruction = (
-                    "Untersuche das Bild sehr sorgfaeltig. Erkenne relevante Objekte, "
-                    "kleine Details, sichtbaren Text, Zahlen, Fehlermeldungen, UI-Elemente, "
-                    "Diagramme und Beziehungen im Bild. Lies sichtbaren Text so exakt wie "
-                    "moeglich. Wenn etwas nicht sicher erkennbar ist, sage das offen statt "
-                    "zu raten. Beantworte danach die eigentliche Nutzerfrage vollstaendig. "
+                    "Analysiere das Bild intern sorgfaeltig und erkenne relevante Objekte, "
+                    "sichtbaren Text, Zahlen, Fehlermeldungen, UI-Elemente und wichtige Details. "
+                    "Antworte aber standardmaessig KURZ und DIREKT: normalerweise 2 bis 5 Saetze. "
+                    "Nenne nur Details, die fuer die Nutzerfrage wichtig sind. Wiederhole nicht "
+                    "unnötig, was offensichtlich ist. Wenn etwas unsicher ist, sage das kurz. "
+                    "Nur wenn der Nutzer ausdruecklich eine ausfuehrliche oder detaillierte "
+                    "Bildanalyse verlangt, darf die Antwort deutlich laenger sein. "
                     "Nutzerfrage: " + last_text
                 )
 
@@ -161,7 +163,7 @@ class ApiWorker(QThread):
                 "model": model,
                 "messages": payload_messages,
                 "temperature": 0.6,
-                "max_completion_tokens": 2800,
+                "max_completion_tokens": 900 if self.image_path else 2800,
             }
 
             response = requests.post(API_URL, headers=headers, json=payload, timeout=120)
