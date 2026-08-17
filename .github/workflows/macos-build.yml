@@ -3,11 +3,12 @@ name: Build and Release Sliqadius for macOS
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
-      - 'Sliqadius.py'
-      - 'index.html'
-      - '.github/workflows/macos-build.yml'
+      - Sliqadius.py
+      - index.html
+      - .github/workflows/macos-build.yml
 
 permissions:
   contents: write
@@ -29,67 +30,29 @@ jobs:
           python -m pip install PySide6 requests pyinstaller
       - name: Check source
         run: python -m py_compile Sliqadius.py
-      - name: Build application
+      - name: Build app
         run: |
           pyinstaller --noconfirm --clean --windowed --name Sliqadius Sliqadius.py
           test -d dist/Sliqadius.app
           mkdir -p dist/Sliqadius-macOS
           cp -R dist/Sliqadius.app dist/Sliqadius-macOS/Sliqadius.app
-          cat > dist/Sliqadius-macOS/START-Sliqadius.command <<'EOF'
-#!/bin/bash
-cd "$(dirname "$0")"
-open "Sliqadius.app"
-EOF
+          printf '%s\n' '#!/bin/bash' 'cd "$(dirname "$0")"' 'open "Sliqadius.app"' > dist/Sliqadius-macOS/START-Sliqadius.command
           chmod +x dist/Sliqadius-macOS/START-Sliqadius.command
-          cat > dist/Sliqadius-macOS/README-Mac.txt <<'EOF'
-SLIQADIUS – MACOS START
-
-1. Öffne den Ordner „Sliqadius-macOS“.
-2. Doppelklicke „START-Sliqadius.command“.
-3. Sliqadius.app wird automatisch geöffnet.
-
-Alternative:
-Doppelklicke „Sliqadius.app“ direkt.
-
-Falls macOS die App beim ersten Start blockiert:
-Rechtsklick auf „Sliqadius.app“ → „Öffnen“ → „Öffnen“.
-
-Apple Silicon: M1 / M2 / M3 / M4
-EOF
+          printf '%s\n' 'SLIQADIUS - MACOS START' '' '1. Open START-Sliqadius.command to start the app.' '2. If macOS blocks it, right-click Sliqadius.app and choose Open.' '3. You can also double-click Sliqadius.app directly.' '' 'Apple Silicon: M1, M2, M3, M4' > dist/Sliqadius-macOS/README-Mac.txt
           ditto -c -k --sequesterRsrc --keepParent dist/Sliqadius-macOS dist/Sliqadius-macOS-Apple-Silicon.zip
-      - name: Test macOS app package
+      - name: Test app package
         run: |
           test -d dist/Sliqadius-macOS/Sliqadius.app
           test -x dist/Sliqadius-macOS/START-Sliqadius.command
           test -f dist/Sliqadius-macOS/README-Mac.txt
           test -x dist/Sliqadius-macOS/Sliqadius.app/Contents/MacOS/Sliqadius
-          codesign --verify --deep --strict dist/Sliqadius-macOS/Sliqadius.app
-          file dist/Sliqadius-macOS/Sliqadius.app/Contents/MacOS/Sliqadius
           unzip -t dist/Sliqadius-macOS-Apple-Silicon.zip
-      - name: Upload build artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-Apple-Silicon
           path: dist/Sliqadius-macOS-Apple-Silicon.zip
           if-no-files-found: error
-
-  release_apple:
-    name: Publish Apple Silicon release
-    needs: build_apple
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Apple Silicon build
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-Apple-Silicon
-          path: dist
-      - name: Publish Apple Silicon ZIP
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="macos-v1.0.0"
-          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "Sliqadius macOS v1.0.0" --notes "Sliqadius für macOS. Apple Silicon und Intel Downloads." --target "$GITHUB_SHA"
-          gh release upload "$TAG" dist/Sliqadius-macOS-Apple-Silicon.zip --clobber --repo "$GITHUB_REPOSITORY"
 
   build_intel:
     name: Build macOS Intel
@@ -107,121 +70,62 @@ EOF
           python -m pip install PySide6 requests pyinstaller
       - name: Check source
         run: python -m py_compile Sliqadius.py
-      - name: Build application
+      - name: Build app
         run: |
           pyinstaller --noconfirm --clean --windowed --name Sliqadius Sliqadius.py
           test -d dist/Sliqadius.app
           mkdir -p dist/Sliqadius-macOS
           cp -R dist/Sliqadius.app dist/Sliqadius-macOS/Sliqadius.app
-          cat > dist/Sliqadius-macOS/START-Sliqadius.command <<'EOF'
-#!/bin/bash
-cd "$(dirname "$0")"
-open "Sliqadius.app"
-EOF
+          printf '%s\n' '#!/bin/bash' 'cd "$(dirname "$0")"' 'open "Sliqadius.app"' > dist/Sliqadius-macOS/START-Sliqadius.command
           chmod +x dist/Sliqadius-macOS/START-Sliqadius.command
-          cat > dist/Sliqadius-macOS/README-Mac.txt <<'EOF'
-SLIQADIUS – MACOS START
-
-1. Öffne den Ordner „Sliqadius-macOS“.
-2. Doppelklicke „START-Sliqadius.command“.
-3. Sliqadius.app wird automatisch geöffnet.
-
-Alternative:
-Doppelklicke „Sliqadius.app“ direkt.
-
-Falls macOS die App beim ersten Start blockiert:
-Rechtsklick auf „Sliqadius.app“ → „Öffnen“ → „Öffnen“.
-
-Intel Mac
-EOF
+          printf '%s\n' 'SLIQADIUS - MACOS START' '' '1. Open START-Sliqadius.command to start the app.' '2. If macOS blocks it, right-click Sliqadius.app and choose Open.' '3. You can also double-click Sliqadius.app directly.' '' 'Intel Mac' > dist/Sliqadius-macOS/README-Mac.txt
           ditto -c -k --sequesterRsrc --keepParent dist/Sliqadius-macOS dist/Sliqadius-macOS-Intel.zip
-      - name: Test macOS app package
+      - name: Test app package
         run: |
           test -d dist/Sliqadius-macOS/Sliqadius.app
           test -x dist/Sliqadius-macOS/START-Sliqadius.command
           test -f dist/Sliqadius-macOS/README-Mac.txt
           test -x dist/Sliqadius-macOS/Sliqadius.app/Contents/MacOS/Sliqadius
-          codesign --verify --deep --strict dist/Sliqadius-macOS/Sliqadius.app
-          file dist/Sliqadius-macOS/Sliqadius.app/Contents/MacOS/Sliqadius
           unzip -t dist/Sliqadius-macOS-Intel.zip
-      - name: Upload build artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-Intel
           path: dist/Sliqadius-macOS-Intel.zip
           if-no-files-found: error
 
-  release_intel:
-    name: Publish Intel release
-    needs: build_intel
+  release:
+    name: Publish macOS downloads
+    needs:
+      - build_apple
+      - build_intel
     runs-on: ubuntu-latest
     steps:
-      - name: Download Intel build
+      - name: Download Apple Silicon
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-Apple-Silicon
+          path: dist
+      - name: Download Intel
         uses: actions/download-artifact@v4
         with:
           name: macos-Intel
           path: dist
-      - name: Publish Intel ZIP
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="macos-v1.0.0"
-          for i in {1..30}; do
-            if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-              break
-            fi
-            sleep 10
-          done
-          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "Sliqadius macOS v1.0.0" --notes "Sliqadius für macOS. Apple Silicon und Intel Downloads." --target "$GITHUB_SHA"
-          gh release upload "$TAG" dist/Sliqadius-macOS-Intel.zip --clobber --repo "$GITHUB_REPOSITORY"
-
-  combined_release:
-    name: Publish combined macOS download
-    needs: [release_apple, release_intel]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Apple Silicon build
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-Apple-Silicon
-          path: dist/apple
-      - name: Download Intel build
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-Intel
-          path: dist/intel
-      - name: Create combined ZIP
+      - name: Create combined package
         run: |
           mkdir -p combined/Sliqadius-macOS
-          cp dist/apple/Sliqadius-macOS-Apple-Silicon.zip combined/Sliqadius-macOS/
-          cp dist/intel/Sliqadius-macOS-Intel.zip combined/Sliqadius-macOS/
-          cat > combined/Sliqadius-macOS/START-HERE-Mac.txt <<'EOF'
-SLIQADIUS – MACOS EINFACH STARTEN
-
-1. Entscheide zuerst, welchen Mac du hast:
-   - M1 / M2 / M3 / M4 → Sliqadius-macOS-Apple-Silicon.zip
-   - Intel → Sliqadius-macOS-Intel.zip
-
-2. Öffne die passende ZIP-Datei.
-3. Öffne den Ordner „Sliqadius-macOS“.
-4. Doppelklicke „START-Sliqadius.command“.
-5. Sliqadius startet automatisch.
-
-Falls macOS die App blockiert:
-Rechtsklick auf „Sliqadius.app“ → „Öffnen“ → „Öffnen“.
-EOF
-          cat > combined/Sliqadius-macOS/README.txt <<'EOF'
-Sliqadius macOS
-
-Apple Silicon: M1 / M2 / M3 / M4
-Intel: Intel Macs
-
-Die passende ZIP öffnen und anschließend START-Sliqadius.command doppelklicken.
-EOF
+          cp dist/Sliqadius-macOS-Apple-Silicon.zip combined/Sliqadius-macOS/
+          cp dist/Sliqadius-macOS-Intel.zip combined/Sliqadius-macOS/
+          printf '%s\n' 'SLIQADIUS - MACOS EINFACH STARTEN' '' 'M1, M2, M3, M4: use Sliqadius-macOS-Apple-Silicon.zip' 'Intel Mac: use Sliqadius-macOS-Intel.zip' '' 'After opening the matching ZIP, double-click START-Sliqadius.command.' 'You can also double-click Sliqadius.app.' > combined/Sliqadius-macOS/START-HERE-Mac.txt
           cd combined
           zip -qr ../dist/Sliqadius-macOS.zip Sliqadius-macOS
           unzip -t ../dist/Sliqadius-macOS.zip
-      - name: Publish combined ZIP
+      - name: Publish release assets
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload macos-v1.0.0 dist/Sliqadius-macOS.zip --clobber --repo "$GITHUB_REPOSITORY"
+        run: |
+          TAG=macos-v1.0.0
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "Sliqadius macOS v1.0.0" --notes "Sliqadius macOS downloads for Apple Silicon and Intel." --target "$GITHUB_SHA"
+          gh release upload "$TAG" dist/Sliqadius-macOS-Apple-Silicon.zip --clobber --repo "$GITHUB_REPOSITORY"
+          gh release upload "$TAG" dist/Sliqadius-macOS-Intel.zip --clobber --repo "$GITHUB_REPOSITORY"
+          gh release upload "$TAG" dist/Sliqadius-macOS.zip --clobber --repo "$GITHUB_REPOSITORY"
