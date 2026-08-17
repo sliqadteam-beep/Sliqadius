@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - Sliqadius.py
+      - index.html
       - .github/workflows/windows-build.yml
 
 permissions:
@@ -74,7 +75,7 @@ jobs:
           $path='index.html'
           $html=Get-Content $path -Raw -Encoding UTF8
           $new='https://github.com/sliqadteam-beep/Sliqadius/releases/download/windows-v1.1.0/Sliqadius.exe'
-          $html=[regex]::Replace($html,'https://github\.com/sliqadteam-beep/Sliqadius/releases/download/[^\"'']+/Sliqadius-Setup\.exe',$new)
+          $html=[regex]::Replace($html,'https://github\.com/sliqadteam-beep/Sliqadius/releases/download/[^\"'']+/(Sliqadius-Setup|Sliqadius)\.exe',$new)
           Set-Content $path $html -Encoding UTF8
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
