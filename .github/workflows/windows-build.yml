@@ -1,0 +1,86 @@
+name: Build and Release Sliqadius for Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - Sliqadius.py
+      - .github/workflows/windows-build.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Windows app
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install PySide6 requests pyinstaller
+
+      - name: Check source
+        shell: pwsh
+        run: python -m py_compile Sliqadius.py
+
+      - name: Build executable
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --windowed --onefile --name Sliqadius Sliqadius.py
+          if (!(Test-Path 'dist/Sliqadius.exe')) { throw 'Sliqadius.exe wurde nicht erstellt.' }
+          $size=(Get-Item 'dist/Sliqadius.exe').Length
+          if ($size -lt 1000000) { throw 'Sliqadius.exe ist unerwartet klein.' }
+
+      - name: Test executable exists
+        shell: pwsh
+        run: |
+          Get-Item dist/Sliqadius.exe
+          Get-FileHash dist/Sliqadius.exe -Algorithm SHA256
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sliqadius-Windows
+          path: dist/Sliqadius.exe
+          if-no-files-found: error
+
+      - name: Publish Windows release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $tag='windows-v1.1.0'
+          gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --repo $env:GITHUB_REPOSITORY --title 'Sliqadius Windows v1.1.0' --notes 'Aktuelle Sliqadius Windows-Version, automatisch aus main gebaut.' --target $env:GITHUB_SHA
+          }
+          gh release upload $tag dist/Sliqadius.exe --clobber --repo $env:GITHUB_REPOSITORY
+
+      - name: Update website Windows download
+        shell: pwsh
+        run: |
+          $path='index.html'
+          $html=Get-Content $path -Raw -Encoding UTF8
+          $new='https://github.com/sliqadteam-beep/Sliqadius/releases/download/windows-v1.1.0/Sliqadius.exe'
+          $html=[regex]::Replace($html,'https://github\.com/sliqadteam-beep/Sliqadius/releases/download/[^\"'']+/Sliqadius-Setup\.exe',$new)
+          Set-Content $path $html -Encoding UTF8
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m 'Update Windows download to latest build'
+            git push origin main
+          }
