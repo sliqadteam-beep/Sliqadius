@@ -2,12 +2,12 @@ import sys, os, json, base64, mimetypes, requests, io
 import re
 from datetime import datetime, timedelta
 from PIL import Image, ImageOps
-from PySide6.QtCore import Qt, QThread, Signal, QSize, QUrl, QTimer, QPropertyAnimation, QEasingCurve
+from PySide6.QtCore import Qt, QThread, Signal, QSize, QUrl, QTimer, QPropertyAnimation, QEasingCurve, QLocale
 from PySide6.QtGui import QFont, QPixmap, QDesktopServices
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QLineEdit, QFileDialog, QScrollArea, QFrame, QDialog,
-    QMessageBox, QListWidget, QListWidgetItem, QSizePolicy, QGraphicsOpacityEffect
+    QMessageBox, QListWidget, QListWidgetItem, QSizePolicy, QGraphicsOpacityEffect, QComboBox
 )
 
 APP_NAME = "Sliqadius"
@@ -15,6 +15,34 @@ TEXT_MODEL = "openai/gpt-oss-120b"
 VISION_MODEL = "qwen/qwen3.6-27b"
 API_URL = "https://api.groq.com/openai/v1/chat/completions"
 KEY_URL = "https://console.groq.com/keys"
+
+# SLIQADIUS_MODE_LANG_V1
+SYSTEM_LANG = (QLocale.system().name().split("_")[0] or "en").lower()
+LANGUAGE_NAMES = {
+    "de":"Deutsch", "en":"English", "fr":"Français", "es":"Español",
+    "it":"Italiano", "nl":"Nederlands", "pl":"Polski", "tr":"Türkçe",
+    "pt":"Português", "ru":"Русский", "ja":"日本語", "ko":"한국어", "zh":"中文",
+}
+_UI = {
+    "de": {"new_chat":"Neuer Chat","change_key":"API-Key ändern","placeholder":"Nachricht an Sliqadius","warning":"Sliqadius kann Fehler machen. Wichtige Informationen bitte prüfen.","welcome":"Was kann ich für dich tun?","hint":"Schreib eine Nachricht oder füge mit + ein Bild hinzu.","thinking":"Sliqadius denkt","pick_image":"Bild auswählen","default_image":"Was ist auf diesem Bild zu sehen?","fast":"Schnell","medium":"Mittel","smart":"Schlau","key_subtitle":"Sliqadius benötigt einen Groq API Key.\nDer Key wird nur auf diesem Gerät gespeichert.","create_key":"API Key kostenlos erstellen","show_key":"Key anzeigen","cancel":"Abbrechen","save":"Speichern"},
+    "en": {"new_chat":"New Chat","change_key":"Change API Key","placeholder":"Message Sliqadius","warning":"Sliqadius can make mistakes. Check important information.","welcome":"How can I help you?","hint":"Write a message or add an image with +.","thinking":"Sliqadius is thinking","pick_image":"Choose image","default_image":"What is shown in this image?","fast":"Fast","medium":"Medium","smart":"Smart","key_subtitle":"Sliqadius needs a Groq API Key.\nThe key is stored only on this device.","create_key":"Create free API Key","show_key":"Show key","cancel":"Cancel","save":"Save"},
+    "fr": {"new_chat":"Nouveau chat","change_key":"Modifier la clé API","placeholder":"Message à Sliqadius","warning":"Sliqadius peut faire des erreurs. Vérifiez les informations importantes.","welcome":"Que puis-je faire pour vous ?","hint":"Écrivez un message ou ajoutez une image avec +.","thinking":"Sliqadius réfléchit","pick_image":"Choisir une image","default_image":"Que montre cette image ?","fast":"Rapide","medium":"Moyen","smart":"Intelligent"},
+    "es": {"new_chat":"Nuevo chat","change_key":"Cambiar clave API","placeholder":"Mensaje para Sliqadius","warning":"Sliqadius puede cometer errores. Comprueba la información importante.","welcome":"¿En qué puedo ayudarte?","hint":"Escribe un mensaje o añade una imagen con +.","thinking":"Sliqadius está pensando","pick_image":"Elegir imagen","default_image":"¿Qué aparece en esta imagen?","fast":"Rápido","medium":"Medio","smart":"Inteligente"},
+    "it": {"new_chat":"Nuova chat","change_key":"Cambia chiave API","placeholder":"Messaggio a Sliqadius","warning":"Sliqadius può commettere errori. Verifica le informazioni importanti.","welcome":"Come posso aiutarti?","hint":"Scrivi un messaggio o aggiungi un'immagine con +.","thinking":"Sliqadius sta pensando","pick_image":"Scegli immagine","default_image":"Cosa c'è in questa immagine?","fast":"Veloce","medium":"Medio","smart":"Intelligente"},
+    "nl": {"new_chat":"Nieuwe chat","change_key":"API-sleutel wijzigen","placeholder":"Bericht aan Sliqadius","warning":"Sliqadius kan fouten maken. Controleer belangrijke informatie.","welcome":"Waarmee kan ik je helpen?","hint":"Schrijf een bericht of voeg met + een afbeelding toe.","thinking":"Sliqadius denkt","pick_image":"Afbeelding kiezen","default_image":"Wat staat er op deze afbeelding?","fast":"Snel","medium":"Gemiddeld","smart":"Slim"},
+    "pl": {"new_chat":"Nowy czat","change_key":"Zmień klucz API","placeholder":"Wiadomość do Sliqadius","warning":"Sliqadius może popełniać błędy. Sprawdzaj ważne informacje.","welcome":"W czym mogę pomóc?","hint":"Napisz wiadomość lub dodaj obraz przyciskiem +.","thinking":"Sliqadius myśli","pick_image":"Wybierz obraz","default_image":"Co znajduje się na tym obrazie?","fast":"Szybki","medium":"Średni","smart":"Mądry"},
+    "tr": {"new_chat":"Yeni sohbet","change_key":"API anahtarını değiştir","placeholder":"Sliqadius'a mesaj","warning":"Sliqadius hata yapabilir. Önemli bilgileri kontrol edin.","welcome":"Sana nasıl yardımcı olabilirim?","hint":"Bir mesaj yaz veya + ile görsel ekle.","thinking":"Sliqadius düşünüyor","pick_image":"Görsel seç","default_image":"Bu görselde ne var?","fast":"Hızlı","medium":"Orta","smart":"Akıllı"},
+    "pt": {"new_chat":"Novo chat","change_key":"Alterar chave API","placeholder":"Mensagem para Sliqadius","warning":"Sliqadius pode cometer erros. Verifique informações importantes.","welcome":"Como posso ajudar?","hint":"Escreva uma mensagem ou adicione uma imagem com +.","thinking":"Sliqadius está pensando","pick_image":"Escolher imagem","default_image":"O que aparece nesta imagem?","fast":"Rápido","medium":"Médio","smart":"Inteligente"},
+    "ru": {"new_chat":"Новый чат","change_key":"Изменить API-ключ","placeholder":"Сообщение Sliqadius","warning":"Sliqadius может ошибаться. Проверяйте важную информацию.","welcome":"Чем я могу помочь?","hint":"Напишите сообщение или добавьте изображение кнопкой +.","thinking":"Sliqadius думает","pick_image":"Выбрать изображение","default_image":"Что изображено на этой картинке?","fast":"Быстро","medium":"Средне","smart":"Умно"},
+    "ja": {"new_chat":"新しいチャット","change_key":"APIキーを変更","placeholder":"Sliqadiusにメッセージ","warning":"Sliqadiusは間違えることがあります。重要な情報は確認してください。","welcome":"何をお手伝いできますか？","hint":"メッセージを書くか、+で画像を追加してください。","thinking":"Sliqadiusが考えています","pick_image":"画像を選択","default_image":"この画像には何が写っていますか？","fast":"高速","medium":"標準","smart":"賢い"},
+    "ko": {"new_chat":"새 채팅","change_key":"API 키 변경","placeholder":"Sliqadius에게 메시지","warning":"Sliqadius는 실수할 수 있습니다. 중요한 정보는 확인하세요.","welcome":"무엇을 도와드릴까요?","hint":"메시지를 쓰거나 +로 이미지를 추가하세요.","thinking":"Sliqadius가 생각 중","pick_image":"이미지 선택","default_image":"이 이미지에 무엇이 있나요?","fast":"빠름","medium":"중간","smart":"스마트"},
+    "zh": {"new_chat":"新聊天","change_key":"更改 API 密钥","placeholder":"给 Sliqadius 发消息","warning":"Sliqadius 可能会出错。请核实重要信息。","welcome":"我能帮你做什么？","hint":"输入消息或用 + 添加图片。","thinking":"Sliqadius 正在思考","pick_image":"选择图片","default_image":"这张图片里有什么？","fast":"快速","medium":"中等","smart":"聪明"},
+}
+
+def tr(key):
+    base = _UI["en"]
+    return _UI.get(SYSTEM_LANG, base).get(key, base.get(key, key))
+
 
 DATA_DIR = os.path.join(os.path.expanduser("~"), ".sliqadius")
 KEY_FILE = os.path.join(DATA_DIR, "groq_key.txt")
@@ -112,11 +140,12 @@ class ApiWorker(QThread):
     done = Signal(str)
     failed = Signal(str)
 
-    def __init__(self, key, messages, image_path=None):
+    def __init__(self, key, messages, image_path=None, ai_mode="medium"):
         super().__init__()
         self.key = key
         self.messages = messages
         self.image_path = image_path
+        self.ai_mode = ai_mode
 
     def run(self):
         try:
@@ -159,11 +188,29 @@ class ApiWorker(QThread):
                     ],
                 })
 
+            if self.image_path:
+                reasoning_effort = "default" if self.ai_mode == "smart" else "none"
+                max_tokens = {"fast": 450, "medium": 650, "smart": 900}.get(self.ai_mode, 650)
+            elif self.ai_mode == "fast":
+                model = "openai/gpt-oss-20b"
+                reasoning_effort = "low"
+                max_tokens = 1400
+            elif self.ai_mode == "smart":
+                model = "openai/gpt-oss-120b"
+                reasoning_effort = "high"
+                max_tokens = 2800
+            else:
+                model = "openai/gpt-oss-120b"
+                reasoning_effort = "medium"
+                max_tokens = 2200
+
             payload = {
                 "model": model,
                 "messages": payload_messages,
                 "temperature": 0.6,
-                "max_completion_tokens": 900 if self.image_path else 2800,
+                "max_completion_tokens": max_tokens,
+                "reasoning_effort": reasoning_effort,
+                "reasoning_format": "hidden",
             }
 
             response = requests.post(API_URL, headers=headers, json=payload, timeout=120)
@@ -269,15 +316,12 @@ class KeyDialog(QDialog):
         title.setStyleSheet("font-size:24px;font-weight:700;")
         root.addWidget(title)
 
-        subtitle = QLabel(
-            "Sliqadius benötigt einen Groq API Key.\n"
-            "Der Key wird nur auf diesem PC gespeichert."
-        )
+        subtitle = QLabel(tr("key_subtitle"))
         subtitle.setWordWrap(True)
         subtitle.setStyleSheet("color:#a6a7ac;font-size:13px;")
         root.addWidget(subtitle)
 
-        link = QPushButton("API Key kostenlos erstellen")
+        link = QPushButton(tr("create_key"))
         link.setObjectName("link")
         link.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(KEY_URL)))
         root.addWidget(link)
@@ -291,7 +335,7 @@ class KeyDialog(QDialog):
         root.addWidget(self.edit)
 
         row2 = QHBoxLayout()
-        show = QPushButton("Key anzeigen")
+        show = QPushButton(tr("show_key"))
         show.setCheckable(True)
         show.setFixedWidth(118)
         show.toggled.connect(
@@ -307,11 +351,11 @@ class KeyDialog(QDialog):
         row.addStretch()
 
         if not required:
-            cancel = QPushButton("Abbrechen")
+            cancel = QPushButton(tr("cancel"))
             cancel.clicked.connect(self.reject)
             row.addWidget(cancel)
 
-        save = QPushButton("Speichern")
+        save = QPushButton(tr("save"))
         save.setObjectName("primary")
         save.clicked.connect(self.save_and_close)
         row.addWidget(save)
@@ -392,7 +436,7 @@ class ThinkingWidget(QWidget):
         row = QHBoxLayout(self)
         row.setContentsMargins(5, 2, 0, 2)
 
-        self.label = QLabel("Sliqadius denkt")
+        self.label = QLabel(tr("thinking"))
         self.label.setStyleSheet("color:#98999f;font-size:13px;background:transparent;")
         row.addWidget(self.label)
         row.addStretch()
@@ -404,7 +448,7 @@ class ThinkingWidget(QWidget):
 
     def tick(self):
         self.step = (self.step + 1) % 4
-        self.label.setText("Sliqadius denkt" + "." * self.step)
+        self.label.setText(tr("thinking") + "." * self.step)
 
     def stop(self):
         self.timer.stop()
@@ -422,6 +466,7 @@ class ChatWindow(QMainWindow):
         self.image_path = None
         self.worker = None
         self.animations = []
+        self.ai_mode = "medium"
 
         self.build_ui()
         self.refresh_chat_list()
@@ -475,7 +520,7 @@ class ChatWindow(QMainWindow):
             }
             QLineEdit#composer {
                 background:#2a2c30; color:#f7f7f8; border:1px solid #3a3d43;
-                border-radius:25px; padding:14px 58px 14px 52px; font-size:14px;
+                border-radius:25px; padding:14px 150px 14px 52px; font-size:14px;
             }
             QLineEdit#composer:focus { border:1px solid #62666e; background:#2d2f34; }
             QPushButton#round {
@@ -515,7 +560,7 @@ class ChatWindow(QMainWindow):
         brand.setContentsMargins(7, 1, 0, 5)
         side.addWidget(brand)
 
-        new_btn = QPushButton("+  Neuer Chat")
+        new_btn = QPushButton("+  " + tr("new_chat"))
         new_btn.setObjectName("newChat")
         new_btn.clicked.connect(self.new_chat)
         side.addWidget(new_btn)
@@ -524,7 +569,7 @@ class ChatWindow(QMainWindow):
         self.chat_list.itemClicked.connect(self.open_chat_from_item)
         side.addWidget(self.chat_list, 1)
 
-        api_btn = QPushButton("API-Key ändern")
+        api_btn = QPushButton(tr("change_key"))
         api_btn.clicked.connect(self.change_key)
         side.addWidget(api_btn)
 
@@ -594,7 +639,7 @@ class ChatWindow(QMainWindow):
 
         self.input = QLineEdit(self.composer_box)
         self.input.setObjectName("composer")
-        self.input.setPlaceholderText("Nachricht an Sliqadius")
+        self.input.setPlaceholderText(tr("placeholder"))
         self.input.returnPressed.connect(self.send_message)
         self.input.textChanged.connect(self.update_send_enabled)
 
@@ -603,6 +648,26 @@ class ChatWindow(QMainWindow):
         self.plus_btn.setFixedSize(36, 36)
         self.plus_btn.clicked.connect(self.pick_image)
 
+        self.mode_combo = QComboBox(self.composer_box)
+        self.mode_combo.setFixedSize(88, 34)
+        self.mode_combo.addItem(tr("fast"), "fast")
+        self.mode_combo.addItem(tr("medium"), "medium")
+        self.mode_combo.addItem(tr("smart"), "smart")
+        self.mode_combo.setCurrentIndex(1)
+        self.mode_combo.setStyleSheet("""
+            QComboBox {
+                background:transparent; color:#bfc0c5; border:none;
+                border-radius:10px; padding:5px 20px 5px 7px; font-size:12px;
+            }
+            QComboBox:hover { background:#35373c; color:#ffffff; }
+            QComboBox::drop-down { border:none; width:18px; }
+            QComboBox QAbstractItemView {
+                background:#292a2e; color:#eeeeee; border:1px solid #3d3f44;
+                selection-background-color:#3a3c42; padding:4px;
+            }
+        """)
+        self.mode_combo.currentIndexChanged.connect(self._mode_changed)
+
         self.send_btn = QPushButton("↑", self.composer_box)
         self.send_btn.setObjectName("send")
         self.send_btn.setFixedSize(36, 36)
@@ -610,7 +675,7 @@ class ChatWindow(QMainWindow):
 
         composer_layout.addWidget(self.composer_box)
 
-        note = QLabel("Sliqadius kann Fehler machen. Wichtige Informationen bitte prüfen.")
+        note = QLabel(tr("warning"))
         note.setAlignment(Qt.AlignCenter)
         note.setStyleSheet("color:#6f7075;font-size:10px;background:transparent;")
         composer_layout.addWidget(note)
@@ -624,6 +689,12 @@ class ChatWindow(QMainWindow):
         main.addWidget(content, 1)
 
         self.update_send_enabled()
+
+    def _mode_changed(self, index):
+        try:
+            self.ai_mode = self.mode_combo.itemData(index) or "medium"
+        except Exception:
+            self.ai_mode = "medium"
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -649,6 +720,7 @@ class ChatWindow(QMainWindow):
             width = self.composer_box.width()
             self.input.setGeometry(0, 0, width, 52)
             self.plus_btn.move(8, 8)
+            self.mode_combo.move(width - 138, 9)
             self.send_btn.move(width - 44, 8)
 
             viewport_width = max(500, self.scroll.viewport().width())
@@ -749,11 +821,11 @@ class ChatWindow(QMainWindow):
 
         layout.addStretch()
 
-        title = QLabel("Was kann ich für dich tun?")
+        title = QLabel(tr("welcome"))
         title.setObjectName("welcome")
         title.setAlignment(Qt.AlignCenter)
 
-        hint = QLabel("Schreib eine Nachricht oder füge mit + ein Bild hinzu.")
+        hint = QLabel(tr("hint"))
         hint.setObjectName("hint")
         hint.setAlignment(Qt.AlignCenter)
 
@@ -765,7 +837,7 @@ class ChatWindow(QMainWindow):
         self.fade_in_widget(card, 240)
 
     def new_chat(self, checked=False, initial=False):
-        self.current_chat = {"title": "Neuer Chat", "messages": []}
+        self.current_chat = {"title": tr("new_chat"), "messages": []}
 
         if not initial:
             self.chats.insert(0, self.current_chat)
@@ -818,7 +890,7 @@ class ChatWindow(QMainWindow):
     def pick_image(self):
         path, _ = QFileDialog.getOpenFileName(
             self,
-            "Bild auswählen",
+            tr("pick_image"),
             "",
             "Bilder (*.png *.jpg *.jpeg *.webp *.bmp)",
         )
@@ -861,7 +933,7 @@ class ChatWindow(QMainWindow):
         if not self.current_chat.get("messages"):
             self.clear_messages()
 
-        display_text = text if text else "Was ist auf diesem Bild zu sehen?"
+        display_text = text if text else tr("default_image")
 
         self.add_bubble("user", display_text, image_path)
 
@@ -874,7 +946,7 @@ class ChatWindow(QMainWindow):
 
         self.current_chat.setdefault("messages", []).append(user_entry)
 
-        if self.current_chat.get("title") in ("", "Neuer Chat"):
+        if self.current_chat.get("title") in ("", "Neuer Chat", tr("new_chat")):
             self.current_chat["title"] = (
                 display_text[:34] + ("…" if len(display_text) > 34 else "")
             )
@@ -894,11 +966,18 @@ class ChatWindow(QMainWindow):
         self.fade_in_widget(thinking, 130)
         self.scroll_to_bottom(thinking)
 
+        language_name = LANGUAGE_NAMES.get(SYSTEM_LANG, SYSTEM_LANG)
+        mode_instruction = {
+            "fast": "Priorisiere Geschwindigkeit. Antworte direkt und kompakt und nutze nur wenig internes Reasoning.",
+            "medium": "Nutze eine ausgewogene Mischung aus Geschwindigkeit, Genauigkeit und Reasoning.",
+            "smart": "Priorisiere Genauigkeit und gründliches Problemlösen. Bei schwierigen Aufgaben darfst du stärker intern reasonen.",
+        }.get(self.ai_mode, "Nutze eine ausgewogene Mischung aus Geschwindigkeit und Genauigkeit.")
+
         api_messages = [{
             "role": "system",
             "content": (
-                "Du bist Sliqadius, ein schneller, hilfreicher KI-Assistent. "
-                "Antworte verständlich, vollständig und in angemessener Tiefe. Bei Erklärungen, Fragen, Programmierung, Hausaufgaben oder komplexeren Themen sollst du normalerweise mehrere hilfreiche Absätze liefern, wichtige Zusammenhänge erklären, sinnvolle Schritte nennen und bei Bedarf Beispiele geben. Beantworte alle wichtigen Teile der Frage und höre nicht unnötig früh auf. Kurze Antworten sind nur bei wirklich einfachen Fragen oder wenn der Nutzer ausdrücklich eine kurze Antwort möchte. Antworte auf Deutsch, wenn der Nutzer Deutsch schreibt. "
+                f"Du bist Sliqadius, ein schneller, hilfreicher KI-Assistent. Die automatisch erkannte Systemsprache des Geräts ist {language_name}. Antworte standardmäßig in dieser Sprache, außer der Nutzer schreibt klar in einer anderen Sprache oder bittet um eine andere Sprache. {mode_instruction} "
+                "Antworte verständlich, vollständig und in angemessener Tiefe. Bei Erklärungen, Fragen, Programmierung, Hausaufgaben oder komplexeren Themen sollst du normalerweise mehrere hilfreiche Absätze liefern, wichtige Zusammenhänge erklären, sinnvolle Schritte nennen und bei Bedarf Beispiele geben. Beantworte alle wichtigen Teile der Frage und höre nicht unnötig früh auf. Kurze Antworten sind nur bei wirklich einfachen Fragen oder wenn der Nutzer ausdrücklich eine kurze Antwort möchte. "
                 "Strukturiere längere Antworten übersichtlich mit Absätzen und, wenn hilfreich, Aufzählungen oder klaren Schritten. Bei Codefragen liefere vollständigen, verwendbaren Code und erkläre die wichtigsten Teile. Wiederhole dich nicht künstlich und erfinde keine Informationen. Gib niemals internes Chain-of-Thought aus."
             ),
         }]
@@ -909,7 +988,7 @@ class ChatWindow(QMainWindow):
                 "content": message.get("content", ""),
             })
 
-        self.worker = ApiWorker(key, api_messages, image_path)
+        self.worker = ApiWorker(key, api_messages, image_path, self.ai_mode)
         self.worker.done.connect(
             lambda answer: self.finish_answer(answer, thinking)
         )
