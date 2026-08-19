@@ -15,9 +15,7 @@ function language(){try{return String(localStorage.getItem('sliq-web-lang')||nav
 const REQUIRED={
   de:'Bitte füge deinen Groq API-Key ein.',en:'Please add your Groq API key.',fr:'Ajoutez votre clé API Groq.',es:'Añade tu clave API de Groq.',it:'Aggiungi la tua chiave API Groq.',nl:'Voeg je Groq API-key toe.',pl:'Dodaj klucz API Groq.',tr:'Groq API anahtarını ekle.',pt:'Adiciona a tua chave API Groq.',ru:'Добавьте API-ключ Groq.',ja:'Groq APIキーを追加してください。',ko:'Groq API 키를 추가하세요.',zh:'请添加 Groq API Key。'
 };
-const INVALID={
-  de:'Bitte gib einen gültigen Groq API-Key ein.',en:'Please enter a valid Groq API key.'
-};
+const INVALID={de:'Bitte gib einen gültigen Groq API-Key ein.',en:'Please enter a valid Groq API key.'};
 
 function validKey(v){return /^gsk_\S{10,}$/.test(String(v||'').trim())}
 function setModal(open){const m=$('keyModal');if(!m)return;m.classList.toggle('open',!!open)}
@@ -26,13 +24,16 @@ function focusKey(select){setTimeout(()=>{const i=$('keyInput');if(i){i.focus();
 
 function openKey(reason){
   const m=$('keyModal');if(!m)return;
-  if(reason!=='invalid'&&getKey())return;
+  if(reason==='missing'&&getKey())return;
   dismissedThisPage=false;
   const i=$('keyInput');
-  if(i&&!i.value)i.value=getKey();
+  if(i){
+    if(reason==='change')i.value=getKey();
+    else if(!i.value)i.value=getKey();
+  }
   setModal(true);
-  status(reason==='invalid'?(INVALID[language()]||INVALID.en):(REQUIRED[language()]||REQUIRED.en));
-  focusKey(reason==='invalid');
+  status(reason==='invalid'?(INVALID[language()]||INVALID.en):(reason==='missing'?(REQUIRED[language()]||REQUIRED.en):''));
+  focusKey(reason==='invalid'||reason==='change');
 }
 
 function closeKey(){
@@ -43,7 +44,7 @@ function closeKey(){
 }
 
 function fallbackSave(){
-  const input=$('keyInput');if(!input)return;
+  const input=$('keyInput');if(!input)return false;
   const v=input.value.trim();
   if(!validKey(v)){status(INVALID[language()]||INVALID.en);focusKey(true);return false}
   if(!setKey(v)){status('API-Key konnte nicht lokal gespeichert werden.');return false}
@@ -100,9 +101,11 @@ function bindKeyUi(){
   input.addEventListener('keydown',function(e){
     if(e.key==='Enter'&&!e.shiftKey){
       e.preventDefault();
+      e.stopImmediatePropagation();
       save.click();
     }else if(e.key==='Escape'){
       e.preventDefault();
+      e.stopImmediatePropagation();
       cancel.click();
     }
   },true);
@@ -125,6 +128,7 @@ function enterToSend(){
     if(!e.target||e.target.id!=='messageInput')return;
     if(e.key!=='Enter'||e.shiftKey||e.isComposing)return;
     e.preventDefault();
+    e.stopImmediatePropagation();
     const send=$('sendBtn');
     if(send&&!send.disabled)send.click();
   },true);
@@ -150,25 +154,25 @@ function install401Recovery(){
 function health(){
   const required=['newChatBtn','chatSearch','history','messageInput','sendBtn','changeKeyBtn','apiBadge','keyModal','keyInput','cancelKeyBtn','saveKeyBtn','messages','attachBtn','modeBtn'];
   const missing=required.filter(id=>!$(id));
+  const keyModalBound=!!($('keyModal')&&$('keyModal').dataset.sliqV18Bound==='1');
+  const mainRuntimeReady=!!($('sendBtn')&&typeof $('sendBtn').onclick==='function');
   window.SliqadiusWebHealth={
     version:18,
     missing,
     keySaved:!!getKey(),
-    keyModalBound:!!($('keyModal')&&$('keyModal').dataset.sliqV18Bound==='1'),
-    cancelBound:!!$('cancelKeyBtn'),
-    saveBound:!!$('saveKeyBtn'),
-    mainRuntimeReady:!!($('sendBtn')&&typeof $('sendBtn').onclick==='function'),
+    keyModalBound,
+    cancelBound:keyModalBound&&!!$('cancelKeyBtn'),
+    saveBound:keyModalBound&&!!$('saveKeyBtn'),
+    mainRuntimeReady,
     enterToSend:true,
     lightningRemoved:!$('micBtn')||$('micBtn').hidden||getComputedStyle($('micBtn')).display==='none',
-    ok:missing.length===0,
+    ok:missing.length===0&&keyModalBound,
     checkedAt:new Date().toISOString()
   };
   return window.SliqadiusWebHealth;
 }
 
-function autoPrompt(){
-  if(!getKey()&&!dismissedThisPage)openKey('missing');
-}
+function autoPrompt(){if(!getKey()&&!dismissedThisPage)openKey('missing')}
 
 function boot(){
   hideLightning();
