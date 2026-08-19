@@ -11,7 +11,7 @@ function load(code){
   if(loading[code])return loading[code];
   loading[code]=new Promise(function(resolve,reject){
     var s=document.createElement('script');
-    s.src='i18n/'+code+'.js?v=17';
+    s.src='i18n/'+code+'.js?v=18';
     s.async=true;
     s.onload=function(){var d=g.SliqI18nLangs[code];d?resolve(d):reject(new Error('I18N_EMPTY_'+code))};
     s.onerror=function(){reject(new Error('I18N_LOAD_'+code))};
@@ -27,16 +27,15 @@ g.CSS=g.CSS||{};
 if(!g.CSS.escape){g.CSS.escape=function(v){return String(v).replace(/[^a-zA-Z0-9_-]/g,function(ch){return'\\'+ch})}}
 if(!('indexedDB' in g))g.indexedDB=null;
 
-/* Keep voice input, but never show its old lightning-like control beside Send. */
 function isWeb(){return /\/web\.html$/i.test(location.pathname)||!!document.getElementById('messageInput')}
-if(/\/web\.html$/i.test(location.pathname)){
+if(isWeb()){
   var style=document.createElement('style');
-  style.id='sliqWebComposerRepair17';
+  style.id='sliqWebComposerRepair18';
   style.textContent='#micBtn{display:none!important}';
   document.head.appendChild(style);
 }
 
-/* Keep local chat libraries separated by Groq API key. */
+/* Keep local chat libraries separated when changing to a different Groq key. */
 function hashKey(key){
   key=String(key||'guest');
   var h1=2166136261>>>0,h2=2246822519>>>0;
@@ -54,7 +53,7 @@ function seedFreshKeyLibrary(){
     if(!input)return;
     var next=String(input.value||'').trim();
     var old=localStorage.getItem('sliq-web-key')||'';
-    if(!old||!next||old===next||!/^gsk_[A-Za-z0-9_-]{12,}$/.test(next))return;
+    if(!old||!next||old===next||!/^gsk_\S{10,}$/.test(next))return;
     var storageKey='sliq-v15-'+hashKey(next);
     if(localStorage.getItem(storageKey)!==null)return;
     var blank={version:15,chats:[],memories:[],usage:{requests:0,totalTokens:0,inputTokens:0,outputTokens:0,estimated:true,lastModel:'',rate:{}},current:''};
@@ -69,15 +68,15 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Enter'&&e.target&&e.target.id==='keyInput')seedFreshKeyLibrary();
 },true);
 
-/* Load v17 after the main runtime; v17 waits until the runtime handlers exist. */
-function loadRepair(){
-  if(!isWeb()||document.getElementById('sliqWebRepairV17Script'))return;
+/* Load the API-key and interaction fallback independently from the main runtime. */
+function loadBootstrap(){
+  if(!isWeb()||document.getElementById('sliqWebBootstrapV18Script'))return;
   var s=document.createElement('script');
-  s.id='sliqWebRepairV17Script';
-  s.src='web-repair-v17.js?v=17';
+  s.id='sliqWebBootstrapV18Script';
+  s.src='web-bootstrap-v18.js?v=18';
   s.async=false;
-  document.body.appendChild(s);
+  (document.body||document.documentElement).appendChild(s);
 }
-if(document.readyState==='complete')setTimeout(loadRepair,0);else g.addEventListener('load',loadRepair,{once:true});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadBootstrap,{once:true});else loadBootstrap();
 
 })(window);
