@@ -20,6 +20,25 @@ function status(text){const s=$('keyStatus');if(s)s.textContent=text||''}
 function setModal(open){const m=$('keyModal');if(m)m.classList.toggle('open',!!open)}
 function focusKey(select){const i=$('keyInput');if(!i)return;requestAnimationFrame(()=>{i.focus();if(select)i.select()})}
 
+/* The old runtime waits for IndexedDB before wiring Send. Make only its first DB open fail fast;
+   the app already persists the same key/chats through localStorage. */
+function bypassFirstIndexedDbOpen(){
+  try{
+    const idb=window.indexedDB;
+    if(!idb||typeof idb.open!=='function')return;
+    const original=idb.open.bind(idb);
+    let used=false;
+    idb.open=function(){
+      if(used)return original.apply(idb,arguments);
+      used=true;
+      try{idb.open=original}catch(e){}
+      const req={result:null,onupgradeneeded:null,onsuccess:null,onerror:null,onblocked:null};
+      queueMicrotask(()=>{if(typeof req.onerror==='function')req.onerror({target:req})});
+      return req;
+    };
+  }catch(e){}
+}
+
 function openKey(reason){
   if(reason==='missing'&&getKey())return;
   const modal=$('keyModal'),input=$('keyInput');if(!modal||!input)return;
@@ -83,19 +102,12 @@ function bindKeyUi(){
   return true;
 }
 
-function hideLightning(){
-  const mic=$('micBtn');if(!mic)return;
-  mic.hidden=true;mic.setAttribute('aria-hidden','true');mic.tabIndex=-1;mic.style.setProperty('display','none','important');
-}
+function hideLightning(){const mic=$('micBtn');if(!mic)return;mic.hidden=true;mic.setAttribute('aria-hidden','true');mic.tabIndex=-1;mic.style.setProperty('display','none','important')}
 
 function addVoiceToPlusMenu(){
   const menu=$('attachMenu'),mic=$('micBtn');if(!menu||!mic)return;
   let b=$('sliqVoiceMenuBtn');
-  if(!b){
-    b=document.createElement('button');b.id='sliqVoiceMenuBtn';b.type='button';
-    b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();menu.classList.remove('open');try{mic.click()}catch(err){}const input=$('messageInput');if(input)input.focus()});
-    menu.appendChild(b);
-  }
+  if(!b){b=document.createElement('button');b.id='sliqVoiceMenuBtn';b.type='button';b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();menu.classList.remove('open');try{mic.click()}catch(err){}const input=$('messageInput');if(input)input.focus()});menu.appendChild(b)}
   b.textContent=VOICE[language()]||VOICE.en;
 }
 
@@ -107,13 +119,9 @@ function install401Recovery(){
 }
 
 function autoPrompt(){if(!getKey()&&!dismissedThisPage)openKey('missing')}
-function health(){
-  const required=['messageInput','sendBtn','keyModal','keyInput','cancelKeyBtn','saveKeyBtn','changeKeyBtn','apiBadge'];
-  const missing=required.filter(id=>!$(id));
-  window.SliqadiusWebHealth={version:19,missing,keySaved:!!getKey(),keyModalBound:!!($('keyModal')&&$('keyModal').dataset.sliqV19Bound==='1'),mainRuntimeReady:!!($('sendBtn')&&typeof $('sendBtn').onclick==='function'),voiceMenuReady:!!$('sliqVoiceMenuBtn'),lightningRemoved:!$('micBtn')||$('micBtn').hidden||getComputedStyle($('micBtn')).display==='none',ok:missing.length===0,checkedAt:new Date().toISOString()};
-}
+function health(){const required=['messageInput','sendBtn','keyModal','keyInput','cancelKeyBtn','saveKeyBtn','changeKeyBtn','apiBadge'];const missing=required.filter(id=>!$(id));window.SliqadiusWebHealth={version:19,missing,keySaved:!!getKey(),keyModalBound:!!($('keyModal')&&$('keyModal').dataset.sliqV19Bound==='1'),mainRuntimeReady:!!($('sendBtn')&&typeof $('sendBtn').onclick==='function'),voiceMenuReady:!!$('sliqVoiceMenuBtn'),lightningRemoved:!$('micBtn')||$('micBtn').hidden||getComputedStyle($('micBtn')).display==='none',ok:missing.length===0,checkedAt:new Date().toISOString()}}
 
-function boot(){hideLightning();bindKeyUi();addVoiceToPlusMenu();install401Recovery();autoPrompt();health()}
+function boot(){bypassFirstIndexedDbOpen();hideLightning();bindKeyUi();addVoiceToPlusMenu();install401Recovery();autoPrompt();health()}
 
 /* web.html loads this after the DOM, so bind immediately. Never intercept message Enter here. */
 boot();
