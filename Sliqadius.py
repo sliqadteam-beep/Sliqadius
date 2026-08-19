@@ -16,6 +16,47 @@ VISION_MODEL = "qwen/qwen3.6-27b"
 API_URL = "https://api.groq.com/openai/v1/chat/completions"
 KEY_URL = "https://console.groq.com/keys"
 
+# SLIQADIUS_EXTERNAL_LINK_V1
+def open_external_url(url, parent=None):
+    """Open a web URL reliably on Windows, macOS and Linux."""
+    try:
+        if QDesktopServices.openUrl(QUrl(url)):
+            return True
+    except Exception:
+        pass
+
+    try:
+        if sys.platform.startswith("win"):
+            os.startfile(url)
+            return True
+        if sys.platform == "darwin":
+            import subprocess
+            subprocess.Popen(["open", url])
+            return True
+
+        import webbrowser
+        if webbrowser.open(url, new=2):
+            return True
+    except Exception:
+        pass
+
+    try:
+        import webbrowser
+        if webbrowser.open_new_tab(url):
+            return True
+    except Exception:
+        pass
+
+    try:
+        QMessageBox.warning(
+            parent,
+            "Browser konnte nicht geöffnet werden",
+            "Bitte öffne diese Adresse manuell:\n" + url,
+        )
+    except Exception:
+        pass
+    return False
+
 # SLIQADIUS_MODE_LANG_V1
 # SLIQADIUS_SMARTER_V2
 SYSTEM_LANG = (QLocale.system().name().split("_")[0] or "en").lower()
@@ -325,7 +366,8 @@ class KeyDialog(QDialog):
 
         link = QPushButton(tr("create_key"))
         link.setObjectName("link")
-        link.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(KEY_URL)))
+        link.setCursor(Qt.PointingHandCursor)
+        link.clicked.connect(lambda _checked=False: open_external_url(KEY_URL, self))
         root.addWidget(link)
 
         self.edit = QLineEdit()
