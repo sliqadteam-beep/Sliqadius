@@ -9,20 +9,38 @@ function t(){return data&&data.site||{}}
 async function setLangFull(k){
   k=L.norm(k);var d=await L.load(k);active=k;data=d;var x=d.site||{};document.documentElement.lang=k;
   if(q('langBtn'))q('langBtn').textContent=N[k]||N.en;
-  document.querySelectorAll('[data-i18n]').forEach(function(el){var key=el.getAttribute('data-i18n');if(x[key]!=null&&el.textContent!==String(x[key]))el.textContent=x[key]});
+  document.querySelectorAll('[data-i18n]').forEach(function(el){var key=el.getAttribute('data-i18n');if(x[key]!=null)el.textContent=x[key]});
   try{localStorage.setItem('sliqadius-lang',k);localStorage.setItem('sliq-web-lang',k)}catch(e){}
-  if(q('lang'))q('lang').classList.remove('open');updateGoogleButton();updateGoogleModal();
+  if(q('lang'))q('lang').classList.remove('open');updateGoogleButton();
 }
 window.setLang=function(k){setLangFull(k).catch(function(){})};
-var style=document.createElement('style');style.textContent='.sliq-google-home{display:inline-flex;align-items:center;gap:8px}.sliq-google-home svg{width:17px;height:17px}.sliq-gshade{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:150;display:none;align-items:center;justify-content:center;padding:18px}.sliq-gshade.open{display:flex}.sliq-gmodal{width:min(520px,100%);background:#111411;border:1px solid #343d35;border-radius:20px;padding:24px;box-shadow:0 30px 100px rgba(0,0,0,.65)}.sliq-gmodal h2{margin:0 0 8px}.sliq-gmodal p{color:#9ba49c;font-size:13px;line-height:1.55}.sliq-ginput{width:100%;background:#171b18;color:#fff;border:1px solid #3a443c;border-radius:12px;padding:12px;margin:8px 0;outline:none}.sliq-gstatus{min-height:18px;color:#ff868e;font-size:11px;margin-top:5px}.sliq-gactions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px}.sliq-gactions button,.sliq-gactions a{border:1px solid #3b453d;background:#1a1f1b;color:#eef2ee;border-radius:10px;padding:9px 13px;text-decoration:none;cursor:pointer}.sliq-gactions .primary{background:#39d98a;border-color:#39d98a;color:#07110b;font-weight:800}';document.head.appendChild(style);
+
+var style=document.createElement('style');style.textContent='.sliq-google-home{display:inline-flex;align-items:center;gap:8px}.sliq-google-home svg{width:17px;height:17px}.sliq-login-toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,16px);opacity:0;pointer-events:none;z-index:250;max-width:min(560px,calc(100% - 28px));background:#151916;border:1px solid #364039;color:#eef3ef;border-radius:13px;padding:11px 14px;font-size:12px;line-height:1.45;box-shadow:0 22px 70px rgba(0,0,0,.55);transition:.18s}.sliq-login-toast.show{opacity:1;transform:translate(-50%,0)}';document.head.appendChild(style);
 function googleSvg(){return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.9-1.75 2.98-4.34 2.98-7.38Z"/><path fill="#34A853" d="M12 22c2.7 0 4.97-.9 6.62-2.39l-3.24-2.51c-.9.6-2.05.96-3.38.96-2.61 0-4.82-1.76-5.61-4.13H3.05v2.6A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.39 13.93A6 6 0 0 1 6.08 12c0-.67.12-1.32.31-1.93v-2.6H3.05A10 10 0 0 0 2 12c0 1.61.39 3.13 1.05 4.53l3.34-2.6Z"/><path fill="#EA4335" d="M12 5.94c1.47 0 2.79.51 3.83 1.5l2.87-2.88A9.63 9.63 0 0 0 12 2a10 10 0 0 0-8.95 5.47l3.34 2.6C7.18 7.7 9.39 5.94 12 5.94Z"/></svg>'}
-var hero=document.querySelector('.heroactions');if(hero){var btn=document.createElement('button');btn.type='button';btn.className='action sliq-google-home';btn.id='sliqGoogleHomeBtn';btn.onclick=openGoogle;hero.appendChild(btn)}
-var shade=document.createElement('div');shade.className='sliq-gshade';shade.id='sliqGoogleShade';shade.innerHTML='<div class="sliq-gmodal"><h2 id="sliqGTitle"></h2><p id="sliqGHint"></p><input id="sliqGClient" class="sliq-ginput" placeholder="123456789-abc.apps.googleusercontent.com"><p style="font-size:11px"><a id="sliqGSetup" target="_blank" rel="noopener noreferrer" href="https://console.cloud.google.com/apis/credentials"></a></p><div id="sliqGStatus" class="sliq-gstatus"></div><div class="sliq-gactions"><button id="sliqGCancel" type="button"></button><button id="sliqGSignOut" type="button" style="display:none"></button><a id="sliqGContinue" href="web.html#google" style="display:none"></a><button id="sliqGSave" class="primary" type="button"></button></div></div>';document.body.appendChild(shade);
-shade.onclick=function(e){if(e.target===shade)closeGoogle()};q('sliqGCancel').onclick=closeGoogle;q('sliqGSignOut').onclick=function(){if(window.SliqGoogle){SliqGoogle.signOut();updateGoogleButton();updateGoogleModal()}};q('sliqGSave').onclick=signinGoogle;
+var toast=document.createElement('div');toast.className='sliq-login-toast';toast.id='sliqLoginToast';document.body.appendChild(toast);
+function showToast(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(function(){toast.classList.remove('show')},4200)}
+function setupMessage(){
+  var x=t();
+  if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1')return active==='de'?'Google-Anmeldung benötigt zuerst HTTPS auf sliqado.org.':active==='zh'?'Google 登录需要先为 sliqado.org 启用 HTTPS。':'Google sign-in needs HTTPS on sliqado.org first.';
+  return x.googleNeedClient||x.needClient||(active==='de'?'Google-Anmeldung ist noch nicht vollständig eingerichtet. Es fehlt die einmalige Web-OAuth-Client-ID für sliqado.org.':'Google sign-in is not fully configured yet. The one-time Web OAuth Client ID for sliqado.org is still missing.');
+}
+var hero=document.querySelector('.heroactions');if(hero){var btn=document.createElement('button');btn.type='button';btn.className='action sliq-google-home';btn.id='sliqGoogleHomeBtn';btn.onclick=directGoogleLogin;hero.appendChild(btn)}
 function updateGoogleButton(){var x=t(),p=window.SliqGoogle&&SliqGoogle.getProfile(),b=q('sliqGoogleHomeBtn');if(!b)return;b.innerHTML=googleSvg()+'<span></span>';b.querySelector('span').textContent=p?(x.googleConnected||'Google connected'):(x.google||'Sign in with Google')}
-function updateGoogleModal(){var x=t(),p=window.SliqGoogle&&SliqGoogle.getProfile();if(!q('sliqGTitle'))return;q('sliqGTitle').textContent=x.googleTitle||'Connect Google account';q('sliqGHint').textContent=x.googleHint||'';q('sliqGSetup').textContent=x.googleSetup||'Google OAuth setup';q('sliqGCancel').textContent=x.cancel||'Cancel';q('sliqGSave').textContent=x.googleClient||'Google OAuth Client ID';q('sliqGContinue').textContent=x.continueWeb||'Continue to Sliqadius Web';q('sliqGSignOut').textContent=x.signOut||'Sign out';q('sliqGSignOut').style.display=p?'':'none';q('sliqGContinue').style.display=p?'':'none';if(window.SliqGoogle)q('sliqGClient').value=SliqGoogle.getClientId()||''}
-function openGoogle(){updateGoogleModal();q('sliqGStatus').textContent='';shade.classList.add('open');setTimeout(function(){q('sliqGClient').focus()},40)}function closeGoogle(){shade.classList.remove('open')}
-async function signinGoogle(){var x=t(),status=q('sliqGStatus'),v=q('sliqGClient').value.trim();status.textContent='';try{if(!window.SliqGoogle)throw new Error('NO_HELPER');SliqGoogle.setClientId(v);status.textContent=x.signing||'Opening Google sign-in…';await SliqGoogle.signIn();status.textContent='';updateGoogleButton();updateGoogleModal();q('sliqGContinue').style.display=''}catch(e){status.textContent=(e&&/INVALID_CLIENT_ID|NO_CLIENT_ID/.test(e.message))?(x.needClient||'Enter a valid Google OAuth Client ID.'):(x.failed||'Google sign-in failed.') }}
+async function directGoogleLogin(){
+  var x=t();
+  if(window.SliqGoogle&&SliqGoogle.getProfile()){location.href='web.html#google';return}
+  try{
+    if(!window.SliqGoogle)throw new Error('NO_HELPER');
+    if(!SliqGoogle.getClientId()){showToast(setupMessage());return}
+    if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){showToast(setupMessage());return}
+    showToast(x.signing||'Google…');
+    await SliqGoogle.signIn({selectAccount:true});
+    updateGoogleButton();
+    location.href='web.html#google';
+  }catch(e){
+    console.error(e);showToast(x.failed||'Google sign-in failed.');
+  }
+}
 window.addEventListener('sliq-google-profile',updateGoogleButton);
 setLangFull(savedLang()).catch(function(){setLangFull('en')});
 })();
