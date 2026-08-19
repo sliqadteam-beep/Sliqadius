@@ -1,5 +1,6 @@
 name: Sliqadius Web v18 Quality
 
+# This workflow owns current web repairs and validation.
 on:
   workflow_dispatch:
   push:
