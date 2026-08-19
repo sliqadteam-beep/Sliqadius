@@ -1,0 +1,25 @@
+{
+  "name": "Sliqadius",
+  "short_name": "Sliqadius",
+  "description": "Sliqadius – moderner KI-Assistent direkt im Browser.",
+  "start_url": "./web.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101311",
+  "theme_color": "#101311",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
