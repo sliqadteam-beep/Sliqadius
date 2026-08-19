@@ -1,0 +1,46 @@
+name: Update Sliqadius favicon
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/favicon-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  favicon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Sliqadius logo as favicon
+        shell: python
+        run: |
+          from pathlib import Path
+
+          for filename in ("index.html", "web.html"):
+              p = Path(filename)
+              s = p.read_text(encoding="utf-8")
+              s = s.replace(
+                  '<link rel="icon" type="image/jpeg" href="logo-approved.jpg">\n<link rel="apple-touch-icon" href="logo-approved.jpg">',
+                  '<link rel="icon" type="image/png" sizes="32x32" href="logo.png?v=4">\n<link rel="shortcut icon" type="image/png" href="logo.png?v=4">\n<link rel="apple-touch-icon" href="logo.png?v=4">'
+              )
+              p.write_text(s, encoding="utf-8", newline="\n")
+
+      - name: Commit favicon update
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html web.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Use Sliqadius logo as browser favicon'
+            git push origin main
+          fi
