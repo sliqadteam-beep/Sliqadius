@@ -1,0 +1,53 @@
+name: Sliqadius Web v18 Quality
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ci_web_v18_patch.py
+      - web_smoke_check.py
+      - web-bootstrap-v18.js
+      - web.html
+      - web-v15.js
+      - sliq-i18n-loader.js
+      - sw.js
+      - i18n/**
+      - .github/workflows/web-v18-quality.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply deterministic v18 repairs
+        run: python ci_web_v18_patch.py
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check web-v15.js
+          node --check web-bootstrap-v18.js
+          node --check sliq-i18n-loader.js
+          node --check sw.js
+          for f in i18n/*.js; do node --check "$f"; done
+
+      - name: Run Web smoke checks
+        run: python web_smoke_check.py
+
+      - name: Commit repaired web files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web.html web-v15.js sliq-i18n-loader.js sw.js
+          if ! git diff --cached --quiet; then
+            git commit -m 'Repair and validate Sliqadius Web v18'
+            git push origin main
+          fi
