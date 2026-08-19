@@ -22,9 +22,10 @@ function load(code){
 
 g.SliqI18nLoader={load:load,norm:norm,supported:Object.keys(supported)};
 
-/* Compatibility guard for browsers without CSS.escape. */
+/* Compatibility guards used by the main web runtime. */
 g.CSS=g.CSS||{};
 if(!g.CSS.escape){g.CSS.escape=function(v){return String(v).replace(/[^a-zA-Z0-9_-]/g,function(ch){return'\\'+ch})}}
+if(!('indexedDB' in g))g.indexedDB=null;
 
 /* Hide the old lightning-like voice icon before the page becomes interactive. */
 function isWeb(){return /\/web\.html$/i.test(location.pathname)||!!document.getElementById('messageInput')}
