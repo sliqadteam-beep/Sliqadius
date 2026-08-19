@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#080a09">
 <meta name="description" content="Sliqadius – dein moderner KI-Assistent für Windows, Android, macOS und direkt im Browser.">
 <title>Sliqadius — KI-Assistent</title>
-<link rel="icon" type="image/png" sizes="32x32" href="logo.png?v=5">
-<link rel="shortcut icon" type="image/png" href="logo.png?v=5">
-<link rel="apple-touch-icon" href="logo.png?v=5">
+<link rel="icon" type="image/png" sizes="32x32" href="logo.png?v=10">
+<link rel="shortcut icon" type="image/png" href="logo.png?v=10">
+<link rel="apple-touch-icon" href="logo.png?v=10">
 <style>
 :root{--bg:#080a09;--panel:#101311;--panel2:#151916;--line:#242b25;--line2:#333d35;--text:#f5f7f5;--muted:#929a93;--muted2:#697069;--green:#39d98a;--green2:#20b572;--greenSoft:rgba(57,217,138,.10);--shadow:0 24px 80px rgba(0,0,0,.36);--max:1180px}
 *{box-sizing:border-box}html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}body{margin:0;min-width:280px;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}a{text-decoration:none;color:inherit}button{font:inherit}img{max-width:100%}.wrap{width:min(var(--max),calc(100% - clamp(24px,5vw,56px)));margin-inline:auto}.bg{position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(circle at 50% -12%,rgba(57,217,138,.16),transparent 34%),radial-gradient(circle at 90% 30%,rgba(57,217,138,.06),transparent 24%),linear-gradient(180deg,#090b0a,#080a09 68%,#090b0a)}.gridbg{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.15;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,black,transparent 75%)}
@@ -78,5 +78,9 @@ const T={de:{name:'Deutsch',...base},en:{name:'English',...base,install:'Install
 function toggleLang(){document.getElementById('lang').classList.toggle('open')}function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('open')}function closeMenu(){document.getElementById('mobileMenu').classList.remove('open')}function setLang(k){const t=T[k]||T.en;document.documentElement.lang=k;document.getElementById('langBtn').textContent=t.name;document.querySelectorAll('[data-i18n]').forEach(e=>{const key=e.dataset.i18n;if(t[key])e.textContent=t[key]});localStorage.setItem('sliqadius-lang',k);document.getElementById('lang').classList.remove('open')}
 const saved=localStorage.getItem('sliqadius-lang');const detected=(navigator.language||'en').slice(0,2).toLowerCase();setLang(saved||(T[detected]?detected:'en'));document.addEventListener('click',e=>{const l=document.getElementById('lang');if(!l.contains(e.target))l.classList.remove('open')});const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('show')}),{threshold:.08});document.querySelectorAll('.reveal').forEach(e=>io.observe(e));
 </script>
+<!-- SLIQADIUS_SITE_V10_RUNTIME -->
+<script src="sliq-i18n-loader.js?v=10"></script>
+<script src="sliq-google.js?v=10"></script>
+<script src="site-v10.js?v=10"></script>
 </body>
 </html>

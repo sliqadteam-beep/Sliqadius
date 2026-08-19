@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#080a09">
 <meta name="description" content="Sliqadius Installationsanleitung für Windows, Android, macOS und Browser.">
 <title>Sliqadius – Installation</title>
-<link rel="icon" type="image/png" sizes="64x64" href="logo.png?v=6">
-<link rel="shortcut icon" type="image/png" href="logo.png?v=6">
-<link rel="apple-touch-icon" href="logo.png?v=6">
+<link rel="icon" type="image/png" sizes="64x64" href="logo.png?v=10">
+<link rel="shortcut icon" type="image/png" href="logo.png?v=10">
+<link rel="apple-touch-icon" href="logo.png?v=10">
 <style>
 :root{--bg:#080a09;--panel:#101311;--line:#283029;--text:#f5f7f5;--muted:#8c948d;--green:#39d98a;--max:1100px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 50% -10%,rgba(57,217,138,.14),transparent 34%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -60,7 +60,7 @@ zh:{...base,back:'← 返回网站',title:'安装 Sliqadius',intro:'Windows、An
 };
 const ids=['back','title','intro','w1','w2','w3','wbtn','a1','a2','a3','apkbtn','m1','m2','m3','mbtn','b1','b2','b3','bbtn','noteTitle','noteText'];
 const sel=document.getElementById('lang');for(const [k,name] of Object.entries(N)){const o=document.createElement('option');o.value=k;o.textContent=name;sel.appendChild(o)}
-function setLang(k){if(!T[k])k='en';const t=T[k];document.documentElement.lang=k;sel.value=k;for(const id of ids){const el=document.getElementById(id);if(el&&t[id]!=null)el.textContent=t[id]}localStorage.setItem('sliqadius-lang',k)}
+function setLang(k){if(!T[k])k='en';const t=T[k];document.documentElement.lang=k;sel.value=k;for(const id of ids){const el=document.getElementById(id);if(el&&t[id]!=null)el.textContent=t[id]}localStorage.setItem('sliqadius-lang',k);localStorage.setItem('sliq-web-lang',k)}
 sel.addEventListener('change',()=>setLang(sel.value));const saved=localStorage.getItem('sliqadius-lang');const detected=(navigator.language||'en').slice(0,2).toLowerCase();setLang(saved||detected);
 </script>
 </body>
