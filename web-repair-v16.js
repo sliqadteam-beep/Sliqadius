@@ -37,6 +37,18 @@ function addVoiceToPlusMenu(){
   menu.appendChild(b);
 }
 
+function hasPendingAttachment(){
+  var box=$('attachmentChips');
+  return !!(box&&box.children&&box.children.length);
+}
+
+function syncSendButton(){
+  var send=$('sendBtn'),input=$('messageInput');
+  if(!send||!input)return;
+  if(send.classList.contains('stop')){send.disabled=false;return}
+  send.disabled=!(input.value.trim()||hasPendingAttachment());
+}
+
 function enforceEnterToSend(){
   document.addEventListener('keydown',function(e){
     var input=e.target;
@@ -45,9 +57,11 @@ function enforceEnterToSend(){
     e.preventDefault();
     e.stopPropagation();
     if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+    syncSendButton();
     var send=$('sendBtn');
     if(send&&!send.disabled)send.click();
   },true);
+  document.addEventListener('input',function(e){if(e.target&&e.target.id==='messageInput')setTimeout(syncSendButton,0)},true);
 }
 
 function ensureScrollableChat(){
@@ -57,6 +71,7 @@ function ensureScrollableChat(){
   box.style.overflowY='auto';
   box.style.overflowX='hidden';
   box.style.webkitOverflowScrolling='touch';
+  box.style.touchAction='pan-y';
 }
 
 function installAutoScrollSafety(){
@@ -69,26 +84,42 @@ function installAutoScrollSafety(){
   new MutationObserver(function(){
     clearTimeout(timer);
     timer=setTimeout(function(){
+      syncSendButton();
       if(nearBottom){try{box.scrollTo({top:box.scrollHeight,behavior:'auto'})}catch(e){box.scrollTop=box.scrollHeight}}
     },12);
   }).observe(box,{childList:true,subtree:true,characterData:true});
 }
 
-function promptForMissingKey(){
-  if(getKey())return;
+function openKeyPrompt(message){
+  if(getKey()&&message!=='invalid')return;
   var modal=$('keyModal');
   if(!modal)return;
-  try{
-    if(sessionStorage.getItem('sliq-key-prompted-v16')==='1')return;
-    sessionStorage.setItem('sliq-key-prompted-v16','1');
-  }catch(e){}
   var badge=$('apiBadge');
   if(badge&&typeof badge.onclick==='function'){
     try{badge.click()}catch(e){modal.classList.add('open')}
   }else modal.classList.add('open');
   var status=$('keyStatus');
-  if(status&&!status.textContent.trim())status.textContent=KEY_REQUIRED[lang()]||KEY_REQUIRED.en;
-  setTimeout(function(){var input=$('keyInput');if(input)input.focus()},40);
+  if(status&&(!status.textContent.trim()||message==='invalid'))status.textContent=KEY_REQUIRED[lang()]||KEY_REQUIRED.en;
+  setTimeout(function(){var input=$('keyInput');if(input){input.focus();if(message==='invalid')input.select()}},40);
+}
+
+function promptForMissingKey(){if(!getKey())openKeyPrompt('missing')}
+
+function installInvalidKeyRecovery(){
+  if(window.__SLIQ_FETCH_REPAIR_V16__)return;
+  window.__SLIQ_FETCH_REPAIR_V16__=true;
+  var original=window.fetch;
+  if(typeof original!=='function')return;
+  window.fetch=function(){
+    var args=arguments;
+    return original.apply(this,args).then(function(resp){
+      try{
+        var url=String(args[0]&&args[0].url||args[0]||'');
+        if(resp&&resp.status===401&&url.indexOf('api.groq.com')>=0)setTimeout(function(){openKeyPrompt('invalid')},80);
+      }catch(e){}
+      return resp;
+    });
+  };
 }
 
 function keepKeyPromptCorrect(){
@@ -116,11 +147,12 @@ function healthCheck(){
   var send=$('sendBtn'),input=$('messageInput');
   window.SliqadiusWebHealth={
     version:16,
-    ok:missing.length===0&&!!send&&!!input,
+    ok:missing.length===0&&!!send&&!!input&&!!(send&&typeof send.onclick==='function'),
     missing:missing,
     sendHandler:!!(send&&typeof send.onclick==='function'),
     inputHandler:!!(input&&typeof input.oninput==='function'),
     keySaved:!!getKey(),
+    scrollable:!!($('messages')&&getComputedStyle($('messages')).overflowY!=='hidden'),
     checkedAt:new Date().toISOString()
   };
 }
@@ -134,11 +166,13 @@ function boot(){
   addVoiceToPlusMenu();
   ensureScrollableChat();
   installAutoScrollSafety();
+  installInvalidKeyRecovery();
   modalEscapeSupport();
+  syncSendButton();
   healthCheck();
   setTimeout(promptForMissingKey,900);
-  setTimeout(healthCheck,1300);
-  setInterval(function(){hideOldLightning();syncLanguage();keepKeyPromptCorrect()},1200);
+  setTimeout(healthCheck,1400);
+  setInterval(function(){hideOldLightning();syncLanguage();keepKeyPromptCorrect();syncSendButton()},1200);
 }
 
 enforceEnterToSend();
