@@ -42,3 +42,5 @@ jobs:
             git commit -m 'Apply new Sliqadius logo across platforms'
             git push origin main
           fi
+
+# Triggered from ChatGPT browser session for approved logo rollout.
