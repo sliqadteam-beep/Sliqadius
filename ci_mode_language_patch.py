@@ -7,18 +7,40 @@ s = p.read_text(encoding="utf-8")
 if "SLIQADIUS_MODE_LANG_V1" not in s:
     raise RuntimeError("Expected mode/language version not found in Sliqadius.py")
 
-MARKER = "SLIQADIUS_SMARTER_V2"
-if MARKER in s:
-    print("Smarter patch already present")
-    py_compile.compile(str(p), doraise=True)
-    raise SystemExit(0)
-
 
 def replace_once(old, new, name):
     global s
     if old not in s:
-        raise RuntimeError(f"Smarter patch marker not found: {name}")
+        raise RuntimeError(f"Patch marker not found: {name}")
     s = s.replace(old, new, 1)
+
+
+# -----------------------------------------------------------------------------
+# Reliable external-link opening for the Groq API-key button.
+# This runs even when the smarter patch is already present, so Windows/macOS
+# release builds always get the fix.
+# -----------------------------------------------------------------------------
+EXTERNAL_MARKER = "SLIQADIUS_EXTERNAL_LINK_V1"
+external_changed = False
+
+if EXTERNAL_MARKER not in s:
+    key_anchor = 'KEY_URL = "https://console.groq.com/keys"\n'
+    helper = '''KEY_URL = "https://console.groq.com/keys"\n\n# SLIQADIUS_EXTERNAL_LINK_V1\ndef open_external_url(url, parent=None):\n    \"\"\"Open a web URL reliably on Windows, macOS and Linux.\"\"\"\n    try:\n        if QDesktopServices.openUrl(QUrl(url)):\n            return True\n    except Exception:\n        pass\n\n    try:\n        if sys.platform.startswith("win"):\n            os.startfile(url)\n            return True\n        if sys.platform == "darwin":\n            import subprocess\n            subprocess.Popen(["open", url])\n            return True\n\n        import webbrowser\n        if webbrowser.open(url, new=2):\n            return True\n    except Exception:\n        pass\n\n    try:\n        import webbrowser\n        if webbrowser.open_new_tab(url):\n            return True\n    except Exception:\n        pass\n\n    try:\n        QMessageBox.warning(\n            parent,\n            "Browser konnte nicht geöffnet werden",\n            "Bitte öffne diese Adresse manuell:\\n" + url,\n        )\n    except Exception:\n        pass\n    return False\n'''
+    replace_once(key_anchor, helper, "external URL helper")
+
+    old_link = '        link.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(KEY_URL)))'
+    new_link = '        link.setCursor(Qt.PointingHandCursor)\n        link.clicked.connect(lambda _checked=False: open_external_url(KEY_URL, self))'
+    replace_once(old_link, new_link, "API key link button")
+    external_changed = True
+
+
+MARKER = "SLIQADIUS_SMARTER_V2"
+if MARKER in s:
+    if external_changed:
+        p.write_text(s, encoding="utf-8", newline="\n")
+    py_compile.compile(str(p), doraise=True)
+    print("Desktop external-link fix applied; smarter patch already present")
+    raise SystemExit(0)
 
 
 replace_once(
