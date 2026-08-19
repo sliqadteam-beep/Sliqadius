@@ -1,0 +1,45 @@
+name: Apply Sliqadius Web v10
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - apply_web_v10.py
+      - groq-reliable.js
+      - sliq-i18n-loader.js
+      - sliq-google.js
+      - site-v10.js
+      - web-v10-extras.js
+      - i18n/**
+      - .github/workflows/apply-web-v10.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Apply web integration
+        run: python apply_web_v10.py
+      - name: Validate helper JavaScript
+        run: |
+          node --check groq-reliable.js
+          node --check sliq-i18n-loader.js
+          node --check sliq-google.js
+          node --check site-v10.js
+          node --check web-v10-extras.js
+          for f in i18n/*.js; do node --check "$f"; done
+      - name: Commit updated pages
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add web.html index.html install.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Upgrade Sliqadius web reliability languages and Google sync'
+            git push origin main
+          fi
