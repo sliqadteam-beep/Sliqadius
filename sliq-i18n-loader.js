@@ -11,7 +11,7 @@ function load(code){
   if(loading[code])return loading[code];
   loading[code]=new Promise(function(resolve,reject){
     var s=document.createElement('script');
-    s.src='i18n/'+code+'.js?v=15';
+    s.src='i18n/'+code+'.js?v=16';
     s.async=true;
     s.onload=function(){var d=g.SliqI18nLangs[code];d?resolve(d):reject(new Error('I18N_EMPTY_'+code))};
     s.onerror=function(){reject(new Error('I18N_LOAD_'+code))};
@@ -22,13 +22,24 @@ function load(code){
 
 g.SliqI18nLoader={load:load,norm:norm,supported:Object.keys(supported)};
 
+/* Compatibility guard for browsers without CSS.escape. */
+g.CSS=g.CSS||{};
+if(!g.CSS.escape){g.CSS.escape=function(v){return String(v).replace(/[^a-zA-Z0-9_-]/g,function(ch){return'\\'+ch})}}
+
+/* Hide the old lightning-like voice icon before the page becomes interactive. */
+function isWeb(){return /\/web\.html$/i.test(location.pathname)||!!document.getElementById('messageInput')}
+if(/\/web\.html$/i.test(location.pathname)){
+  var style=document.createElement('style');
+  style.textContent='#micBtn{display:none!important}';
+  document.head.appendChild(style);
+}
+
 /*
-  Web v15 storage guard:
+  Storage guard:
   The active local chat library is intentionally tied to the Groq API key.
   When an existing user changes from one API key to a brand-new key, seed an
   empty state for that new key before the main runtime handles the switch.
-  This prevents the legacy active-chat mirror from being copied into a
-  different key's library. A user's very first key still inherits guest chats.
+  A user's very first key still inherits guest chats.
 */
 function hashKey(key){
   key=String(key||'guest');
@@ -42,7 +53,7 @@ function hashKey(key){
 }
 function seedFreshKeyLibrary(){
   try{
-    if(!/\/web\.html$/i.test(location.pathname))return;
+    if(!isWeb())return;
     var input=document.getElementById('keyInput');
     if(!input)return;
     var next=String(input.value||'').trim();
@@ -61,5 +72,16 @@ document.addEventListener('click',function(e){
 document.addEventListener('keydown',function(e){
   if(e.key==='Enter'&&e.target&&e.target.id==='keyInput')seedFreshKeyLibrary();
 },true);
+
+/* Load the repair/quality layer only on Sliqadius Web, after the main runtime. */
+function loadRepair(){
+  if(!isWeb()||document.getElementById('sliqWebRepairV16Script'))return;
+  var s=document.createElement('script');
+  s.id='sliqWebRepairV16Script';
+  s.src='web-repair-v16.js?v=16';
+  s.async=false;
+  document.body.appendChild(s);
+}
+if(document.readyState==='complete')setTimeout(loadRepair,0);else g.addEventListener('load',loadRepair,{once:true});
 
 })(window);
