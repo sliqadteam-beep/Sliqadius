@@ -11,7 +11,7 @@ function load(code){
   if(loading[code])return loading[code];
   loading[code]=new Promise(function(resolve,reject){
     var s=document.createElement('script');
-    s.src='i18n/'+code+'.js?v=16';
+    s.src='i18n/'+code+'.js?v=17';
     s.async=true;
     s.onload=function(){var d=g.SliqI18nLangs[code];d?resolve(d):reject(new Error('I18N_EMPTY_'+code))};
     s.onerror=function(){reject(new Error('I18N_LOAD_'+code))};
@@ -27,21 +27,16 @@ g.CSS=g.CSS||{};
 if(!g.CSS.escape){g.CSS.escape=function(v){return String(v).replace(/[^a-zA-Z0-9_-]/g,function(ch){return'\\'+ch})}}
 if(!('indexedDB' in g))g.indexedDB=null;
 
-/* Hide the old lightning-like voice icon before the page becomes interactive. */
+/* Keep voice input, but never show its old lightning-like control beside Send. */
 function isWeb(){return /\/web\.html$/i.test(location.pathname)||!!document.getElementById('messageInput')}
 if(/\/web\.html$/i.test(location.pathname)){
   var style=document.createElement('style');
+  style.id='sliqWebComposerRepair17';
   style.textContent='#micBtn{display:none!important}';
   document.head.appendChild(style);
 }
 
-/*
-  Storage guard:
-  The active local chat library is intentionally tied to the Groq API key.
-  When an existing user changes from one API key to a brand-new key, seed an
-  empty state for that new key before the main runtime handles the switch.
-  A user's very first key still inherits guest chats.
-*/
+/* Keep local chat libraries separated by Groq API key. */
 function hashKey(key){
   key=String(key||'guest');
   var h1=2166136261>>>0,h2=2246822519>>>0;
@@ -74,12 +69,12 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Enter'&&e.target&&e.target.id==='keyInput')seedFreshKeyLibrary();
 },true);
 
-/* Load the repair/quality layer only on Sliqadius Web, after the main runtime. */
+/* Load v17 after the main runtime; v17 waits until the runtime handlers exist. */
 function loadRepair(){
-  if(!isWeb()||document.getElementById('sliqWebRepairV16Script'))return;
+  if(!isWeb()||document.getElementById('sliqWebRepairV17Script'))return;
   var s=document.createElement('script');
-  s.id='sliqWebRepairV16Script';
-  s.src='web-repair-v16.js?v=16';
+  s.id='sliqWebRepairV17Script';
+  s.src='web-repair-v17.js?v=17';
   s.async=false;
   document.body.appendChild(s);
 }
