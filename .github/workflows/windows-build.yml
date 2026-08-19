@@ -8,6 +8,8 @@ on:
     paths:
       - Sliqadius.py
       - ci_mode_language_patch.py
+      - ci_logo_patch.py
+      - logo-approved.jpg
       - index.html
       - .github/workflows/windows-build.yml
 
@@ -37,6 +39,16 @@ jobs:
         shell: pwsh
         run: python ci_mode_language_patch.py
 
+      - name: Apply approved Sliqadius logo
+        shell: pwsh
+        run: python ci_logo_patch.py
+
+      - name: Create Windows icon
+        shell: pwsh
+        run: |
+          python -c "from PIL import Image; im=Image.open('logo-approved.jpg').convert('RGBA'); im.save('Sliqadius.ico',format='ICO',sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])"
+          if (!(Test-Path 'Sliqadius.ico')) { throw 'Sliqadius.ico wurde nicht erstellt.' }
+
       - name: Check source
         shell: pwsh
         run: python -m py_compile Sliqadius.py
@@ -44,7 +56,7 @@ jobs:
       - name: Build executable
         shell: pwsh
         run: |
-          pyinstaller --noconfirm --clean --windowed --onefile --name Sliqadius Sliqadius.py
+          pyinstaller --noconfirm --clean --windowed --onefile --name Sliqadius --icon Sliqadius.ico --add-data "logo-approved.jpg;." Sliqadius.py
           if (!(Test-Path 'dist/Sliqadius.exe')) { throw 'Sliqadius.exe wurde nicht erstellt.' }
           $size=(Get-Item 'dist/Sliqadius.exe').Length
           if ($size -lt 1000000) { throw 'Sliqadius.exe ist unerwartet klein.' }
