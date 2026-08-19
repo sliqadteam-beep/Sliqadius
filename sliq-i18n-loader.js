@@ -68,15 +68,5 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Enter'&&e.target&&e.target.id==='keyInput')seedFreshKeyLibrary();
 },true);
 
-/* Load the API-key and interaction fallback independently from the main runtime. */
-function loadBootstrap(){
-  if(!isWeb()||document.getElementById('sliqWebBootstrapV18Script'))return;
-  var s=document.createElement('script');
-  s.id='sliqWebBootstrapV18Script';
-  s.src='web-bootstrap-v18.js?v=18';
-  s.async=false;
-  (document.body||document.documentElement).appendChild(s);
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadBootstrap,{once:true});else loadBootstrap();
-
+/* web-bootstrap-v18.js is loaded explicitly by web.html before the main runtime. */
 })(window);
