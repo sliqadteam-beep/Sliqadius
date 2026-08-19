@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - "logo-approved.jpg"
+      - ".pwa-icons-trigger"
       - ".github/workflows/pwa-icons.yml"
 
 permissions:
