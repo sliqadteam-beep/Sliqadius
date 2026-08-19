@@ -8,6 +8,8 @@ on:
     paths:
       - Sliqadius.py
       - ci_mode_language_patch.py
+      - ci_logo_patch.py
+      - logo-approved.jpg
       - index.html
       - .github/workflows/macos-build.yml
 
@@ -31,11 +33,17 @@ jobs:
           python -m pip install PySide6 requests Pillow pyinstaller
       - name: Apply desktop mode and language features
         run: python ci_mode_language_patch.py
+      - name: Apply approved Sliqadius logo
+        run: python ci_logo_patch.py
+      - name: Create macOS icon
+        run: |
+          python -c "from PIL import Image; im=Image.open('logo-approved.jpg').convert('RGBA').resize((1024,1024),Image.Resampling.LANCZOS); im.save('Sliqadius.icns',format='ICNS')"
+          test -f Sliqadius.icns
       - name: Check source
         run: python -m py_compile Sliqadius.py
       - name: Build app
         run: |
-          pyinstaller --noconfirm --clean --windowed --name Sliqadius Sliqadius.py
+          pyinstaller --noconfirm --clean --windowed --name Sliqadius --icon Sliqadius.icns --add-data "logo-approved.jpg:." Sliqadius.py
           test -d dist/Sliqadius.app
           mkdir -p dist/Sliqadius-macOS
           cp -R dist/Sliqadius.app dist/Sliqadius-macOS/Sliqadius.app
@@ -73,11 +81,17 @@ jobs:
           python -m pip install PySide6 requests Pillow pyinstaller
       - name: Apply desktop mode and language features
         run: python ci_mode_language_patch.py
+      - name: Apply approved Sliqadius logo
+        run: python ci_logo_patch.py
+      - name: Create macOS icon
+        run: |
+          python -c "from PIL import Image; im=Image.open('logo-approved.jpg').convert('RGBA').resize((1024,1024),Image.Resampling.LANCZOS); im.save('Sliqadius.icns',format='ICNS')"
+          test -f Sliqadius.icns
       - name: Check source
         run: python -m py_compile Sliqadius.py
       - name: Build app
         run: |
-          pyinstaller --noconfirm --clean --windowed --name Sliqadius Sliqadius.py
+          pyinstaller --noconfirm --clean --windowed --name Sliqadius --icon Sliqadius.icns --add-data "logo-approved.jpg:." Sliqadius.py
           test -d dist/Sliqadius.app
           mkdir -p dist/Sliqadius-macOS
           cp -R dist/Sliqadius.app dist/Sliqadius-macOS/Sliqadius.app
