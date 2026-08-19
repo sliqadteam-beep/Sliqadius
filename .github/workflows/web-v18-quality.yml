@@ -1,6 +1,5 @@
-name: Sliqadius Web v18 Quality
+name: Sliqadius Web v19 Quality
 
-# This workflow owns current web repairs and validation.
 on:
   workflow_dispatch:
   push:
@@ -17,6 +16,10 @@ on:
       - i18n/**
       - .github/workflows/web-v18-quality.yml
 
+concurrency:
+  group: sliqadius-web-quality
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -29,7 +32,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Apply deterministic v18 repairs
+      - name: Apply deterministic v19 repairs
         run: python ci_web_v18_patch.py
 
       - name: Check JavaScript syntax
@@ -49,6 +52,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add web.html web-v15.js sliq-i18n-loader.js sw.js
           if ! git diff --cached --quiet; then
-            git commit -m 'Repair and validate Sliqadius Web v18'
+            git commit -m 'Repair and validate Sliqadius Web v19'
+            git pull --rebase origin main
             git push origin main
           fi
