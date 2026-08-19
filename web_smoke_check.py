@@ -32,39 +32,49 @@ p = IdParser(); p.feed(html)
 duplicates = sorted({x for x in p.ids if p.ids.count(x) > 1})
 assert not duplicates, f'duplicate HTML ids: {duplicates}'
 
-loader_pos = html.index('sliq-i18n-loader.js?v=18')
-boot_pos = html.index('web-bootstrap-v18.js?v=18')
-main_pos = html.index('web-v15.js?v=18')
+loader_pos = html.index('sliq-i18n-loader.js?v=19')
+boot_pos = html.index('web-bootstrap-v18.js?v=19')
+main_pos = html.index('web-v15.js?v=19')
 assert loader_pos < boot_pos < main_pos, 'runtime script order is wrong'
 assert 'web-repair-v17.js' not in html
 assert 'web-repair-v17.js' not in loader
 assert 'id="micBtn"' in html and 'hidden' in html[html.index('id="micBtn"')-100:html.index('id="micBtn"')+160]
 
-# Main runtime must still expose its normal controls.
+# Main runtime is the one and only owner of message sending.
+assert "$('sendBtn').onclick=sendMessage" in main
+assert "e.key==='Enter'&&!e.shiftKey&&!e.isComposing" in main
+assert "if(!apiKey){showKey(true,true);return}" in main
 assert "$('cancelKeyBtn').onclick=()=>{closeModal('keyModal');retryAfterKey=false}" in main
 assert "$('saveKeyBtn').onclick=saveKey" in main
-assert "if(!apiKey){showKey(true,true);return}" in main
-assert "e.key==='Enter'&&!e.shiftKey&&!e.isComposing" in main
+assert 'function start(){' in main
+assert 'state=loadStateLocalForKey(apiKey)' in main
+assert 'applyTheme();wire();renderAll();persistNow()' in main
+assert 'openDb().then(' in main
+assert 'setTimeout(()=>finish(null),350)' in main
+assert 'function switchApiKey(newKey,copyGuest)' in main
+assert "await dbPut('api-key'" not in main
 assert "$('newChatBtn').onclick=newChat" in main
 assert "$('memoryBtn').onclick" in main
 assert "$('themeBtn').onclick" in main
 assert "$('exportBtn').onclick=exportData" in main
 assert "$('importBtn').onclick" in main
 
-# v18 bootstrap owns reliability of the API-key dialog even if main startup fails.
+# Bootstrap may make the key dialog reliable, but must never intercept chat Enter.
 assert 'cancel.addEventListener' in boot
 assert 'save.addEventListener' in boot
 assert "if(reason==='missing'&&getKey())return" in boot
 assert "openKey('change')" in boot
 assert 'autoPrompt()' in boot
 assert 'install401Recovery()' in boot
-assert 'enterToSend()' in boot
-assert 'e.stopImmediatePropagation()' in boot
+assert 'function enterToSend' not in boot
+assert "e.target.id!=='messageInput'" not in boot
+assert 'Never intercept message Enter' in boot
 assert "^gsk_\\S{10,}$" in boot
+assert 'setTimeout(()=>{' not in boot
 
 assert 'web-bootstrap-v18.js' in sw
-assert "sliqadius-web-v18" in sw
-assert "?v=18" in loader
+assert "sliqadius-web-v19" in sw
+assert "?v=19" in loader
 assert 'web-repair-v17.js' not in loader
 
 for src in re.findall(r'<script src="([^"?]+)', html):
@@ -72,4 +82,4 @@ for src in re.findall(r'<script src="([^"?]+)', html):
         continue
     assert Path(src).exists(), f'missing local script: {src}'
 
-print('Sliqadius Web v18 smoke checks passed')
+print('Sliqadius Web v19 smoke checks passed')
