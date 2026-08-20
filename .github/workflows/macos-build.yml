@@ -240,6 +240,7 @@ jobs:
 
       - name: Update website macOS download
         run: |
+          git pull --rebase origin main
           python - <<'PY'
           from pathlib import Path
           import re
@@ -256,7 +257,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git pull --rebase origin main
             git commit -m 'Update macOS download to icon-fixed build'
             git push origin main
           fi
