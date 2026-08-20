@@ -99,6 +99,8 @@ jobs:
       - name: Update website Windows download
         shell: pwsh
         run: |
+          git reset --hard HEAD
+          git pull --rebase origin main
           $path='index.html'
           $html=Get-Content $path -Raw -Encoding UTF8
           $new='https://github.com/sliqadteam-beep/Sliqadius/releases/download/windows-v1.2.0/Sliqadius.exe'
