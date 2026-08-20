@@ -43,10 +43,10 @@ jobs:
       - name: Create native macOS icon
         run: |
           python ci_desktop_icons.py --macos
-          iconutil -c icns Sliqadius.iconset -o Sliqadius.icns
+          iconutil -c icns -o Sliqadius.icns Sliqadius.iconset
           test -s Sliqadius.icns
           rm -rf Sliqadius-icon-check.iconset
-          iconutil -c iconset Sliqadius.icns -o Sliqadius-icon-check.iconset
+          iconutil -c iconset -o Sliqadius-icon-check.iconset Sliqadius.icns
           test -f Sliqadius-icon-check.iconset/icon_16x16.png
           test -f Sliqadius-icon-check.iconset/icon_512x512@2x.png
 
@@ -128,10 +128,10 @@ jobs:
       - name: Create native macOS icon
         run: |
           python ci_desktop_icons.py --macos
-          iconutil -c icns Sliqadius.iconset -o Sliqadius.icns
+          iconutil -c icns -o Sliqadius.icns Sliqadius.iconset
           test -s Sliqadius.icns
           rm -rf Sliqadius-icon-check.iconset
-          iconutil -c iconset Sliqadius.icns -o Sliqadius-icon-check.iconset
+          iconutil -c iconset -o Sliqadius-icon-check.iconset Sliqadius.icns
           test -f Sliqadius-icon-check.iconset/icon_16x16.png
           test -f Sliqadius-icon-check.iconset/icon_512x512@2x.png
 
