@@ -9,8 +9,8 @@ on:
       - Sliqadius.py
       - ci_mode_language_patch.py
       - ci_logo_patch.py
+      - ci_desktop_icons.py
       - logo-approved.jpg
-      - index.html
       - .github/workflows/macos-build.yml
 
 permissions:
@@ -23,41 +23,78 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install PySide6 requests Pillow pyinstaller
+
       - name: Apply desktop mode and language features
         run: python ci_mode_language_patch.py
+
       - name: Apply approved Sliqadius logo
         run: python ci_logo_patch.py
-      - name: Create macOS icon
+
+      - name: Create native macOS icon
         run: |
-          python -c "from PIL import Image; im=Image.open('logo-approved.jpg').convert('RGBA').resize((1024,1024),Image.Resampling.LANCZOS); im.save('Sliqadius.icns',format='ICNS')"
-          test -f Sliqadius.icns
+          python ci_desktop_icons.py --macos
+          iconutil -c icns Sliqadius.iconset -o Sliqadius.icns
+          test -s Sliqadius.icns
+          rm -rf Sliqadius-icon-check.iconset
+          iconutil -c iconset Sliqadius.icns -o Sliqadius-icon-check.iconset
+          test -f Sliqadius-icon-check.iconset/icon_16x16.png
+          test -f Sliqadius-icon-check.iconset/icon_512x512@2x.png
+
       - name: Check source
         run: python -m py_compile Sliqadius.py
-      - name: Build app
+
+      - name: Build native app bundle
         run: |
-          pyinstaller --noconfirm --clean --windowed --name Sliqadius --icon Sliqadius.icns --add-data "logo-approved.jpg:." Sliqadius.py
+          pyinstaller --noconfirm --clean --windowed --name Sliqadius --osx-bundle-identifier com.sliqad.sliqadius --icon Sliqadius.icns --add-data "logo-approved.jpg:." Sliqadius.py
           test -d dist/Sliqadius.app
+          test -x dist/Sliqadius.app/Contents/MacOS/Sliqadius
+
+      - name: Verify Finder and Desktop app icon
+        run: |
+          python - <<'PY'
+          import plistlib
+          from pathlib import Path
+          plist_path=Path('dist/Sliqadius.app/Contents/Info.plist')
+          with plist_path.open('rb') as f:
+              info=plistlib.load(f)
+          icon=info.get('CFBundleIconFile','')
+          if not icon:
+              raise SystemExit('CFBundleIconFile is missing')
+          icon_name=icon if icon.endswith('.icns') else icon+'.icns'
+          icon_path=Path('dist/Sliqadius.app/Contents/Resources')/icon_name
+          if not icon_path.is_file() or icon_path.stat().st_size < 4096:
+              raise SystemExit(f'Bundle icon missing or invalid: {icon_path}')
+          if info.get('CFBundleIdentifier')!='com.sliqad.sliqadius':
+              raise SystemExit('Wrong macOS bundle identifier')
+          print('MACOS_BUNDLE_ICON_OK',icon_path,icon_path.stat().st_size)
+          PY
+
+      - name: Package Apple Silicon app
+        run: |
           mkdir -p dist/Sliqadius-macOS
           cp -R dist/Sliqadius.app dist/Sliqadius-macOS/Sliqadius.app
-          printf '%s\n' '#!/bin/bash' 'cd "$(dirname "$0")"' 'open "Sliqadius.app"' > dist/Sliqadius-macOS/START-Sliqadius.command
-          chmod +x dist/Sliqadius-macOS/START-Sliqadius.command
-          printf '%s\n' 'SLIQADIUS - MACOS START' '' '1. Open START-Sliqadius.command to start the app.' '2. If macOS blocks it, right-click Sliqadius.app and choose Open.' '3. You can also double-click Sliqadius.app directly.' '' 'Apple Silicon: M1, M2, M3, M4' > dist/Sliqadius-macOS/README-Mac.txt
+          printf '%s\n' \
+            'SLIQADIUS - MACOS' \
+            '' \
+            '1. Drag Sliqadius.app into Applications or onto your Desktop.' \
+            '2. Open Sliqadius.app directly by double-clicking it.' \
+            '3. If macOS blocks the first launch, right-click Sliqadius.app and choose Open.' \
+            '' \
+            'Apple Silicon: M1, M2, M3, M4 and newer.' \
+            > dist/Sliqadius-macOS/README-Mac.txt
           ditto -c -k --sequesterRsrc --keepParent dist/Sliqadius-macOS dist/Sliqadius-macOS-Apple-Silicon.zip
-      - name: Test app package
-        run: |
-          test -d dist/Sliqadius-macOS/Sliqadius.app
-          test -x dist/Sliqadius-macOS/START-Sliqadius.command
-          test -f dist/Sliqadius-macOS/README-Mac.txt
-          test -x dist/Sliqadius-macOS/Sliqadius.app/Contents/MacOS/Sliqadius
           unzip -t dist/Sliqadius-macOS-Apple-Silicon.zip
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -71,41 +108,78 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install PySide6 requests Pillow pyinstaller
+
       - name: Apply desktop mode and language features
         run: python ci_mode_language_patch.py
+
       - name: Apply approved Sliqadius logo
         run: python ci_logo_patch.py
-      - name: Create macOS icon
+
+      - name: Create native macOS icon
         run: |
-          python -c "from PIL import Image; im=Image.open('logo-approved.jpg').convert('RGBA').resize((1024,1024),Image.Resampling.LANCZOS); im.save('Sliqadius.icns',format='ICNS')"
-          test -f Sliqadius.icns
+          python ci_desktop_icons.py --macos
+          iconutil -c icns Sliqadius.iconset -o Sliqadius.icns
+          test -s Sliqadius.icns
+          rm -rf Sliqadius-icon-check.iconset
+          iconutil -c iconset Sliqadius.icns -o Sliqadius-icon-check.iconset
+          test -f Sliqadius-icon-check.iconset/icon_16x16.png
+          test -f Sliqadius-icon-check.iconset/icon_512x512@2x.png
+
       - name: Check source
         run: python -m py_compile Sliqadius.py
-      - name: Build app
+
+      - name: Build native app bundle
         run: |
-          pyinstaller --noconfirm --clean --windowed --name Sliqadius --icon Sliqadius.icns --add-data "logo-approved.jpg:." Sliqadius.py
+          pyinstaller --noconfirm --clean --windowed --name Sliqadius --osx-bundle-identifier com.sliqad.sliqadius --icon Sliqadius.icns --add-data "logo-approved.jpg:." Sliqadius.py
           test -d dist/Sliqadius.app
+          test -x dist/Sliqadius.app/Contents/MacOS/Sliqadius
+
+      - name: Verify Finder and Desktop app icon
+        run: |
+          python - <<'PY'
+          import plistlib
+          from pathlib import Path
+          plist_path=Path('dist/Sliqadius.app/Contents/Info.plist')
+          with plist_path.open('rb') as f:
+              info=plistlib.load(f)
+          icon=info.get('CFBundleIconFile','')
+          if not icon:
+              raise SystemExit('CFBundleIconFile is missing')
+          icon_name=icon if icon.endswith('.icns') else icon+'.icns'
+          icon_path=Path('dist/Sliqadius.app/Contents/Resources')/icon_name
+          if not icon_path.is_file() or icon_path.stat().st_size < 4096:
+              raise SystemExit(f'Bundle icon missing or invalid: {icon_path}')
+          if info.get('CFBundleIdentifier')!='com.sliqad.sliqadius':
+              raise SystemExit('Wrong macOS bundle identifier')
+          print('MACOS_BUNDLE_ICON_OK',icon_path,icon_path.stat().st_size)
+          PY
+
+      - name: Package Intel app
+        run: |
           mkdir -p dist/Sliqadius-macOS
           cp -R dist/Sliqadius.app dist/Sliqadius-macOS/Sliqadius.app
-          printf '%s\n' '#!/bin/bash' 'cd "$(dirname "$0")"' 'open "Sliqadius.app"' > dist/Sliqadius-macOS/START-Sliqadius.command
-          chmod +x dist/Sliqadius-macOS/START-Sliqadius.command
-          printf '%s\n' 'SLIQADIUS - MACOS START' '' '1. Open START-Sliqadius.command to start the app.' '2. If macOS blocks it, right-click Sliqadius.app and choose Open.' '3. You can also double-click Sliqadius.app directly.' '' 'Intel Mac' > dist/Sliqadius-macOS/README-Mac.txt
+          printf '%s\n' \
+            'SLIQADIUS - MACOS' \
+            '' \
+            '1. Drag Sliqadius.app into Applications or onto your Desktop.' \
+            '2. Open Sliqadius.app directly by double-clicking it.' \
+            '3. If macOS blocks the first launch, right-click Sliqadius.app and choose Open.' \
+            '' \
+            'Intel Mac.' \
+            > dist/Sliqadius-macOS/README-Mac.txt
           ditto -c -k --sequesterRsrc --keepParent dist/Sliqadius-macOS dist/Sliqadius-macOS-Intel.zip
-      - name: Test app package
-        run: |
-          test -d dist/Sliqadius-macOS/Sliqadius.app
-          test -x dist/Sliqadius-macOS/START-Sliqadius.command
-          test -f dist/Sliqadius-macOS/README-Mac.txt
-          test -x dist/Sliqadius-macOS/Sliqadius.app/Contents/MacOS/Sliqadius
           unzip -t dist/Sliqadius-macOS-Intel.zip
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -120,31 +194,69 @@ jobs:
       - build_intel
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Download Apple Silicon
         uses: actions/download-artifact@v4
         with:
           name: macos-Apple-Silicon
           path: dist
+
       - name: Download Intel
         uses: actions/download-artifact@v4
         with:
           name: macos-Intel
           path: dist
+
       - name: Create combined package
         run: |
           mkdir -p combined/Sliqadius-macOS
           cp dist/Sliqadius-macOS-Apple-Silicon.zip combined/Sliqadius-macOS/
           cp dist/Sliqadius-macOS-Intel.zip combined/Sliqadius-macOS/
-          printf '%s\n' 'SLIQADIUS - MACOS EINFACH STARTEN' '' 'M1, M2, M3, M4: use Sliqadius-macOS-Apple-Silicon.zip' 'Intel Mac: use Sliqadius-macOS-Intel.zip' '' 'After opening the matching ZIP, double-click START-Sliqadius.command.' 'You can also double-click Sliqadius.app.' > combined/Sliqadius-macOS/START-HERE-Mac.txt
+          printf '%s\n' \
+            'SLIQADIUS - MACOS' \
+            '' \
+            'M1, M2, M3, M4 and newer: Sliqadius-macOS-Apple-Silicon.zip' \
+            'Intel Mac: Sliqadius-macOS-Intel.zip' \
+            '' \
+            'After opening the matching ZIP, drag Sliqadius.app to Applications or the Desktop and open the app directly.' \
+            > combined/Sliqadius-macOS/START-HERE-Mac.txt
           cd combined
           zip -qr ../dist/Sliqadius-macOS.zip Sliqadius-macOS
           unzip -t ../dist/Sliqadius-macOS.zip
+
       - name: Publish release assets
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG=macos-v1.0.0
-          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "Sliqadius macOS v1.0.0" --notes "Sliqadius macOS downloads for Apple Silicon and Intel." --target "$GITHUB_SHA"
+          TAG=macos-v1.1.0
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "Sliqadius macOS v1.1.0" --notes "macOS builds with the approved Sliqadius Finder/Desktop icon for Apple Silicon and Intel." --target "$GITHUB_SHA"
           gh release upload "$TAG" dist/Sliqadius-macOS-Apple-Silicon.zip --clobber --repo "$GITHUB_REPOSITORY"
           gh release upload "$TAG" dist/Sliqadius-macOS-Intel.zip --clobber --repo "$GITHUB_REPOSITORY"
           gh release upload "$TAG" dist/Sliqadius-macOS.zip --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: Update website macOS download
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=re.sub(
+              r'https://github\.com/sliqadteam-beep/Sliqadius/releases/download/macos-v[^/]+/Sliqadius-macOS\.zip',
+              'https://github.com/sliqadteam-beep/Sliqadius/releases/download/macos-v1.1.0/Sliqadius-macOS.zip',
+              s,
+          )
+          p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git pull --rebase origin main
+            git commit -m 'Update macOS download to icon-fixed build'
+            git push origin main
+          fi
