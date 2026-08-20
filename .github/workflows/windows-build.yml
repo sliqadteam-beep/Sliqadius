@@ -9,8 +9,8 @@ on:
       - Sliqadius.py
       - ci_mode_language_patch.py
       - ci_logo_patch.py
+      - ci_desktop_icons.py
       - logo-approved.jpg
-      - index.html
       - .github/workflows/windows-build.yml
 
 permissions:
@@ -43,17 +43,18 @@ jobs:
         shell: pwsh
         run: python ci_logo_patch.py
 
-      - name: Create Windows icon
+      - name: Create native Windows icon
         shell: pwsh
         run: |
-          python -c "from PIL import Image; im=Image.open('logo-approved.jpg').convert('RGBA'); im.save('Sliqadius.ico',format='ICO',sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])"
+          python ci_desktop_icons.py --windows
           if (!(Test-Path 'Sliqadius.ico')) { throw 'Sliqadius.ico wurde nicht erstellt.' }
+          python -c "from PIL import Image; im=Image.open('Sliqadius.ico'); sizes=set(im.info.get('sizes',set())); required={(16,16),(32,32),(48,48),(128,128),(256,256)}; missing=required-sizes; assert not missing, f'Missing ICO sizes: {missing}'; print('ICO_OK',sorted(sizes))"
 
       - name: Check source
         shell: pwsh
         run: python -m py_compile Sliqadius.py
 
-      - name: Build executable
+      - name: Build executable with embedded icon
         shell: pwsh
         run: |
           pyinstaller --noconfirm --clean --windowed --onefile --name Sliqadius --icon Sliqadius.ico --add-data "logo-approved.jpg;." Sliqadius.py
@@ -61,10 +62,19 @@ jobs:
           $size=(Get-Item 'dist/Sliqadius.exe').Length
           if ($size -lt 1000000) { throw 'Sliqadius.exe ist unerwartet klein.' }
 
-      - name: Test executable exists
+      - name: Verify embedded Windows desktop icon
         shell: pwsh
         run: |
-          Get-Item dist/Sliqadius.exe
+          Add-Type -AssemblyName System.Drawing
+          $exe=(Resolve-Path 'dist/Sliqadius.exe').Path
+          $icon=[System.Drawing.Icon]::ExtractAssociatedIcon($exe)
+          if ($null -eq $icon) { throw 'Windows konnte kein eingebettetes App-Icon aus Sliqadius.exe lesen.' }
+          $bmp=$icon.ToBitmap()
+          if ($bmp.Width -lt 16 -or $bmp.Height -lt 16) { throw 'Das eingebettete Windows-Icon ist ungültig.' }
+          $bmp.Save((Join-Path $PWD 'dist/Sliqadius-embedded-icon.png'),[System.Drawing.Imaging.ImageFormat]::Png)
+          Write-Host "EMBEDDED_ICON_OK $($bmp.Width)x$($bmp.Height)"
+          $bmp.Dispose()
+          $icon.Dispose()
           Get-FileHash dist/Sliqadius.exe -Algorithm SHA256
 
       - name: Upload artifact
@@ -79,10 +89,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: pwsh
         run: |
-          $tag='windows-v1.1.0'
+          $tag='windows-v1.2.0'
           gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $tag --repo $env:GITHUB_REPOSITORY --title 'Sliqadius Windows v1.1.0' --notes 'Aktuelle Sliqadius Windows-Version, automatisch aus main gebaut.' --target $env:GITHUB_SHA
+            gh release create $tag --repo $env:GITHUB_REPOSITORY --title 'Sliqadius Windows v1.2.0' --notes 'Windows build with the approved Sliqadius icon correctly embedded for Explorer, Desktop and taskbar.' --target $env:GITHUB_SHA
           }
           gh release upload $tag dist/Sliqadius.exe --clobber --repo $env:GITHUB_REPOSITORY
 
@@ -91,7 +101,7 @@ jobs:
         run: |
           $path='index.html'
           $html=Get-Content $path -Raw -Encoding UTF8
-          $new='https://github.com/sliqadteam-beep/Sliqadius/releases/download/windows-v1.1.0/Sliqadius.exe'
+          $new='https://github.com/sliqadteam-beep/Sliqadius/releases/download/windows-v1.2.0/Sliqadius.exe'
           $html=[regex]::Replace($html,'https://github\.com/sliqadteam-beep/Sliqadius/releases/download/[^\"'']+/(Sliqadius-Setup|Sliqadius)\.exe',$new)
           Set-Content $path $html -Encoding UTF8
           git config user.name 'github-actions[bot]'
@@ -99,6 +109,6 @@ jobs:
           git add index.html
           git diff --cached --quiet
           if ($LASTEXITCODE -ne 0) {
-            git commit -m 'Update Windows download to latest build'
+            git commit -m 'Update Windows download to icon-fixed build'
             git push origin main
           }
