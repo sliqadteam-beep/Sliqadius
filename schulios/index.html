@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080a09">
+<meta name="description" content="Schulios – ein einfacher Stundenplaner für Android.">
+<title>Schulios — Stundenplaner</title>
+<style>
+:root{--bg:#080a09;--panel:#111512;--line:#253029;--text:#f5f7f5;--muted:#929b94;--green:#39d98a;--green2:#20b572;--soft:rgba(57,217,138,.10);--max:980px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}a{text-decoration:none;color:inherit}.bg{position:fixed;inset:0;z-index:-1;background:radial-gradient(circle at 50% -10%,rgba(57,217,138,.18),transparent 34%),linear-gradient(180deg,#090c0a,#080a09 70%)}.wrap{width:min(var(--max),calc(100% - 30px));margin:auto}.nav{height:68px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06)}.brand{display:flex;align-items:center;gap:11px;font-size:19px;font-weight:850}.mark{width:35px;height:35px;border-radius:11px;background:linear-gradient(145deg,var(--green),var(--green2));color:#07110b;display:grid;place-items:center;font-weight:950;box-shadow:0 0 28px rgba(57,217,138,.22)}.back{font-size:13px;color:#a6aea8;border:1px solid #303a32;background:#111411;padding:9px 12px;border-radius:11px}.back:hover{color:#fff;background:#171b18}.hero{text-align:center;padding:88px 0 54px}.badge{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(57,217,138,.27);background:var(--soft);color:#a7efca;border-radius:999px;padding:7px 11px;font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}h1{margin:22px 0 16px;font-size:clamp(48px,10vw,88px);line-height:.96;letter-spacing:-.06em}h1 span{background:linear-gradient(90deg,#fff,#cfe1d5 55%,#8ff0bd);-webkit-background-clip:text;background-clip:text;color:transparent}.lead{max-width:650px;margin:0 auto;color:#9ba39d;font-size:17px;line-height:1.65}.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:28px}.btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:0 20px;border-radius:13px;font-size:14px;font-weight:850;border:1px solid #364139;background:#141815}.btn.primary{background:var(--green);border-color:var(--green);color:#07110b}.btn:hover{transform:translateY(-2px)}.note{margin:13px auto 0;max-width:560px;color:#667069;font-size:12px;line-height:1.55}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:20px 0 70px}.card{border:1px solid var(--line);background:linear-gradient(145deg,#111512,#0d100e);border-radius:20px;padding:22px;min-height:165px}.icon{width:40px;height:40px;border-radius:12px;background:var(--soft);border:1px solid rgba(57,217,138,.18);display:grid;place-items:center;color:#9bedc1;font-weight:900}.card h2{font-size:18px;margin:22px 0 7px}.card p{margin:0;color:#7f8881;font-size:13px;line-height:1.55}.downloadbox{margin:0 0 76px;border:1px solid rgba(57,217,138,.24);background:linear-gradient(145deg,#102118,#0e1511);border-radius:24px;padding:28px;text-align:center}.downloadbox h2{margin:0 0 8px;font-size:28px}.downloadbox p{margin:0 auto 20px;max-width:580px;color:#8e9991;line-height:1.6;font-size:14px}.footer{border-top:1px solid rgba(255,255,255,.06);padding:25px 0 34px;color:#687169;font-size:12px;display:flex;justify-content:space-between;gap:20px}.footer a{color:#909990}@media(max-width:720px){.hero{text-align:left;padding-top:58px}.lead{margin-left:0}.actions{justify-content:flex-start}.actions .btn{width:100%}.grid{grid-template-columns:1fr}.downloadbox{text-align:left}.downloadbox .btn{width:100%}.footer{flex-direction:column}.nav{height:62px}}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+  <nav class="nav">
+    <a class="brand" href="./"><span class="mark">S</span><span>Schulios</span></a>
+    <a class="back" href="/">← Sliqado.org</a>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="badge"><span class="dot"></span> Android</div>
+      <h1><span>Dein Stundenplan.<br>Einfach.</span></h1>
+      <p class="lead">Schulios ist ein einfacher Android-Stundenplaner. Trage Wochentag, Uhrzeit, Fach und Raum ein und behalte deinen Unterricht übersichtlich im Blick.</p>
+      <div class="actions">
+        <a class="btn primary" href="/Schulios.apk" download>Schulios APK herunterladen</a>
+        <a class="btn" href="#funktionen">Funktionen ansehen</a>
+      </div>
+      <p class="note">Die APK muss als <strong>Schulios.apk</strong> auf dieser Website hochgeladen sein. Android kann vor der Installation nach der Erlaubnis für Apps aus dieser Quelle fragen.</p>
+    </section>
+
+    <section class="grid" id="funktionen">
+      <article class="card"><div class="icon">01</div><h2>Stundenplan</h2><p>Unterricht mit Wochentag, Uhrzeit, Fach und Raum hinzufügen, bearbeiten und löschen.</p></article>
+      <article class="card"><div class="icon">02</div><h2>Lokal gespeichert</h2><p>Der Schulios-Stundenplan wird lokal auf deinem Android-Gerät gespeichert. Für Schulios selbst ist kein Konto nötig.</p></article>
+      <article class="card"><div class="icon">03</div><h2>Webbereich</h2><p>In den Einstellungen stehen Browser, YouTube und TikTok als klar sichtbare Webbereiche innerhalb von Schulios bereit.</p></article>
+    </section>
+
+    <section class="downloadbox">
+      <h2>Schulios für Android</h2>
+      <p>Lade die APK direkt von sliqado.org herunter. Nach dem Build deiner Android-App muss die fertige Datei nur noch als <strong>Schulios.apk</strong> in das Website-Repository hochgeladen werden.</p>
+      <a class="btn primary" href="/Schulios.apk" download>APK herunterladen</a>
+    </section>
+  </main>
+
+  <footer class="footer"><span>© 2026 Schulios · Sliqado</span><a href="/">Zur Hauptseite</a></footer>
+</div>
+</body>
+</html>
