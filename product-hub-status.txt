@@ -1,0 +1,1 @@
+Product hub is now the root page. Existing product routes: /mail/, /sliqadius/, /schulios/.
