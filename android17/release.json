@@ -1,0 +1,14 @@
+{
+  "project": "Android 17 + Multiuser",
+  "version": "0.1-dev",
+  "status": "development",
+  "available": false,
+  "download_url": "",
+  "file_name": "",
+  "file_size": "",
+  "sha256": "",
+  "android_version": "17",
+  "max_users": 5,
+  "device": "Not released yet",
+  "notes": "Development build not yet available for download."
+}
