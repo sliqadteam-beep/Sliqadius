@@ -9,6 +9,6 @@
   "sha256": "",
   "android_version": "17",
   "max_users": 5,
-  "device": "Not released yet",
-  "notes": "Development build not yet available for download."
+  "device": "Samsung Galaxy A26 5G (SM-A266B/DS) — currently the only supported target",
+  "notes": "Development build not yet available for download. Other devices are not supported at this time."
 }
