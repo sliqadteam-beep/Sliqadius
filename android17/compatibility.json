@@ -1,16 +1,17 @@
 {
   "project": "Android 17 + Multiuser",
   "updated": "2026-09-01",
+  "support_note": "Currently only the Samsung Galaxy A26 5G (SM-A266B/DS) is targeted. Other devices are not supported at this time.",
   "devices": [
     {
       "manufacturer": "Samsung",
       "name": "Galaxy A26 5G",
       "model": "SM-A266B/DS",
-      "status": "unverified",
+      "status": "current target only",
       "bootloader": "unknown / not yet checked",
       "treble": "not yet verified",
       "architecture": "ARM64 expected; verify before release",
-      "notes": "Do not flash until the exact device, partition layout, bootloader state and compatibility have been verified."
+      "notes": "This is currently the only supported target device. The build is still in development, so do not flash until the exact partition layout, bootloader state and compatibility have been verified."
     }
   ]
 }
