@@ -1,0 +1,16 @@
+{
+  "project": "Android 17 + Multiuser",
+  "updated": "2026-09-01",
+  "devices": [
+    {
+      "manufacturer": "Samsung",
+      "name": "Galaxy A26 5G",
+      "model": "SM-A266B/DS",
+      "status": "unverified",
+      "bootloader": "unknown / not yet checked",
+      "treble": "not yet verified",
+      "architecture": "ARM64 expected; verify before release",
+      "notes": "Do not flash until the exact device, partition layout, bootloader state and compatibility have been verified."
+    }
+  ]
+}
