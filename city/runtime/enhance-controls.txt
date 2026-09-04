@@ -1,0 +1,48 @@
+
+// --- Improved controls: keyboard, mouse pan, touch camera gestures ---
+const ctlKeys=new Set();
+addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase(); ctlKeys.add(k);
+  if(['w','a','s','d','q','e','arrowup','arrowdown','arrowleft','arrowright','+','=','-','escape','home'].includes(k)) e.preventDefault();
+  if(k==='escape'){drag=null;orbit=false;}
+  if(k==='home'){target.set(0,0,0);dist=78;az=.78;el=.78;}
+});
+addEventListener('keyup',e=>ctlKeys.delete(e.key.toLowerCase()));
+let ctlLast=performance.now();
+function controlLoop(t){
+  requestAnimationFrame(controlLoop);
+  let dt=Math.min(.05,(t-ctlLast)/1000||.016);ctlLast=t;
+  let sp=(ctlKeys.has('shift')?42:22)*dt*(.55+dist/90);
+  let fx=-Math.cos(az),fz=-Math.sin(az),rx=-fz,rz=fx;
+  let mx=0,mz=0;
+  if(ctlKeys.has('w')||ctlKeys.has('arrowup')){mx+=fx;mz+=fz}
+  if(ctlKeys.has('s')||ctlKeys.has('arrowdown')){mx-=fx;mz-=fz}
+  if(ctlKeys.has('a')||ctlKeys.has('arrowleft')){mx-=rx;mz-=rz}
+  if(ctlKeys.has('d')||ctlKeys.has('arrowright')){mx+=rx;mz+=rz}
+  if(mx||mz){let l=Math.hypot(mx,mz)||1;target.x=Math.max(-H,Math.min(H,target.x+mx/l*sp));target.z=Math.max(-H,Math.min(H,target.z+mz/l*sp));}
+  if(ctlKeys.has('q'))az+=1.35*dt;
+  if(ctlKeys.has('e'))az-=1.35*dt;
+  if(ctlKeys.has('+')||ctlKeys.has('='))dist=Math.max(24,dist-35*dt);
+  if(ctlKeys.has('-'))dist=Math.min(150,dist+35*dt);
+}
+requestAnimationFrame(controlLoop);
+
+let midPan=false,midLast={x:0,y:0};
+ren.domElement.addEventListener('pointerdown',e=>{if(e.button===1){midPan=true;midLast={x:e.clientX,y:e.clientY};drag=null;e.preventDefault()}},true);
+ren.domElement.addEventListener('pointermove',e=>{if(!midPan)return;let dx=e.clientX-midLast.x,dy=e.clientY-midLast.y;midLast={x:e.clientX,y:e.clientY};let s=dist*.00115;target.x=Math.max(-H,Math.min(H,target.x+(Math.cos(az)*dx-Math.sin(az)*dy)*s));target.z=Math.max(-H,Math.min(H,target.z+(Math.sin(az)*dx+Math.cos(az)*dy)*s));},true);
+addEventListener('pointerup',()=>midPan=false,true);
+
+let touchCam=false,touchPrev=null,touchDist=0;
+ren.domElement.style.touchAction='none';
+ren.domElement.addEventListener('touchstart',e=>{
+  if(e.touches.length>=2){touchCam=true;drag=null;let a=e.touches[0],b=e.touches[1];touchPrev={x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2};touchDist=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);e.preventDefault();}
+},{passive:false,capture:true});
+ren.domElement.addEventListener('touchmove',e=>{
+  if(!touchCam||e.touches.length<2)return;let a=e.touches[0],b=e.touches[1],p={x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2},d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);let dx=p.x-touchPrev.x,dy=p.y-touchPrev.y;
+  if(Math.abs(dx)>Math.abs(dy)*1.3)az-=dx*.006;else{let s=dist*.001;target.x=Math.max(-H,Math.min(H,target.x+(Math.cos(az)*dx-Math.sin(az)*dy)*s));target.z=Math.max(-H,Math.min(H,target.z+(Math.sin(az)*dx+Math.cos(az)*dy)*s));}
+  dist=Math.max(24,Math.min(150,dist+(touchDist-d)*.08));touchPrev=p;touchDist=d;e.preventDefault();
+},{passive:false,capture:true});
+ren.domElement.addEventListener('touchend',e=>{if(e.touches.length<2)touchCam=false},{passive:true,capture:true});
+
+const ctl=document.createElement('div');ctl.className='p';ctl.style.cssText='position:fixed;left:10px;bottom:112px;z-index:12;padding:7px 10px;border-radius:10px;font-size:11px;color:#cfe0e7;pointer-events:none;opacity:.88';ctl.innerHTML='<b>Steuerung</b> &nbsp; WASD bewegen · Q/E drehen · Mausrad Zoom · Rechts ziehen drehen · Mittlere Taste ziehen verschieben · Touch: 2 Finger Kamera';document.body.appendChild(ctl);
+if(matchMedia('(max-width:750px)').matches){ctl.innerHTML='<b>Kamera</b> · 2 Finger: bewegen/drehen/zoomen';ctl.style.bottom='116px';}
