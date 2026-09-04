@@ -1,3 +1,8 @@
+if(!localStorage.getItem('sliqadiusCityBuild8Fresh')){
+ for(const c of cars||[])try{removeCar(c)}catch{}
+ roads=[];buildings=[];cars=[];
+ try{localStorage.removeItem('sliqadiusCityV6');localStorage.setItem('sliqadiusCityBuild8Fresh','1')}catch{}
+}
 const OUTSIDE_CONNECTIONS=[
  {t:'road4',external:true,p:[{x:-90,z:-24},{x:-82,z:-24}]},
  {t:'road4',external:true,p:[{x:90,z:24},{x:82,z:24}]}
@@ -6,7 +11,7 @@ function pclose(a,b,m=.45){return !!a&&!!b&&Math.hypot(a.x-b.x,a.z-b.z)<=m}
 function ensureOutsideConnections(){
  roads=roads.filter(r=>!r.external);
  for(const e of OUTSIDE_CONNECTIONS)roads.push({t:e.t,external:true,p:e.p.map(q=>({x:q.x,z:q.z}))});
- roadsBuild();
+ roadsBuild();buildingsBuild();saveGame();
 }
 ensureOutsideConnections();
 
