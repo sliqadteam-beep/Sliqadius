@@ -127,3 +127,5 @@ carsUp=function(dt){
  }
  carsUp10(dt);
 };
+
+eval(await (await fetch('build12-connections-controls.js?v=12',{cache:'no-store'})).text());
