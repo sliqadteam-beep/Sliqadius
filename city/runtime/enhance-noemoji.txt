@@ -1,0 +1,58 @@
+
+/* Sliqado City - emoji-free UI */
+const __emojiRE=/[\p{Extended_Pictographic}\uFE0F\u200D]/gu;
+const __cleanText=v=>String(v??'').replace(__emojiRE,'').replace(/\s{2,}/g,' ').trim();
+
+// Remove emoji from all build/category definitions before the UI is rendered.
+for(const group of Object.values(defs))for(const item of group)if(item&&typeof item[1]==='string')item[1]=__cleanText(item[1]);
+for(const item of catsDef)if(item&&typeof item[1]==='string')item[1]=__cleanText(item[1]);
+
+// Replace symbol-heavy top controls with clean text labels.
+const __pauseBtn=$('pause'),__speedBtn=$('speed'),__saveBtn=$('save');
+if(__pauseBtn)__pauseBtn.textContent='Pause';
+if(__speedBtn)__speedBtn.textContent=(state.speed||1)+'x';
+if(__saveBtn)__saveBtn.textContent='Speichern';
+
+// Keep future button changes emoji-free.
+if(__pauseBtn)__pauseBtn.addEventListener('click',()=>queueMicrotask(()=>{__pauseBtn.textContent=state.paused?'Start':'Pause'}));
+if(__speedBtn)__speedBtn.addEventListener('click',()=>queueMicrotask(()=>{__speedBtn.textContent=(state.speed||1)+'x'}));
+
+// Strip emojis from all current and future DOM text.
+function __stripEmojiDOM(root=document.body){
+ const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
+ while(n=w.nextNode()){
+  const c=__cleanText(n.nodeValue);
+  if(c!==n.nodeValue)n.nodeValue=c;
+ }
+}
+__stripEmojiDOM();
+const __emojiObserver=new MutationObserver(ms=>{
+ for(const m of ms){
+  for(const n of m.addedNodes){
+   if(n.nodeType===3){const c=__cleanText(n.nodeValue);if(c!==n.nodeValue)n.nodeValue=c}
+   else if(n.nodeType===1)__stripEmojiDOM(n);
+  }
+  if(m.type==='characterData'){const c=__cleanText(m.target.nodeValue);if(c!==m.target.nodeValue)m.target.nodeValue=c}
+ }
+});
+__emojiObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
+
+// Make all toasts emoji-free, including messages from older modules.
+const __oldToastNoEmoji=toast;
+toast=function(t){return __oldToastNoEmoji(__cleanText(t))};
+
+// Replace building problem emoji bubbles with a clean warning mark.
+problemSprite=function(){
+ let c=document.createElement('canvas');c.width=256;c.height=128;let x=c.getContext('2d');
+ x.fillStyle='rgba(15,24,30,.94)';x.beginPath();x.roundRect(4,4,248,98,20);x.fill();
+ x.fillStyle='#fff';x.font='700 50px system-ui';x.textAlign='center';x.fillText('!',128,70);
+ x.fillStyle='rgba(15,24,30,.94)';x.beginPath();x.moveTo(112,100);x.lineTo(144,100);x.lineTo(128,124);x.fill();
+ let t=new THREE.CanvasTexture(c),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));sp.scale.set(2.15,1.08,1);return sp
+};
+
+// Clean static labels that originally contain emoji icons.
+const __staticLabels=[
+ ['money',''],['pop',''],['happy','']
+];
+document.querySelectorAll('.top .pill').forEach(el=>{el.textContent=__cleanText(el.textContent)});
+setTimeout(__stripEmojiDOM,0);
