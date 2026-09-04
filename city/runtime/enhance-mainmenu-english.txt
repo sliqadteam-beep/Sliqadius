@@ -1,0 +1,65 @@
+
+/* Sliqadius City - English UI, main menu and sound settings */
+document.documentElement.lang='en';document.title='Sliqadius City';
+
+/* English build catalogue */
+defs.roads=[['road','2-Lane Road',K.R,95],['oneway','One-Way Road',K.R,105],['road4','4-Lane Road',K.R,190],['highway','Highway',K.R,330],['roundSmall','Small Roundabout',K.R,280],['roundLarge','Large Roundabout',K.R,620]];
+defs.zones=[['res','Residential',K.RES,0],['ind','Industrial',K.IND,0],['com','Commercial / Entertainment',K.COM,0]];
+defs.services=[['police','Police Station',K.POLICE,18000],['fire','Fire Station',K.FIRE,20000],['hosp','Hospital',K.HOSP,26000],['landfill','Landfill',K.LANDFILL,14000]];
+defs.transport=[['metro','Metro Station',K.METRO,25000],['parking','Parking Lot',K.PARKING,1500]];
+defs.nature=[['park','Park',K.PARK,800]];
+defs.bulldoze=[['doze','Bulldoze',-1,0]];
+catsDef.splice(0,catsDef.length,['roads','Roads'],['zones','Zones'],['services','Services'],['transport','Transport'],['nature','Nature'],['bulldoze','Bulldoze']);
+renderUI();
+
+/* Static English UI */
+const brandEl=document.querySelector('.top .brand');if(brandEl)brandEl.textContent='SLIQADIUS CITY';
+const moneyEl=$('money');if(moneyEl&&moneyEl.parentElement)moneyEl.parentElement.innerHTML='Money <b id="money">'+moneyEl.textContent+'</b>';
+const popEl=$('pop');if(popEl&&popEl.parentElement)popEl.parentElement.innerHTML='Population <b id="pop">'+popEl.textContent+'</b>';
+const happyEl=$('happy');if(happyEl&&happyEl.parentElement)happyEl.parentElement.innerHTML='Happiness <b id="happy">'+happyEl.textContent+'</b>';
+const pauseEl=$('pause');if(pauseEl){pauseEl.textContent='Pause';pauseEl.title='Pause / Resume'}
+const speedEl=$('speed');if(speedEl) speedEl.title='Simulation Speed';
+const saveEl=$('save');if(saveEl){saveEl.textContent='Save';saveEl.title='Save City'}
+const hintEl=document.querySelector('.hint');if(hintEl)hintEl.textContent='Left drag: build / zone   Right drag: rotate camera   Mouse wheel: zoom';
+const sideEl=document.querySelector('.side');if(sideEl)sideEl.innerHTML='<b>City</b><div class="r"><span>Residential</span><b id="dr">70%</b></div><div class="r"><span>Commercial</span><b id="dc">50%</b></div><div class="r"><span>Industry</span><b id="di">55%</b></div><div class="r"><span>Cars</span><b id="carsN">0</b></div><div class="r"><span>Pedestrians</span><b id="npcsN">0</b></div><div class="r"><span>Parking</span><b id="parkN">0/0</b></div><div class="r"><span>Metro</span><b id="metroN">0</b></div><div class="r"><span>Problems</span><b id="problemN">0</b></div><div class="r"><span>Services</span><b id="serviceN">0</b></div>';
+if(typeof freeHint!=='undefined'&&freeHint)freeHint.textContent='Roads: drag freely   Endpoints snap automatically   Roundabout: click once';
+if(typeof strip!=='undefined'&&strip)strip.innerHTML='<span><b id="hudDate">Year 1</b></span><span><b id="hudTemp">17 C</b></span><span>Happiness <b id="hudMood">70%</b></span><span>Traffic <b id="hudTraffic">Light</b></span>';
+if(typeof weather!=='undefined'&&weather)weather.innerHTML='<b>Sliqadius</b><span>calm day</span>';
+if(typeof audioBtn!=='undefined'&&audioBtn)audioBtn.textContent='Sound: Off';
+
+/* Translate runtime messages created by older systems. */
+const __toastEnglish=toast;
+function englishMessage(t){let s=String(t||'');const map=[['Nicht genug Geld','Not enough money'],['Dieses Gebäude muss an einer Straße stehen','This building must be placed next to a road'],['An Straße platziert','Placed next to road'],['Straße gebaut','Road built'],['Straße entfernt','Road removed'],['Hindernisse automatisch abgerissen','Obstacles automatically demolished'],['Gebäude im Weg automatisch abgerissen','Building in the way automatically demolished'],['Gespeichert','Saved'],['Jahr ','Year '],['Dicht','Heavy'],['Mittel','Moderate'],['Ruhig','Light']];for(const [a,b] of map)s=s.split(a).join(b);return s.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').trim()}
+toast=function(t){return __toastEnglish(englishMessage(t))};
+
+/* Keep dynamic labels English even when legacy timers update them. */
+setInterval(()=>{let d=$('hudDate'),tr=$('hudTraffic');if(d&&d.textContent.startsWith('Jahr '))d.textContent=d.textContent.replace('Jahr ','Year ');if(tr){if(tr.textContent==='Dicht')tr.textContent='Heavy';else if(tr.textContent==='Mittel')tr.textContent='Moderate';else if(tr.textContent==='Ruhig')tr.textContent='Light'}if(typeof audioBtn!=='undefined'&&audioBtn)audioBtn.textContent=audioOn?'Sound: On':'Sound: Off';if($('pause'))$('pause').textContent=state.paused?'Resume':'Pause'},180);
+
+/* Main menu styling */
+const menuStyle=document.createElement('style');menuStyle.textContent=`
+#sqMainMenu,#sqQuit{position:fixed;inset:0;z-index:10000;background:#050505;color:#fff;font-family:Inter,Arial,sans-serif;display:flex;align-items:center;justify-content:center}
+.sqMenuBox{width:min(420px,88vw);display:flex;flex-direction:column;gap:12px}.sqLogo{font-size:42px;font-weight:600;letter-spacing:-1.5px;margin-bottom:34px}.sqMenuBtn{width:100%;height:54px;text-align:left;padding:0 18px;border:1px solid #262626;border-radius:8px;background:#111;color:#fff;font-size:17px;cursor:pointer;transition:.14s}.sqMenuBtn:hover{background:#1b1b1b;border-color:#444;transform:translateX(3px)}
+#sqSettings{position:fixed;inset:0;z-index:10001;background:#050505;color:#fff;display:none;align-items:center;justify-content:center}.sqSettingsBox{width:min(500px,90vw);background:#0d0d0d;border:1px solid #282828;border-radius:12px;padding:26px}.sqSettingsBox h2{margin:0 0 24px;font-size:26px}.sqRow{display:grid;grid-template-columns:150px 1fr 52px;gap:12px;align-items:center;margin:19px 0}.sqRow input{width:100%;accent-color:#fff}.sqValue{text-align:right;color:#bbb;font-variant-numeric:tabular-nums}.sqToggle{height:42px;border:1px solid #333;border-radius:7px;background:#151515;color:#fff;padding:0 14px;cursor:pointer}.sqBack{margin-top:20px;width:100%}.sqSub{color:#888;font-size:12px;margin-top:-15px;margin-bottom:18px}
+#sqQuit{display:none;flex-direction:column;gap:10px}.sqQuitLogo{font-size:38px;font-weight:600}.sqQuitText{color:#888;font-size:13px}
+@media(max-width:600px){.sqLogo{font-size:34px}.sqRow{grid-template-columns:105px 1fr 44px}}
+`;document.head.appendChild(menuStyle);
+
+const menu=document.createElement('div');menu.id='sqMainMenu';menu.innerHTML='<div class="sqMenuBox"><div class="sqLogo">Sliqadius™</div><button class="sqMenuBtn" id="sqPlay">Play</button><button class="sqMenuBtn" id="sqSettingsOpen">Settings</button><button class="sqMenuBtn" id="sqQuitBtn">Quit</button></div>';document.body.appendChild(menu);
+const settings=document.createElement('div');settings.id='sqSettings';settings.innerHTML='<div class="sqSettingsBox"><h2>Settings</h2><div class="sqSub">Audio</div><button class="sqToggle" id="sqSoundToggle">Sound: Off</button><div class="sqRow"><label>Master Volume</label><input id="sqMaster" type="range" min="0" max="100" value="72"><span class="sqValue" id="sqMasterV">72%</span></div><div class="sqRow"><label>Music</label><input id="sqMusic" type="range" min="0" max="100" value="18"><span class="sqValue" id="sqMusicV">18%</span></div><div class="sqRow"><label>City Sounds</label><input id="sqAmb" type="range" min="0" max="100" value="6"><span class="sqValue" id="sqAmbV">6%</span></div><button class="sqMenuBtn sqBack" id="sqBack">Back</button></div>';document.body.appendChild(settings);
+const quitScreen=document.createElement('div');quitScreen.id='sqQuit';quitScreen.innerHTML='<div class="sqQuitLogo">Sliqadius™</div><div class="sqQuitText">You can close this tab.</div>';document.body.appendChild(quitScreen);
+
+const audioPrefs=JSON.parse(localStorage.getItem('sliqadiusAudioSettings')||'{}');
+const masterSlider=$('sqMaster'),musicSlider=$('sqMusic'),ambSlider=$('sqAmb');
+if(Number.isFinite(audioPrefs.master))masterSlider.value=audioPrefs.master;if(Number.isFinite(audioPrefs.music))musicSlider.value=audioPrefs.music;if(Number.isFinite(audioPrefs.amb))ambSlider.value=audioPrefs.amb;
+function updateAudioValues(){ $('sqMasterV').textContent=masterSlider.value+'%';$('sqMusicV').textContent=musicSlider.value+'%';$('sqAmbV').textContent=ambSlider.value+'%';if(master)master.gain.setTargetAtTime(audioOn?(+masterSlider.value/100):.0001,ac.currentTime,.05);if(musicGain)musicGain.gain.setTargetAtTime(+musicSlider.value/100,ac.currentTime,.05);if(ambGain)ambGain.gain.setTargetAtTime(+ambSlider.value/100,ac.currentTime,.05);localStorage.setItem('sliqadiusAudioSettings',JSON.stringify({master:+masterSlider.value,music:+musicSlider.value,amb:+ambSlider.value}))}
+[masterSlider,musicSlider,ambSlider].forEach(x=>x.addEventListener('input',updateAudioValues));updateAudioValues();
+async function toggleMenuSound(){if(!ac)startAudio();if(ac.state==='suspended')await ac.resume();audioOn=!audioOn;if(master)master.gain.setTargetAtTime(audioOn?(+masterSlider.value/100):.0001,ac.currentTime,.05);$('sqSoundToggle').textContent=audioOn?'Sound: On':'Sound: Off';if(typeof audioBtn!=='undefined'&&audioBtn)audioBtn.textContent=audioOn?'Sound: On':'Sound: Off'}
+$('sqSoundToggle').onclick=toggleMenuSound;
+if(typeof audioBtn!=='undefined'&&audioBtn){audioBtn.onclick=toggleMenuSound}
+
+const wasPaused=state.paused;state.paused=true;
+$('sqPlay').onclick=()=>{menu.style.display='none';state.paused=wasPaused};
+$('sqSettingsOpen').onclick=()=>{settings.style.display='flex'};
+$('sqBack').onclick=()=>{settings.style.display='none'};
+$('sqQuitBtn').onclick=()=>{try{window.close()}catch{}menu.style.display='none';settings.style.display='none';quitScreen.style.display='flex';state.paused=true};
+addEventListener('keydown',e=>{if(e.key==='Escape'){if(settings.style.display==='flex'){settings.style.display='none';return}if(menu.style.display==='none'&&quitScreen.style.display!=='flex'){state.paused=true;menu.style.display='flex'}else if(menu.style.display==='flex'){menu.style.display='none';state.paused=false}}});
