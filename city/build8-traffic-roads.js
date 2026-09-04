@@ -54,12 +54,26 @@ function roadCurveData(r){
  let pts=r.p.map(q=>new T.Vector3(q.x,.03,q.z)),curve=new T.CatmullRomCurve3(pts,false,'centripetal',.5),len=Math.max(.1,curve.getLength());
  return r._curve8={sig,curve,len}
 }
-function roadConnectionFromEnd(r,atEnd=true){
- let p=atEnd?r.p[r.p.length-1]:r.p[0],best=null,bd=.62;
- for(const o of roads){if(o===r||!validRoad(o))continue;for(const start of[true,false]){let q=start?o.p[0]:o.p[o.p.length-1],d=Math.hypot(p.x-q.x,p.z-q.z);if(d<bd){bd=d;best={r:o,start}}}}
- return best
+function roadConnectionFromEnd(r,atEnd=true,target=null){
+ let p=atEnd?r.p[r.p.length-1]:r.p[0],options=[];
+ for(const o of roads){
+  if(o===r||!validRoad(o))continue;
+  for(const start of[true,false]){
+   let q=start?o.p[0]:o.p[o.p.length-1],d=Math.hypot(p.x-q.x,p.z-q.z);
+   if(d<.62){
+    let score=d;
+    if(target){let far=start?o.p[o.p.length-1]:o.p[0];score+=Math.hypot(far.x-target.x,far.z-target.z)*.06}
+    options.push({r:o,start,score})
+   }
+  }
+ }
+ options.sort((a,b)=>a.score-b.score);
+ return options[0]||null
 }
 function cityHasDestination(){return buildings.some(b=>['res','com','ind'].includes(b.k))}
+function truckTargets(){return buildings.filter(b=>b.k==='com'||b.k==='ind')}
+function carTargets(){return buildings.filter(b=>['res','com','ind'].includes(b.k))}
+function chooseTarget(kind){let a=kind==='truck'?truckTargets():carTargets();return a.length?a[(Math.random()*a.length)|0]:null}
 function outsideConnected(){
  for(const e of roads.filter(r=>r.external&&validRoad(r))){
   for(const r of roads.filter(r=>!r.external&&validRoad(r))){
@@ -76,30 +90,40 @@ function carModel8(kind){
 }
 function spawnOutsideVehicle(){
  if(!cityHasDestination()||!outsideConnected()||cars.length>=46)return;
+ let canTruck=truckTargets().length>0,kind=canTruck&&Math.random()<.32?'truck':'car',destination=chooseTarget(kind);
+ if(!destination)return;
  let ext=roads.filter(r=>r.external&&validRoad(r));if(!ext.length)return;
- let r=ext[(Math.random()*ext.length)|0],kind=Math.random()<.32?'truck':'car',g=carModel8(kind);mg.add(g);
- cars.push({g,r,u:0,dir:1,v:0,target:kind==='truck'?3.1+Math.random()*.35:4.2+Math.random()*.7,kind,wait:0})
+ let r=ext[(Math.random()*ext.length)|0],g=carModel8(kind);mg.add(g);
+ cars.push({g,r,u:0,dir:1,v:0,target:kind==='truck'?3.1+Math.random()*.35:4.2+Math.random()*.7,kind,wait:0,destination})
 }
 function segmentInfoForU(r,u){
  let lens=[],total=0;for(let i=0;i<r.p.length-1;i++){let l=Math.hypot(r.p[i+1].x-r.p[i].x,r.p[i+1].z-r.p[i].z);lens.push(l);total+=l}let d=C(u,0,1)*Math.max(.001,total),acc=0;for(let i=0;i<lens.length;i++){if(d<=acc+lens[i]||i===lens.length-1)return{i,t:lens[i]?C((d-acc)/lens[i],0,1):0};acc+=lens[i]}return{i:0,t:0}
+}
+function reachedDestination(c,p){
+ if(!c.destination)return false;
+ return Math.hypot(p.x-c.destination.x,p.z-c.destination.z)<4.2
 }
 carsUp=function(dt){
  if(cityHasDestination()&&outsideConnected()&&Math.random()<dt*.52*st.speed)spawnOutsideVehicle();
  for(let i=cars.length-1;i>=0;i--){
   let c=cars[i];if(!validRoad(c.r)||!roads.includes(c.r)){removeCar(c);cars.splice(i,1);continue}
+  if(c.kind==='truck'&&(!c.destination||!['com','ind'].includes(c.destination.k))){c.destination=chooseTarget('truck');if(!c.destination){removeCar(c);cars.splice(i,1);continue}}
   let cd=roadCurveData(c.r);if(!cd){removeCar(c);cars.splice(i,1);continue}
   let si=segmentInfoForU(c.r,c.u),blocked=false;
   if(!c.r.external){let q=stop(c.r,si.i,si.t,c.dir||1);blocked=!!q}
   let wanted=blocked?0:c.target;c.v+=(wanted-c.v)*(1-Math.exp(-dt*(blocked?8:3.2)));
   c.u+=((c.v*dt*st.speed)/cd.len)*(c.dir||1);
   if(c.u>=1||c.u<=0){
-   let end=c.u>=1,con=roadConnectionFromEnd(c.r,end);
+   let end=c.u>=1,con=roadConnectionFromEnd(c.r,end,c.destination);
    if(con){c.r=con.r;c.dir=con.start?1:-1;c.u=con.start?.002:.998;cd=roadCurveData(c.r)}
    else if(c.r.external&&end){c.u=.998;c.v*=.3}
    else if(!c.r.external){c.dir*=-1;c.u=C(c.u,0,1)}
    else{removeCar(c);cars.splice(i,1);continue}
   }
   let uu=c.dir<0?1-c.u:c.u,p=cd.curve.getPointAt(C(uu,0,1)),tg=cd.curve.getTangentAt(C(uu,0,1));
+  if(reachedDestination(c,p)){
+   removeCar(c);cars.splice(i,1);continue
+  }
   if(c.dir<0)tg.multiplyScalar(-1);c.g.position.copy(p);c.g.rotation.y=Math.atan2(tg.x,tg.z)
  }
  pu(dt)
