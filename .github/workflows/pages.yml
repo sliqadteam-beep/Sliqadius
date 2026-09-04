@@ -28,6 +28,7 @@ jobs:
         run: |
           test -f index.html
           test -f city/index.html
+          test -f city/build6-patch.js
           test -d city/v4
           test -f city/v4/part1.txt
           test -f city/v4/part2.txt
@@ -35,17 +36,24 @@ jobs:
           test -f city/v4/part4.txt
           test -f city/v4/part5.txt
 
-      - name: Validate assembled City JavaScript
+      - name: Validate City JavaScript
         run: |
           cat city/v4/part1.txt city/v4/part2.txt city/v4/part3.txt city/v4/part4.txt city/v4/part5.txt > /tmp/city.html
           python - <<'PY'
           from pathlib import Path
+          import re
           s=Path('/tmp/city.html').read_text()
           a=s.index('<script type="module">')+len('<script type="module">')
           b=s.index('</script>',a)
           Path('/tmp/city.mjs').write_text(s[a:b])
+          loader=Path('city/index.html').read_text()
+          m=re.search(r'<script>(.*?)</script>',loader,re.S)
+          if not m: raise SystemExit('city loader script missing')
+          Path('/tmp/city-loader.js').write_text(m.group(1))
           PY
           node --check /tmp/city.mjs
+          node --check /tmp/city-loader.js
+          node --check city/build6-patch.js
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
