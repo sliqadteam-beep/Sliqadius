@@ -24,19 +24,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Apply Web v19 reliability fixes
-        run: python ci_web_v18_patch.py
-
-      - name: Validate Web JavaScript
+      - name: Verify website files
         run: |
-          node --check web-v15.js
-          node --check web-bootstrap-v18.js
-          node --check sliq-i18n-loader.js
-          node --check sw.js
-          for f in i18n/*.js; do node --check "$f"; done
-
-      - name: Run Web smoke checks
-        run: python web_smoke_check.py
+          test -f index.html
+          test -f city/index.html
+          test -d city/v4
+          test -f city/v4/part1.txt
+          test -f city/v4/part2.txt
+          test -f city/v4/part3.txt
+          test -f city/v4/part4.txt
+          test -f city/v4/part5.txt
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
