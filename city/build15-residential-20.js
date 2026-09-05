@@ -90,3 +90,5 @@ developZones9=function(){
 // Existing residential buildings also get a stable variant and default zoning footprint.
 for(const b of buildings)if(b.k==='res'){if(!Number.isFinite(b.houseVariant15))b.houseVariant15=Math.floor(h10(seed10(b)+1515)*20);if(!Number.isFinite(b.lotW))b.lotW=5.6;if(!Number.isFinite(b.lotD))b.lotD=5.2}
 buildingsBuild();saveGame();
+
+eval(await (await fetch('build16-emergency-services.js?v=16',{cache:'no-store'})).text());
