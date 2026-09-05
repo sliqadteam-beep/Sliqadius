@@ -13,11 +13,9 @@ function serviceScore14(kind){let service=buildings.filter(b=>b.k===kind),city=b
 function updateBrain14(){let r=buildings.filter(b=>b.k==='res').length,c=buildings.filter(b=>b.k==='com').length,i=buildings.filter(b=>b.k==='ind').length,total=r+c+i;let jobs=c*5+i*7,homes=r*8;brain14.demand.res=C((jobs+4)/(homes+4),.15,1);brain14.demand.com=C((homes+8)/(c*12+8),.12,1);brain14.demand.ind=C((c*5+homes*.35+6)/(i*14+6),.1,1);brain14.service.police=serviceScore14('police');brain14.service.fire=serviceScore14('fire');brain14.service.hospital=serviceScore14('hospital');let avg=(brain14.service.police+brain14.service.fire+brain14.service.hospital)/3;st.happy=C(58+avg*28-Math.max(0,total-80)*.08,25,96);st.pop=Math.round(r*8*(.7+.3*brain14.service.hospital))}
 setInterval(updateBrain14,1800);updateBrain14();
 
-// Demand-aware zoning: a zone type only develops when the city actually needs it.
 const developOld14=developZones9;
 developZones9=function(){if(st.paused)return;updateBrain14();let pool=zones9.filter(canBuildZone9).filter(z=>Math.random()<brain14.demand[z.k]);if(!pool.length)return;pool.sort((a,b)=>brain14.demand[b.k]-brain14.demand[a.k]);let z=pool[0];z.built=true;let n=nearestRoadPoint9(z,7),rot=n?Math.atan2(n.tx,n.tz)+Math.PI/2:0;buildings.push({x:z.x,z:z.z,k:z.k,level:1,rot10:rot,seed10:Math.floor(Math.random()*999999)});buildingsBuild();saveGame()};
 
-// Smarter traffic: route to real destinations, keep distance, do not randomly bounce at dead ends.
 const spawn14=spawnOutsideVehicle;
 spawnOutsideVehicle=function(){let before=cars.length;spawn14();if(cars.length<=before)return;let c=cars[cars.length-1];if(!c||!c.destination)return;let route=routeRoads14(c.r,c.destination);if(route)c.route14=route;else{removeCar(c);cars.pop()}}
 
@@ -37,6 +35,7 @@ carsUp=function(dt){
  pu(dt)
 };
 
-// Re-route traffic when roads change instead of keeping stale decisions.
 const roadsBuildOld14=roadsBuild;roadsBuild=function(){roadsBuildOld14();let s=roadStamp14();if(s!==brain14.graphStamp){brain14.graphStamp=s;for(const c of cars)if(c.destination)c.route14=routeRoads14(c.r,c.destination)}};
 brain14.graphStamp=roadStamp14();
+
+eval(await (await fetch('build15-residential-20.js?v=15',{cache:'no-store'})).text());
