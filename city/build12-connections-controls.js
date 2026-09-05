@@ -96,3 +96,5 @@ spawnOutsideVehicle=function(){
  const r=ext[(Math.random()*ext.length)|0],g=carModel8(kind);mg.add(g);let cd=roadCurveData(r),p=cd&&cd.curve.getPointAt(0);if(p)g.position.copy(p);
  cars.push({g,r,u:0,dir:1,v:0,target:kind==='truck'?3.15:4.35,kind,destination,enteredFromOutside:true})
 };
+
+eval(await (await fetch('build13-photoreal-3d.js?v=13',{cache:'no-store'})).text());
