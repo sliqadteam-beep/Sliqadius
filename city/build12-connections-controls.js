@@ -98,3 +98,4 @@ spawnOutsideVehicle=function(){
 };
 
 eval(await (await fetch('build13-photoreal-3d.js?v=13',{cache:'no-store'})).text());
+eval(await (await fetch('build14-smart-simulation.js?v=14',{cache:'no-store'})).text());
