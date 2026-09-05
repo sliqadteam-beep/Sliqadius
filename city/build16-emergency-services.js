@@ -32,3 +32,5 @@ setInterval(()=>{if(st.paused)return;let income=0;for(const b of buildings){if(b
 const begin16=beginInput;beginInput=function(e,p){if(cat==='bulldoze'&&p){let b=buildings.find(x=>x.burned16&&Math.hypot(x.x-p.x,x.z-p.z)<3);if(b){buildings.splice(buildings.indexOf(b),1);let z=zones9.find(z=>Math.hypot(z.x-b.x,z.z-b.z)<1.6);if(z)z.built=false;emergencies16.forEach(q=>{if(q.b===b)q.resolved=true});buildingsBuild();saveGame();toast('Burned building cleared - lot ready to rebuild');return}}return begin16(e,p)};
 // Persist fire damage state through the normal building save object; safeBuilding already keeps extra fields in objects.
 for(const b of buildings)if(b.burned16)b.incomeDisabled16=true;
+
+eval(await (await fetch('build17-fire-animation-npc-origins.js?v=17',{cache:'no-store'})).text());
