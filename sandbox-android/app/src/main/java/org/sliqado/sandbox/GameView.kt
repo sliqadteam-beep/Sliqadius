@@ -1,53 +1,191 @@
 package org.sliqado.sandbox
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.RectF
 import android.view.MotionEvent
 import android.view.View
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
-class GameView(c:Context):View(c){
- companion object{const val AIR=0;const val SAND=1;const val WATER=2;const val STONE=3;const val WOOD=4;const val FIRE=5;const val OIL=6;const val SEED=7;const val ACID=8;const val SALT=9;const val STEAM=10;const val ICE=11;const val LAVA=12;const val METAL=13;const val COPPER=14;const val WIRE=15;const val BATTERY=16;const val HEATER=17;const val COOLER=18;const val LAMP=19;const val SPARK=20;const val GUNPOWDER=21;const val GLASS=22;const val COAL=23;const val SMOKE=24;const val GAS=25;const val SALTWATER=26;const val MUD=27;const val SNOW=28;const val NITROGEN=29;const val ANT=30;const val SUGAR=31;const val WAX=32;const val MWAX=33;const val MMETAL=34;const val MCOPPER=35;const val MGLASS=36;const val MERCURY=37;const val ALCOHOL=38;const val FOAM=39;const val CONCRETE=40;const val CEMENT=41;const val CLAY=42;const val URANIUM=43;const val PLASMA=44;const val ASH=45;const val CHARCOAL=46;const val HONEY=47;const val SPONGE=48}
- data class D(val id:Int,val n:String,val s:String,val col:Int,val state:Int,val cond:Boolean=false,val r:Float=6f,val flam:Boolean=false)
- private val ds=arrayOfNulls<D>(49);private val menu=ArrayList<D>()
- private val W=160;private val H=240;private val N=W*H;private val g=ByteArray(N);private val life=ShortArray(N);private val t=FloatArray(N){20f};private val v=FloatArray(N);private val moved=IntArray(N);private val t2=FloatArray(N);private val pix=IntArray(N);private val q=IntArray(N);private val bmp=Bitmap.createBitmap(W,H,Bitmap.Config.ARGB_8888);private val src=Rect(0,0,W,H);private val dst=RectF();private val paint=Paint();private val line=Paint(Paint.ANTI_ALIAS_FLAG).apply{style=Paint.Style.STROKE;color=0xff303030.toInt();strokeWidth=2f};private val txt=Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.BLACK;textAlign=Paint.Align.CENTER;typeface=Typeface.DEFAULT_BOLD};private val rnd=Random(System.nanoTime())
- private var sel=SAND;private var eraser=false;private var pause=false;private var view=0;private var tick=1;private var frame=0;private var sb=0f;private var tw=0f;private var th=0f;private var scroll=0f;private var world=false;private var panel=false;private var lx=0f;private var ly=0f;private var py=0f
- private val loop=object:Runnable{override fun run(){if(!pause&&frame%2==0)step();frame++;invalidate();postOnAnimation(this)}}
- init{isFocusable=true;keepScreenOn=true;defs();demo();postOnAnimation(loop)}
- private fun a(id:Int,n:String,s:String,c:Int,st:Int,co:Boolean=false,r:Float=6f,f:Boolean=false){val d=D(id,n,s,c,st,co,r,f);ds[id]=d;menu.add(d)}
- private fun defs(){a(SAND,"Sand","Sa",0xffd9b85d.toInt(),1);a(WATER,"Water","Wa",0xff3b8eea.toInt(),2);a(STONE,"Stone","St",0xff858987.toInt(),0);a(WOOD,"Wood","Wo",0xffa2673d.toInt(),0,f=true);a(FIRE,"Fire","Fi",0xffff6b18.toInt(),3);a(OIL,"Oil","Oi",0xff67512f.toInt(),2,f=true);a(SEED,"Seeds","Se",0xff8c6b2f.toInt(),1,f=true);a(ACID,"Acid","Ac",0xff9dde39.toInt(),2);a(SALT,"Salt","Sl",0xffeee9dc.toInt(),1);a(STEAM,"Steam","Vm",0xffb6c5ca.toInt(),3);a(ICE,"Ice","Ic",0xff9edcf1.toInt(),0);a(LAVA,"Lava","Lv",0xffef3d14.toInt(),2);a(METAL,"Metal","Me",0xff9aa4a9.toInt(),0,true,5f);a(COPPER,"Copper","Cu",0xffc8793e.toInt(),0,true,2f);a(WIRE,"Wire","Wi",0xffd7a63e.toInt(),0,true,2f);a(BATTERY,"Battery","Ba",0xff75c75d.toInt(),0,true,1f);a(HEATER,"Heater","Ht",0xffdd6b43.toInt(),0,true,3f);a(COOLER,"Cooler","Cl",0xff59b9e5.toInt(),0,true,3f);a(LAMP,"Lamp","La",0xffffe76a.toInt(),0,true,4f);a(SPARK,"Spark","Sp",0xff9de9ff.toInt(),3,true,1f);a(GUNPOWDER,"Gunpowder","Gp",0xff4c4943.toInt(),1,f=true);a(GLASS,"Glass","Gl",0xff9bc3cc.toInt(),0);a(COAL,"Coal","Co",0xff323638.toInt(),1,f=true);a(SMOKE,"Smoke","Sm",0xff5c6467.toInt(),3);a(GAS,"Gas","Ga",0xffb49d69.toInt(),3,f=true);a(SALTWATER,"Salt Water","SW",0xff4da2c9.toInt(),2,true,6f);a(MUD,"Mud","Mu",0xff75543b.toInt(),1);a(SNOW,"Snow","Sn",0xffe0f5fb.toInt(),1);a(NITROGEN,"Liquid N2","N2",0xffaeeeff.toInt(),2);a(ANT,"Ants","An",0xff171717.toInt(),4);a(SUGAR,"Sugar","Su",0xfffff1cf.toInt(),1,f=true);a(WAX,"Wax","Wx",0xffffe1a3.toInt(),0,f=true);a(MWAX,"Molten Wax","MW",0xffffb34f.toInt(),2,f=true);a(MMETAL,"Molten Metal","MM",0xffff8b48.toInt(),2,true,4f);a(MCOPPER,"Molten Copper","MC",0xffff7138.toInt(),2,true,2f);a(MGLASS,"Molten Glass","MG",0xffffc97e.toInt(),2);a(MERCURY,"Mercury","Hg",0xffb9c3c8.toInt(),2,true,3f);a(ALCOHOL,"Alcohol","Al",0xffcddff4.toInt(),2,f=true);a(FOAM,"Foam","Fo",0xfff1f4ef.toInt(),1);a(CONCRETE,"Concrete","Cr",0xff9b9a91.toInt(),0);a(CEMENT,"Cement","Ce",0xffbeb9ae.toInt(),1);a(CLAY,"Clay","Cy",0xffa76d52.toInt(),1);a(URANIUM,"Uranium","Ur",0xff83bf4b.toInt(),1,true,8f);a(PLASMA,"Plasma","Pl",0xffff65ef.toInt(),3,true,1f);a(ASH,"Ash","As",0xff77736c.toInt(),1);a(CHARCOAL,"Charcoal","Ch",0xff272727.toInt(),1,f=true);a(HONEY,"Honey","Ho",0xffd79118.toInt(),2,f=true);a(SPONGE,"Sponge","Sg",0xffffdb55.toInt(),0,f=true)}
- private fun id(x:Int,y:Int)=x+y*W;private fun inside(x:Int,y:Int)=x>=0&&x<W&&y>=0&&y<H;private fun at(x:Int,y:Int)=if(inside(x,y))g[id(x,y)].toInt()and 255 else STONE
- private fun baseT(e:Int)=when(e){LAVA->1250f;FIRE->820f;PLASMA->2200f;SPARK->550f;MMETAL->1550f;MCOPPER->1180f;MGLASS->1500f;MWAX->85f;ICE->-12f;SNOW->-8f;NITROGEN->-196f;else->20f}
- private fun set(x:Int,y:Int,e:Int,l:Int=0,tt:Float?=null){if(!inside(x,y))return;val i=id(x,y);g[i]=e.toByte();life[i]=l.toShort();t[i]=tt?:baseT(e);v[i]=0f;moved[i]=tick};private fun clear(i:Int){g[i]=0;life[i]=0;t[i]=20f;v[i]=0f;moved[i]=tick};private fun sw(a:Int,b:Int){var z=g[a];g[a]=g[b];g[b]=z;var s=life[a];life[a]=life[b];life[b]=s;var f=t[a];t[a]=t[b];t[b]=f;f=v[a];v[a]=v[b];v[b]=f;moved[a]=tick;moved[b]=tick}
- private fun neigh(x:Int,y:Int,e:Int):Int{for(dy in-1..1)for(dx in-1..1){if(dx==0&&dy==0)continue;val nx=x+dx;val ny=y+dy;if(inside(nx,ny)){val i=id(nx,ny);if((g[i].toInt()and 255)==e)return i}};return-1};private fun near(x:Int,y:Int,vararg es:Int):Boolean{for(e in es)if(neigh(x,y,e)>=0)return true;return false}
- private fun fluid(e:Int)=e==WATER||e==OIL||e==ACID||e==SALTWATER||e==LAVA||e==NITROGEN||e==MWAX||e==MMETAL||e==MCOPPER||e==MGLASS||e==MERCURY||e==ALCOHOL||e==HONEY
- private fun powder(x:Int,y:Int,slow:Int=1){if(slow>1&&tick%slow!=0)return;val i=id(x,y);if(at(x,y+1)==AIR||fluid(at(x,y+1))){sw(i,id(x,y+1));return};val s=if(rnd.nextBoolean())1 else-1;for(dx in intArrayOf(s,-s))if(inside(x+dx,y+1)&&(at(x+dx,y+1)==AIR||fluid(at(x+dx,y+1)))){sw(i,id(x+dx,y+1));return}}
- private fun liquid(x:Int,y:Int,spread:Int=4,slow:Int=1){if(slow>1&&tick%slow!=0)return;val i=id(x,y);if(y+1<H&&at(x,y+1)==AIR){sw(i,id(x,y+1));return};val s=if(rnd.nextBoolean())1 else-1;for(d in 1..spread)for(k in intArrayOf(s,-s)){val nx=x+k*d;if(inside(nx,y)&&at(nx,y)==AIR){sw(i,id(nx,y));return}}}
- private fun gas(x:Int,y:Int){val i=id(x,y);if(y>0&&at(x,y-1)==AIR){sw(i,id(x,y-1));return};val s=if(rnd.nextBoolean())1 else-1;if(inside(x+s,y-1)&&at(x+s,y-1)==AIR)sw(i,id(x+s,y-1))else if(inside(x+s,y)&&at(x+s,y)==AIR)sw(i,id(x+s,y))}
- private fun phase(i:Int,e:Int){val q=t[i];when(e){WATER,SALTWATER->if(q<0)g[i]=ICE.toByte()else if(q>104)g[i]=STEAM.toByte();ICE,SNOW->if(q>1)g[i]=WATER.toByte();STEAM->if(q<88)g[i]=WATER.toByte();WAX->if(q>62)g[i]=MWAX.toByte();MWAX->if(q<54)g[i]=WAX.toByte();METAL->if(q>1450)g[i]=MMETAL.toByte();MMETAL->if(q<1330)g[i]=METAL.toByte();COPPER,WIRE->if(q>1085)g[i]=MCOPPER.toByte();MCOPPER->if(q<980)g[i]=COPPER.toByte();GLASS->if(q>1400)g[i]=MGLASS.toByte();MGLASS->if(q<850)g[i]=GLASS.toByte();STONE->if(q>1350)g[i]=LAVA.toByte();LAVA->if(q<680)g[i]=STONE.toByte();SUGAR->if(q>185)g[i]=HONEY.toByte();ALCOHOL->if(q>78)g[i]=GAS.toByte();MERCURY->if(q>357)g[i]=GAS.toByte();CLAY->if(q>1050)g[i]=STONE.toByte()}}
- private fun ignite(x:Int,y:Int){for(dy in-1..1)for(dx in-1..1){val nx=x+dx;val ny=y+dy;if(!inside(nx,ny))continue;val i=id(nx,ny);val e=g[i].toInt()and 255;if(ds[e]?.flam==true&&rnd.nextFloat()<(if(e==GAS||e==GUNPOWDER).25f else .04f)){g[i]=FIRE.toByte();life[i]=0;t[i]=max(t[i],700f)}}}
- private fun ant(x:Int,y:Int){val i=id(x,y);if(t[i]>80||near(x,y,FIRE,LAVA,ACID,PLASMA)){clear(i);return};var bx=0;var by=0;loop@for(r in 1..5)for(dy in-r..r)for(dx in-r..r)if(inside(x+dx,y+dy)&&at(x+dx,y+dy)==SEED){bx=dx.sign;by=dy.sign;break@loop};if(abs(bx)<=1&&abs(by)<=1&&near(x,y,SEED)){val s=neigh(x,y,SEED);if(s>=0){clear(s);return}};val dx=if(bx!=0)bx else if(rnd.nextBoolean())1 else-1;val dy=if(by!=0)by else 0;val nx=x+dx;val ny=y+dy;if(inside(nx,ny)&&at(nx,ny)==AIR&&(at(nx,ny+1)!=AIR||at(nx-1,ny)!=AIR||at(nx+1,ny)!=AIR))sw(i,id(nx,ny))}
- private val Int.sign:Int get()=if(this<0)-1 else if(this>0)1 else 0
- private fun cell(x:Int,y:Int){val i=id(x,y);if(moved[i]==tick)return;val e=g[i].toInt()and 255;if(e==AIR)return;phase(i,e);if((g[i].toInt()and 255)!=e)return;when(e){SAND,SALT,SUGAR,CEMENT,CLAY,ASH,CHARCOAL,COAL,GUNPOWDER->powder(x,y);MUD->powder(x,y,2);SNOW->powder(x,y);URANIUM->{powder(x,y);t[i]+=.2f};WATER,SALTWATER,ACID,MERCURY,ALCOHOL->liquid(x,y,5);OIL->liquid(x,y,6);HONEY->liquid(x,y,3,3);MWAX->liquid(x,y,3,2);LAVA,MMETAL,MCOPPER,MGLASS->liquid(x,y,2,2);STEAM,SMOKE,GAS->{life[i]=(life[i]+1).toShort();gas(x,y)};FIRE->{life[i]=(life[i]+1).toShort();t[i]=max(t[i],820f);ignite(x,y);if(near(x,y,WATER,SALTWATER,NITROGEN)&&rnd.nextFloat()<.2f){clear(i);return};if((life[i].toInt()and 65535)>100){g[i]=if(rnd.nextBoolean())SMOKE.toByte()else ASH.toByte();life[i]=0}else gas(x,y)};SPARK->{life[i]=(life[i]+1).toShort();t[i]=550f;ignite(x,y);if((life[i].toInt()and 65535)>18)clear(i)else gas(x,y)};PLASMA->{life[i]=(life[i]+1).toShort();t[i]=2200f;ignite(x,y);gas(x,y)};NITROGEN->{val age=(life[i].toInt()and 65535)+1;life[i]=age.toShort();for(dy in-1..1)for(dx in-1..1)if(inside(x+dx,y+dy))t[id(x+dx,y+dy)]-=3f;val warm=max(0f,t[i]+196f);if(age>max(25f,95f-warm*.18f)){clear(i);return};liquid(x,y,5)};SEED->{powder(x,y);if((g[i].toInt()and255)==SEED&&t[i]in 4f..46f&&near(x,y,WATER,SALTWATER)&&(at(x,y+1)==MUD||at(x,y+1)==SAND)){life[i]=(life[i]+1).toShort();if((life[i].toInt()and65535)>45&&rnd.nextFloat()<.02f&&y>0&&at(x,y-1)==AIR)set(x,y-1,SEED,80,t[i])}};ANT->ant(x,y);SPONGE->{if(near(x,y,WATER,SALTWATER)&&life[i]<200)life[i]++}}
-  if(e==GUNPOWDER&&(t[i]>190||near(x,y,FIRE,SPARK,PLASMA))){for(dy in-3..3)for(dx in-3..3)if(inside(x+dx,y+dy)){val j=id(x+dx,y+dy);t[j]+=250f;if((g[j].toInt()and255)==GUNPOWDER||rnd.nextFloat()<.12f)g[j]=FIRE.toByte()}}
-  if(e==SALT){val w=neigh(x,y,WATER);if(w>=0&&rnd.nextFloat()<.12f){g[w]=SALTWATER.toByte();clear(i)}};if(e==WATER){val s=neigh(x,y,SAND);if(s>=0&&rnd.nextFloat()<.001f)g[s]=MUD.toByte()};if(e==CEMENT&&near(x,y,WATER)&&rnd.nextFloat()<.04f)g[i]=CONCRETE.toByte();if(ds[e]?.flam==true&&(t[i]>320||near(x,y,FIRE,SPARK,PLASMA))&&rnd.nextFloat()<.035f){g[i]=FIRE.toByte();life[i]=0}}
- private fun conductive(e:Int)=ds.getOrNull(e)?.cond==true||e==SALTWATER||e==MERCURY||e==PLASMA
- private fun electricity(){java.util.Arrays.fill(v,0f);var h=0;var z=0;for(i in 0 until N){val e=g[i].toInt()and255;if(e==BATTERY){v[i]=100f;q[z++]=i}else if(e==SPARK||e==PLASMA){v[i]=75f;q[z++]=i}};while(h<z){val i=q[h++];val x=i%W;val y=i/W;fun push(j:Int){val e=g[j].toInt()and255;if(!conductive(e))return;val nv=v[i]-(ds[e]?.r?:6f);if(nv>v[j]+.5f){v[j]=nv;if(z<N)q[z++]=j}};if(x>0)push(i-1);if(x<W-1)push(i+1);if(y>0)push(i-W);if(y<H-1)push(i+W)};for(i in 0 until N)when(g[i].toInt()and255){HEATER->if(v[i]>8)t[i]+=18f;COOLER->if(v[i]>8)t[i]-=16f;LAMP->if(v[i]>8)t[i]+=.6f}}
- private fun heat(){for(i in 0 until N)t2[i]=t[i];for(y in 1 until H-1)for(x in 1 until W-1){val i=id(x,y);val e=g[i].toInt()and255;val target=when(e){LAVA->1250f;FIRE->820f;PLASMA->2200f;MMETAL->1550f;MCOPPER->1180f;MGLASS->1500f;NITROGEN->-196f;ICE->-12f;SNOW->-8f;else->20f};if(e==LAVA||e==FIRE||e==PLASMA||e==MMETAL||e==MCOPPER||e==MGLASS||e==NITROGEN)t2[i]+=(target-t[i])*.08f;val k=when(e){COPPER,MCOPPER->.16f;METAL,MMETAL,WIRE->.12f;WATER,SALTWATER,MERCURY->.08f;STONE,CONCRETE,GLASS->.05f;else->.025f};val av=(t[i-1]+t[i+1]+t[i-W]+t[i+W])*.25f;t2[i]+=(av-t[i])*k};for(i in 0 until N)t[i]=t2[i].coerceIn(-210f,2600f)}
- private fun step(){tick++;if(tick==Int.MAX_VALUE){java.util.Arrays.fill(moved,0);tick=1};if(tick%3==0)electricity();if(tick%4==0)heat();for(y in H-2 downTo 0)for(x in if(rnd.nextBoolean())0 until W else W-1 downTo 0){val e=at(x,y);if(e!=FIRE&&e!=STEAM&&e!=SMOKE&&e!=GAS&&e!=PLASMA&&e!=SPARK)cell(x,y)};for(y in 1 until H)for(x in 0 until W){val e=at(x,y);if(e==FIRE||e==STEAM||e==SMOKE||e==GAS||e==PLASMA||e==SPARK)cell(x,y)}}
- private fun blend(a:Int,b:Int,f:Float):Int{val u=f.coerceIn(0f,1f);return Color.rgb((Color.red(a)+(Color.red(b)-Color.red(a))*u).toInt(),(Color.green(a)+(Color.green(b)-Color.green(a))*u).toInt(),(Color.blue(a)+(Color.blue(b)-Color.blue(a))*u).toInt())};private fun hcol(x:Float)=when{ x<-100->0xff505aff.toInt();x<0->blend(0xff505aff.toInt(),0xff50dcff.toInt(),(x+100)/100);x<100->blend(0xff50dcff.toInt(),0xffffdc46.toInt(),x/100);x<700->blend(0xffffdc46.toInt(),0xffff4614.toInt(),(x-100)/600);else->blend(0xffff4614.toInt(),Color.WHITE,(x-700)/1200)}
- private fun mcol(i:Int,e:Int):Int{if(e==AIR)return 0xff000018.toInt();var c=ds[e]?.col?:Color.MAGENTA;if(e==SEED&&(life[i].toInt()and65535)>45)c=0xff59b95f.toInt();if(e==LAMP&&v[i]>8)c=0xfffff6aa.toInt();if(t[i]>80)c=blend(c,if(t[i]>900)Color.WHITE else 0xffff5a22.toInt(),min(1f,(t[i]-80)/900));else if(t[i]<0)c=blend(c,0xff62c8ff.toInt(),min(.75f,-t[i]/200));return c}
- private fun render(){for(i in 0 until N){val e=g[i].toInt()and255;pix[i]=when(view){0->mcol(i,e);1->if(e==AIR)0xff05051a.toInt()else hcol(t[i]);else->if(e==AIR)0xff030315.toInt()else if(v[i]>1)blend(0xff423300.toInt(),0xffffff68.toInt(),v[i]/100)else blend(mcol(i,e),0xff0b1020.toInt(),.72f)}};bmp.setPixels(pix,0,W,0,0,W,H)}
- override fun onDraw(c:Canvas){super.onDraw(c);c.drawColor(0xff000018.toInt());sb=height*.68f;tw=width/6f;th=(height-sb)/4f;render();dst.set(0f,0f,width.toFloat(),sb);paint.isFilterBitmap=false;c.drawBitmap(bmp,src,dst,paint);controls(c);elements(c)}
- private fun tile(c:Canvas,col:Int,y:Float,bg:Int,big:String,small:String="",active:Boolean=false){val l=col*tw;paint.color=if(active)blend(bg,Color.WHITE,.16f)else bg;paint.style=Paint.Style.FILL;c.drawRect(l,y,l+tw,y+th,paint);c.drawRect(l,y,l+tw,y+th,line);txt.textSize=th*.30f;c.drawText(big,l+tw/2,y+th*.45f,txt);txt.textSize=th*.10f;c.drawText(small,l+tw/2,y+th*.78f,txt)}
- private fun controls(c:Canvas){tile(c,0,sb,0xff858585.toInt(),"NEW","clear");tile(c,1,sb,0xff858585.toInt(),arrayOf("MAT","HOT","ELE")[view],"view");tile(c,2,sb,0xff858585.toInt(),if(pause)"▶"else"Ⅱ",if(pause)"play"else"pause");tile(c,3,sb,0xff858585.toInt(),"ER","eraser",eraser);tile(c,4,sb,0xff79dcf3.toInt(),"°C","heat",view==1);tile(c,5,sb,0xffffff83.toInt(),"⚡","electric",view==2)}
- private fun bg(d:D)=when{d.id==ANT||d.id==SEED->0xffb9e98f.toInt();d.cond->0xffd7c4ff.toInt();d.state==2||d.id==ICE||d.id==SNOW||d.id==NITROGEN->0xff81def3.toInt();d.flam||d.id==FIRE||d.id==LAVA||d.id==PLASMA->0xfffff287.toInt();d.state==3->0xffd8e1e5.toInt();else->0xfff4f4f4.toInt()}
- private fun elements(c:Canvas){val top=sb+th;val max=max(0f,ceil(menu.size/6.0).toFloat()*th-(height-top));scroll=scroll.coerceIn(0f,max);for(n in menu.indices){val r=n/6;val col=n%6;val y=top+r*th-scroll;if(y+th<top||y>height)continue;val d=menu[n];tile(c,col,y,bg(d),d.s,d.n,d.id==sel&&!eraser)}}
- override fun onTouchEvent(e:MotionEvent):Boolean{val x=e.x;val y=e.y;when(e.actionMasked){MotionEvent.ACTION_DOWN->{lx=x;ly=y;if(y<sb){world=true;panel=false;paintAt(x,y)}else{world=false;panel=true;py=y}};MotionEvent.ACTION_MOVE->{if(world){paintLine(lx,ly,x,y);lx=x;ly=y}else if(panel&&y>sb+th){scroll-=y-py;py=y;invalidate()}};MotionEvent.ACTION_UP->{if(panel&&abs(y-ly)<24)tap(x,y);world=false;panel=false;performClick();invalidate()};MotionEvent.ACTION_CANCEL->{world=false;panel=false}};return true};override fun performClick():Boolean{super.performClick();return true}
- private fun tap(x:Float,y:Float){val col=(x/tw).toInt().coerceIn(0,5);if(y<sb+th){when(col){0->newWorld();1->view=(view+1)%3;2->pause=!pause;3->eraser=!eraser;4->view=1;5->view=2};return};val n=(((y-(sb+th)+scroll)/th).toInt()*6)+col;if(n in menu.indices){sel=menu[n].id;eraser=false}}
- private fun paintAt(px:Float,pyy:Float){val cx=(px/width*W).toInt().coerceIn(0,W-1);val cy=(pyy/sb*H).toInt().coerceIn(0,H-1);val e=if(eraser)AIR else sel;val b=4;for(dy in-b..b)for(dx in-b..b)if(dx*dx+dy*dy<=b*b&&inside(cx+dx,cy+dy)){val i=id(cx+dx,cy+dy);if(e==AIR)clear(i)else if((g[i].toInt()and255)==AIR||ds[e]?.state==0||e==FIRE||e==SPARK||e==PLASMA)set(cx+dx,cy+dy,e)}}
- private fun paintLine(x0:Float,y0:Float,x1:Float,y1:Float){val n=max(1,(max(abs(x1-x0),abs(y1-y0))/10).toInt());for(k in 0..n){val f=k.toFloat()/n;paintAt(x0+(x1-x0)*f,y0+(y1-y0)*f)}}
- private fun newWorld(){java.util.Arrays.fill(g,0);java.util.Arrays.fill(life,0);java.util.Arrays.fill(v,0f);java.util.Arrays.fill(t,20f);for(x in 0 until W)set(x,H-1,STONE)}
- private fun demo(){newWorld();for(x in 10..45)for(y in 200 until H-1)if(rnd.nextFloat()<.72)set(x,y,SAND);for(x in 58..96)for(y in 208 until H-1)if(rnd.nextFloat()<.72)set(x,y,WATER);for(x in 110..138)set(x,214,WOOD);for(x in 116..132)for(y in 215 until H-1)if(rnd.nextFloat()<.5)set(x,y,OIL);for(x in 145..156)for(y in 220 until H-1)if(rnd.nextFloat()<.65)set(x,y,LAVA);for(x in 18..28)set(x,197,SEED);for(x in 72..80)set(x,202,NITROGEN);for(x in 32..38)set(x,196,ANT);for(x in 104..108)set(x,190,BATTERY);for(x in 109..130)set(x,190,WIRE);set(131,190,LAMP)}
+class GameView(context: Context) : View(context) {
+    companion object E {
+        const val AIR=0; const val SAND=1; const val WATER=2; const val STONE=3; const val WOOD=4
+        const val FIRE=5; const val OIL=6; const val SEED=7; const val ACID=8; const val SALT=9
+        const val STEAM=10; const val ICE=11; const val LAVA=12; const val METAL=13; const val COPPER=14
+        const val WIRE=15; const val BATTERY=16; const val HEATER=17; const val COOLER=18; const val LAMP=19
+        const val SPARK=20; const val GUNPOWDER=21; const val GLASS=22; const val COAL=23; const val SMOKE=24
+        const val GAS=25; const val SALTWATER=26; const val MUD=27; const val SNOW=28
+        const val LIQUID_NITROGEN=29; const val ANT=30; const val SUGAR=31; const val WAX=32
+        const val MOLTEN_WAX=33; const val MOLTEN_METAL=34; const val MOLTEN_COPPER=35
+        const val MOLTEN_GLASS=36; const val MERCURY=37; const val ALCOHOL=38; const val FOAM=39
+        const val CONCRETE=40; const val CEMENT=41; const val CLAY=42; const val URANIUM=43
+        const val PLASMA=44; const val ASH=45; const val CHARCOAL=46; const val HONEY=47
+        const val SPONGE=48
+    }
+
+    private enum class MotionKind { STATIC, POWDER, LIQUID, GAS, ANT }
+    private enum class ViewMode { MATERIAL, HEAT, ELECTRIC }
+
+    private data class Def(
+        val id:Int, val name:String, val short:String, val color:Int, val motion:MotionKind,
+        val conductive:Boolean=false, val resistance:Float=6f, val hot:Boolean=false,
+        val cold:Boolean=false, val flammable:Boolean=false, val category:Int=0
+    )
+
+    private val defs = arrayOfNulls<Def>(49)
+    private val list = ArrayList<Def>(48)
+    private fun add(d:Def){ defs[d.id]=d; list.add(d) }
+
+    private val GW=160
+    private val GH=240
+    private val N=GW*GH
+    private val type=ByteArray(N)
+    private val life=ShortArray(N)
+    private val temp=FloatArray(N){20f}
+    private val volt=FloatArray(N)
+    private val moved=IntArray(N)
+    private val heatNext=FloatArray(N)
+    private val pixels=IntArray(N)
+    private val queue=IntArray(N)
+    private val bitmap=Bitmap.createBitmap(GW,GH,Bitmap.Config.ARGB_8888)
+    private val src=Rect(0,0,GW,GH)
+    private val dst=RectF()
+
+    private val p=Paint(Paint.ANTI_ALIAS_FLAG)
+    private val text=Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.BLACK;textAlign=Paint.Align.CENTER;typeface=android.graphics.Typeface.DEFAULT_BOLD}
+    private val thin=Paint(Paint.ANTI_ALIAS_FLAG).apply{style=Paint.Style.STROKE;strokeWidth=2f;color=Color.rgb(38,38,38)}
+    private val rnd=Random(System.nanoTime())
+
+    private var selected=SAND
+    private var brush=4
+    private var paused=false
+    private var viewMode=ViewMode.MATERIAL
+    private var tick=1
+    private var frame=0
+    private var simBottom=0f
+    private var controlsH=0f
+    private var tileW=0f
+    private var tileH=0f
+    private var elementScroll=0f
+    private var touchInWorld=false
+    private var touchInPanel=false
+    private var lastX=-1f
+    private var lastY=-1f
+    private var panelLastY=0f
+    private var erasing=false
+
+    private val loop=object:Runnable{override fun run(){if(!paused&&frame%2==0)step();frame++;invalidate();postOnAnimation(this)}}
+
+    init {
+        isFocusable=true
+        keepScreenOn=true
+        buildDefinitions()
+        demoWorld()
+        postOnAnimation(loop)
+    }
+
+    private fun buildDefinitions(){
+        fun d(id:Int,n:String,s:String,c:Int,m:MotionKind,cond:Boolean=false,r:Float=6f,hot:Boolean=false,cold:Boolean=false,flamm:Boolean=false,cat:Int=0)=add(Def(id,n,s,c,m,cond,r,hot,cold,flamm,cat))
+        d(SAND,"Sand","Sa",0xffd9b85d.toInt(),MotionKind.POWDER)
+        d(WATER,"Water","Wa",0xff3b8eea.toInt(),MotionKind.LIQUID)
+        d(STONE,"Stone","St",0xff858987.toInt(),MotionKind.STATIC)
+        d(WOOD,"Wood","Wo",0xffa2673d.toInt(),MotionKind.STATIC,flamm=true)
+        d(FIRE,"Fire","Fi",0xffff6b18.toInt(),MotionKind.GAS,hot=true,cat=1)
+        d(OIL,"Oil","Oi",0xff67512f.toInt(),MotionKind.LIQUID,flamm=true,cat=2)
+        d(SEED,"Seeds","Se",0xff8c6b2f.toInt(),MotionKind.POWDER,flamm=true,cat=3)
+        d(ACID,"Acid","Ac",0xff9dde39.toInt(),MotionKind.LIQUID,cat=2)
+        d(SALT,"Salt","Sl",0xffeee9dc.toInt(),MotionKind.POWDER)
+        d(STEAM,"Steam","Vm",0xffb6c5ca.toInt(),MotionKind.GAS,hot=true,cat=1)
+        d(ICE,"Ice","Ic",0xff9edcf1.toInt(),MotionKind.STATIC,cold=true,cat=1)
+        d(LAVA,"Lava","Lv",0xffef3d14.toInt(),MotionKind.LIQUID,hot=true,cat=1)
+        d(METAL,"Metal","Me",0xff9aa4a9.toInt(),MotionKind.STATIC,true,5f,cat=4)
+        d(COPPER,"Copper","Cu",0xffc8793e.toInt(),MotionKind.STATIC,true,2f,cat=4)
+        d(WIRE,"Wire","Wi",0xffd7a63e.toInt(),MotionKind.STATIC,true,2f,cat=4)
+        d(BATTERY,"Battery","Ba",0xff75c75d.toInt(),MotionKind.STATIC,true,1f,cat=4)
+        d(HEATER,"Heater","Ht",0xffdd6b43.toInt(),MotionKind.STATIC,true,3f,hot=true,cat=4)
+        d(COOLER,"Cooler","Cl",0xff59b9e5.toInt(),MotionKind.STATIC,true,3f,cold=true,cat=4)
+        d(LAMP,"Lamp","La",0xffffe76a.toInt(),MotionKind.STATIC,true,4f,cat=4)
+        d(SPARK,"Spark","Sp",0xff9de9ff.toInt(),MotionKind.GAS,true,1f,hot=true,cat=4)
+        d(GUNPOWDER,"Gunpowder","Gp",0xff4c4943.toInt(),MotionKind.POWDER,flamm=true,cat=2)
+        d(GLASS,"Glass","Gl",0xff9bc3cc.toInt(),MotionKind.STATIC)
+        d(COAL,"Coal","Co",0xff323638.toInt(),MotionKind.POWDER,flamm=true)
+        d(SMOKE,"Smoke","Sm",0xff5c6467.toInt(),MotionKind.GAS)
+        d(GAS,"Gas","Ga",0xffb49d69.toInt(),MotionKind.GAS,flamm=true,cat=2)
+        d(SALTWATER,"Salt Water","SW",0xff4da2c9.toInt(),MotionKind.LIQUID,true,6f,cat=2)
+        d(MUD,"Mud","Mu",0xff75543b.toInt(),MotionKind.POWDER)
+        d(SNOW,"Snow","Sn",0xffe0f5fb.toInt(),MotionKind.POWDER,cold=true,cat=1)
+        d(LIQUID_NITROGEN,"Liquid N2","N2",0xffaeeeff.toInt(),MotionKind.LIQUID,cold=true,cat=5)
+        d(ANT,"Ants","An",0xff171717.toInt(),MotionKind.ANT,cat=5)
+        d(SUGAR,"Sugar","Su",0xfffff1cf.toInt(),MotionKind.POWDER,flamm=true,cat=5)
+        d(WAX,"Wax","Wx",0xffffe1a3.toInt(),MotionKind.STATIC,flamm=true,cat=5)
+        d(MOLTEN_WAX,"Molten Wax","MW",0xffffb34f.toInt(),MotionKind.LIQUID,hot=true,flamm=true,cat=5)
+        d(MOLTEN_METAL,"Molten Metal","MM",0xffff8b48.toInt(),MotionKind.LIQUID,true,4f,hot=true,cat=5)
+        d(MOLTEN_COPPER,"Molten Copper","MC",0xffff7138.toInt(),MotionKind.LIQUID,true,2f,hot=true,cat=5)
+        d(MOLTEN_GLASS,"Molten Glass","MG",0xffffc97e.toInt(),MotionKind.LIQUID,hot=true,cat=5)
+        d(MERCURY,"Mercury","Hg",0xffb9c3c8.toInt(),MotionKind.LIQUID,true,3f,cat=5)
+        d(ALCOHOL,"Alcohol","Al",0xffcddff4.toInt(),MotionKind.LIQUID,flamm=true,cat=5)
+        d(FOAM,"Foam","Fo",0xfff1f4ef.toInt(),MotionKind.POWDER,cat=5)
+        d(CONCRETE,"Concrete","Cr",0xff9b9a91.toInt(),MotionKind.STATIC,cat=5)
+        d(CEMENT,"Cement","Ce",0xffbeb9ae.toInt(),MotionKind.POWDER,cat=5)
+        d(CLAY,"Clay","Cy",0xffa76d52.toInt(),MotionKind.POWDER,cat=5)
+        d(URANIUM,"Uranium","Ur",0xff83bf4b.toInt(),MotionKind.POWDER,true,8f,hot=true,cat=5)
+        d(PLASMA,"Plasma","Pl",0xffff65ef.toInt(),MotionKind.GAS,true,1f,hot=true,cat=5)
+        d(ASH,"Ash","As",0xff77736c.toInt(),MotionKind.POWDER,cat=5)
+        d(CHARCOAL,"Charcoal","Ch",0xff272727.toInt(),MotionKind.POWDER,flamm=true,cat=5)
+        d(HONEY,"Honey","Ho",0xffd79118.toInt(),MotionKind.LIQUID,flamm=true,cat=5)
+        d(SPONGE,"Sponge","Sg",0xffffdb55.toInt(),MotionKind.STATIC,flamm=true,cat=5)
+    }
+
+    private fun id(x:Int,y:Int)=x+y*GW
+    private fun inside(x:Int,y:Int)=x>=0&&x<GW&&y>=0&&y<GH
+    private fun tAt(x:Int,y:Int):Int = if(inside(x,y)) type[id(x,y)].toInt() and 255 else STONE
+    private fun defaultTemp(t:Int)=when(t){LAVA->1250f;FIRE->820f;PLASMA->2200f;SPARK->550f;MOLTEN_METAL->1550f;MOLTEN_COPPER->1180f;MOLTEN_GLASS->1500f;MOLTEN_WAX->85f;ICE->-12f;SNOW->-8f;LIQUID_NITROGEN->-196f;COOLER->-20f;else->20f}
+    private fun setCell(x:Int,y:Int,t:Int,l:Int=0,temperature:Float?=null){if(!inside(x,y))return;val i=id(x,y);type[i]=t.toByte();life[i]=l.toShort();temp[i]=temperature?:defaultTemp(t);volt[i]=0f;moved[i]=tick}
+    private fun clearCell(i:Int){type[i]=0;life[i]=0;temp[i]=20f;volt[i]=0f;moved[i]=tick}
+    private fun swap(a:Int,b:Int){val tt=type[a];type[a]=type[b];type[b]=tt;val ll=life[a];life[a]=life[b];life[b]=ll;val tp=temp[a];temp[a]=temp[b];temp[b]=tp;val vv=volt[a];volt[a]=volt[b];volt[b]=vv;moved[a]=tick;moved[b]=tick}
+    private fun neighbor(x:Int,y:Int,target:Int):Int{for(dy in -1..1)for(dx in -1..1){if(dx==0&&dy==0)continue;val nx=x+dx;val ny=y+dy;if(inside(nx,ny)){val i=id(nx,ny);if((type[i].toInt() and 255)==target)return i}};return -1}
+    private fun hasNeighbor(x:Int,y:Int,vararg ts:Int):Boolean{for(dy in -1..1)for(dx in -1..1){if(dx==0&&dy==0)continue;val nx=x+dx;val ny=y+dy;if(!inside(nx,ny))continue;val q=type[id(nx,ny)].toInt() and 255;for(t in ts)if(q==t)return true};return false}
+    private fun isFluid(t:Int)=t==WATER||t==OIL||t==ACID||t==SALTWATER||t==LAVA||t==LIQUID_NITROGEN||t==MOLTEN_WAX||t==MOLTEN_METAL||t==MOLTEN_COPPER||t==MOLTEN_GLASS||t==MERCURY||t==ALCOHOL||t==HONEY
+    private fun canPowderEnter(t:Int)=t==AIR||isFluid(t)
+    private fun powder(x:Int,y:Int,slow:Int=1){if(slow>1&&tick%slow!=0)return;val i=id(x,y);val b=tAt(x,y+1);if(canPowderEnter(b)){swap(i,id(x,y+1));return};val s=if(rnd.nextBoolean())1 else -1;for(dx in intArrayOf(s,-s)){val nx=x+dx;if(inside(nx,y+1)&&canPowderEnter(tAt(nx,y+1))){swap(i,id(nx,y+1));return}}}
+    private fun liquid(x:Int,y:Int,spread:Int=4,viscosity:Int=1){if(viscosity>1&&tick%viscosity!=0)return;val i=id(x,y);if(y+1<GH&&tAt(x,y+1)==AIR){swap(i,id(x,y+1));return};val s=if(rnd.nextBoolean())1 else -1;for(d in 1..spread)for(sign in intArrayOf(s,-s)){val nx=x+sign*d;if(!inside(nx,y))continue;val q=tAt(nx,y);if(q==AIR){swap(i,id(nx,y));return};if(q!=(type[i].toInt() and 255))break}}
+    private fun gas(x:Int,y:Int,spread:Int=2){val i=id(x,y);if(y>0&&tAt(x,y-1)==AIR){swap(i,id(x,y-1));return};val s=if(rnd.nextBoolean())1 else -1;for(d in 1..spread){val nx=x+s*d;if(inside(nx,y-1)&&tAt(nx,y-1)==AIR){swap(i,id(nx,y-1));return};if(inside(nx,y)&&tAt(nx,y)==AIR){swap(i,id(nx,y));return}}}
+    private fun igniteAround(x:Int,y:Int,heat:Float){for(dy in -1..1)for(dx in -1..1){if(dx==0&&dy==0)continue;val nx=x+dx;val ny=y+dy;if(!inside(nx,ny))continue;val i=id(nx,ny);val q=type[i].toInt() and 255;val d=defs[q];if(d?.flammable==true&&rnd.nextFloat()<(if(q==GAS||q==GUNPOWDER)0.28f else 0.045f)){type[i]=FIRE.toByte();life[i]=0;temp[i]=max(temp[i],heat)}}}
+    private fun updateAnt(x:Int,y:Int){val i=id(x,y);if(temp[i]>80f||hasNeighbor(x,y,FIRE,LAVA,PLASMA,ACID)){clearCell(i);return};if(hasNeighbor(x,y,WATER,SALTWATER,LIQUID_NITROGEN)&&rnd.nextFloat()<0.08f){clearCell(i);return};var tx=0;var ty=0;var found=false;loop@for(r in 1..5)for(dy in -r..r)for(dx in -r..r){val nx=x+dx;val ny=y+dy;if(inside(nx,ny)&&tAt(nx,ny)==SEED){tx=dx.sign();ty=dy.sign();found=true;break@loop}};if(found&&abs(tx)<=1&&abs(ty)<=1){val ni=id(x+tx,y+ty);if((type[ni].toInt() and 255)==SEED){clearCell(ni);life[i]=(life[i]+15).toShort();return}};val choices=if(found)arrayOf(intArrayOf(tx,ty),intArrayOf(tx,0),intArrayOf(0,ty))else arrayOf(intArrayOf(if(rnd.nextBoolean())1 else -1,0),intArrayOf(0,if(rnd.nextBoolean())1 else -1),intArrayOf(if(rnd.nextBoolean())1 else -1,if(rnd.nextBoolean())1 else -1));for(c in choices){val nx=x+c[0];val ny=y+c[1];if(!inside(nx,ny)||tAt(nx,ny)!=AIR)continue;val support=tAt(nx,ny+1)!=AIR||tAt(nx-1,ny)!=AIR||tAt(nx+1,ny)!=AIR;if(support){swap(i,id(nx,ny));return}}}
+    private fun Int.sign()=when{this<0->-1;this>0->1;else->0}
+    private fun phaseChanges(i:Int,t:Int){val tt=temp[i];when(t){WATER,SALTWATER->if(tt<0f){type[i]=ICE.toByte();life[i]=0}else if(tt>104f){type[i]=STEAM.toByte();life[i]=0};ICE,SNOW->if(tt>1f){type[i]=WATER.toByte();life[i]=0};STEAM->if(tt<88f){type[i]=WATER.toByte();life[i]=0};WAX->if(tt>62f){type[i]=MOLTEN_WAX.toByte();life[i]=0};MOLTEN_WAX->if(tt<54f){type[i]=WAX.toByte();life[i]=0};METAL->if(tt>1450f){type[i]=MOLTEN_METAL.toByte();life[i]=0};MOLTEN_METAL->if(tt<1330f){type[i]=METAL.toByte();life[i]=0};COPPER,WIRE->if(tt>1085f){type[i]=MOLTEN_COPPER.toByte();life[i]=0};MOLTEN_COPPER->if(tt<980f){type[i]=COPPER.toByte();life[i]=0};GLASS->if(tt>1400f){type[i]=MOLTEN_GLASS.toByte();life[i]=0};MOLTEN_GLASS->if(tt<850f){type[i]=GLASS.toByte();life[i]=0};STONE->if(tt>1350f){type[i]=LAVA.toByte();life[i]=0};LAVA->if(tt<680f){type[i]=STONE.toByte();life[i]=0};SUGAR->if(tt>185f){type[i]=HONEY.toByte();life[i]=0};ALCOHOL->if(tt>78f){type[i]=GAS.toByte();life[i]=0};MERCURY->if(tt>357f){type[i]=GAS.toByte();life[i]=0};CLAY->if(tt>1050f){type[i]=STONE.toByte();life[i]=0}}}
+    private fun updateCell(x:Int,y:Int){val i=id(x,y);if(moved[i]==tick)return;val t=type[i].toInt() and 255;if(t==AIR)return;phaseChanges(i,t);val now=type[i].toInt() and 255;if(now!=t)return;when(t){SAND,SALT,SUGAR,CEMENT,CLAY,ASH,CHARCOAL->powder(x,y);MUD->powder(x,y,2);SNOW->powder(x,y);COAL,GUNPOWDER->powder(x,y);URANIUM->{powder(x,y);temp[i]+=0.2f};WATER,SALTWATER,ACID,ALCOHOL,MERCURY->liquid(x,y,5);OIL->liquid(x,y,6);HONEY->liquid(x,y,3,3);MOLTEN_WAX->liquid(x,y,3,2);LAVA,MOLTEN_METAL,MOLTEN_COPPER,MOLTEN_GLASS->liquid(x,y,2,2);LIQUID_NITROGEN->{val age=(life[i].toInt() and 0xffff)+1;life[i]=age.toShort();for(dy in -1..1)for(dx in -1..1){val nx=x+dx;val ny=y+dy;if(inside(nx,ny))temp[id(nx,ny)]-=3.5f};val warm=max(0f,temp[i]+196f);val limit=max(22f,95f-warm*.18f);if(age>limit||rnd.nextFloat()<(warm/9000f)){clearCell(i);return};liquid(x,y,5)};STEAM,SMOKE,GAS->{life[i]=(life[i]+1).toShort();gas(x,y,3);if((life[i].toInt() and 0xffff)>360&&t!=GAS)clearCell(i)};FIRE->{life[i]=(life[i]+1).toShort();temp[i]=max(temp[i],820f);igniteAround(x,y,760f);if(hasNeighbor(x,y,WATER,SALTWATER,LIQUID_NITROGEN)&&rnd.nextFloat()<0.22f){clearCell(i);return};if((life[i].toInt() and 0xffff)>80+rnd.nextInt(100)){type[i]=if(rnd.nextFloat()<0.45f)SMOKE.toByte()else ASH.toByte();life[i]=0;return};gas(x,y,2)};SPARK->{life[i]=(life[i]+1).toShort();temp[i]=550f;igniteAround(x,y,620f);if((life[i].toInt() and 0xffff)>18)clearCell(i)else gas(x,y,1)};PLASMA->{life[i]=(life[i]+1).toShort();temp[i]=2200f;igniteAround(x,y,1600f);for(dy in -1..1)for(dx in -1..1)if(inside(x+dx,y+dy))temp[id(x+dx,y+dy)]+=30f;if((life[i].toInt() and 0xffff)>70)type[i]=FIRE.toByte()else gas(x,y,2)};SEED->{powder(x,y);val j=id(x,y);if((type[j].toInt() and 255)!=SEED)return;if(temp[j] in 4f..46f&&hasNeighbor(x,y,WATER,SALTWATER)&&(tAt(x,y+1)==MUD||tAt(x,y+1)==SAND||tAt(x,y+1)==CLAY)){val a=(life[j].toInt() and 0xffff)+1;life[j]=a.toShort();if(a>45&&rnd.nextFloat()<0.018f){val ny=y-1;if(inside(x,ny)&&tAt(x,ny)==AIR)setCell(x,ny,SEED,min(180,a+25),temp[j])}}};ANT->updateAnt(x,y);SPONGE->{if(hasNeighbor(x,y,WATER,SALTWATER)&&life[i]<200)life[i]=(life[i]+1).toShort();if(temp[i]>110f&&life[i]>0)life[i]=(life[i]-1).toShort()}}
+        if(t==GUNPOWDER&&(temp[i]>190f||hasNeighbor(x,y,FIRE,SPARK,PLASMA))){for(dy in -3..3)for(dx in -3..3){val nx=x+dx;val ny=y+dy;if(!inside(nx,ny))continue;val j=id(nx,ny);temp[j]+=250f;if((type[j].toInt() and 255)==GUNPOWDER||rnd.nextFloat()<0.15f)type[j]=FIRE.toByte()}}
+        if(t==ACID){for(dy in -1..1)for(dx in -1..1){if(dx==0&&dy==0)continue;val nx=x+dx;val ny=y+dy;if(!inside(nx,ny))continue;val j=id(nx,ny);val q=type[j].toInt() and 255;if(q!=AIR&&q!=ACID&&q!=GLASS&&q!=MOLTEN_GLASS&&rnd.nextFloat()<0.018f){clearCell(j);if(rnd.nextFloat()<0.12f)clearCell(i);return}}}
+        if(t==SALT){val w=neighbor(x,y,WATER);if(w>=0&&rnd.nextFloat()<0.12f){type[w]=SALTWATER.toByte();clearCell(i)}};if(t==WATER){val s=neighbor(x,y,SAND);if(s>=0&&rnd.nextFloat()<0.0012f)type[s]=MUD.toByte()};if(t==CEMENT){val w=neighbor(x,y,WATER);if(w>=0&&rnd.nextFloat()<0.04f){type[i]=CONCRETE.toByte();temp[i]=temp[w]}};if(t==WOOD||t==CHARCOAL||t==COAL||t==OIL||t==ALCOHOL||t==HONEY||t==WAX){if((temp[i]>320f||hasNeighbor(x,y,FIRE,SPARK,PLASMA))&&rnd.nextFloat()<0.035f){type[i]=FIRE.toByte();life[i]=0}}}
+    private fun conductive(t:Int)=defs.getOrNull(t)?.conductive==true||t==SALTWATER||t==MERCURY||t==PLASMA
+    private fun computeElectricity(){java.util.Arrays.fill(volt,0f);var head=0;var tail=0;for(i in 0 until N){val t=type[i].toInt() and 255;if(t==BATTERY){volt[i]=100f;queue[tail++]=i}else if(t==SPARK||t==PLASMA){volt[i]=75f;queue[tail++]=i}};while(head<tail){val i=queue[head++];val vv=volt[i];if(vv<2f)continue;val x=i%GW;val y=i/GW;fun push(j:Int){val q=type[j].toInt() and 255;if(!conductive(q))return;val nv=vv-(defs[q]?.resistance?:6f);if(nv>volt[j]+0.5f){volt[j]=nv;if(tail<N)queue[tail++]=j}};if(x>0)push(i-1);if(x<GW-1)push(i+1);if(y>0)push(i-GW);if(y<GH-1)push(i+GW)};for(i in 0 until N){when(type[i].toInt() and 255){HEATER->if(volt[i]>8f)temp[i]+=18f;COOLER->if(volt[i]>8f)temp[i]-=16f;LAMP->if(volt[i]>8f)temp[i]+=0.8f}}}
+    private fun updateHeat(){for(i in 0 until N)heatNext[i]=temp[i];for(y in 1 until GH-1)for(x in 1 until GW-1){val i=id(x,y);val t=type[i].toInt() and 255;val target=when(t){LAVA->1250f;FIRE->820f;PLASMA->2200f;MOLTEN_METAL->1550f;MOLTEN_COPPER->1180f;MOLTEN_GLASS->1500f;LIQUID_NITROGEN->-196f;ICE->-12f;SNOW->-8f;else->20f};val source=when(t){LAVA,FIRE,PLASMA,MOLTEN_METAL,MOLTEN_COPPER,MOLTEN_GLASS,LIQUID_NITROGEN->0.08f;ICE,SNOW->0.02f;AIR->0.004f;else->0f};if(source>0)heatNext[i]+=(target-temp[i])*source;val k=when(t){COPPER,MOLTEN_COPPER->0.16f;METAL,MOLTEN_METAL,WIRE->0.12f;WATER,SALTWATER,MERCURY->0.08f;STONE,CONCRETE,GLASS->0.05f;else->0.025f};val avg=(temp[i-1]+temp[i+1]+temp[i-GW]+temp[i+GW])*.25f;heatNext[i]+=(avg-temp[i])*k};for(i in 0 until N)temp[i]=heatNext[i].coerceIn(-210f,2600f)}
+    private fun step(){tick++;if(tick==Int.MAX_VALUE){java.util.Arrays.fill(moved,0);tick=1};if(tick%3==0)computeElectricity();if(tick%4==0)updateHeat();for(y in GH-2 downTo 0){if(rnd.nextBoolean())for(x in 0 until GW){val t=type[id(x,y)].toInt() and 255;if(t!=FIRE&&t!=STEAM&&t!=SMOKE&&t!=GAS&&t!=PLASMA&&t!=SPARK)updateCell(x,y)}else for(x in GW-1 downTo 0){val t=type[id(x,y)].toInt() and 255;if(t!=FIRE&&t!=STEAM&&t!=SMOKE&&t!=GAS&&t!=PLASMA&&t!=SPARK)updateCell(x,y)}};for(y in 1 until GH){if(rnd.nextBoolean())for(x in 0 until GW){val t=type[id(x,y)].toInt() and 255;if(t==FIRE||t==STEAM||t==SMOKE||t==GAS||t==PLASMA||t==SPARK)updateCell(x,y)}else for(x in GW-1 downTo 0){val t=type[id(x,y)].toInt() and 255;if(t==FIRE||t==STEAM||t==SMOKE||t==GAS||t==PLASMA||t==SPARK)updateCell(x,y)}}}
+    private fun blend(a:Int,b:Int,f:Float):Int{val q=f.coerceIn(0f,1f);val r=(Color.red(a)+(Color.red(b)-Color.red(a))*q).roundToInt();val gg=(Color.green(a)+(Color.green(b)-Color.green(a))*q).roundToInt();val bl=(Color.blue(a)+(Color.blue(b)-Color.blue(a))*q).roundToInt();return Color.rgb(r,gg,bl)}
+    private fun heatColor(v:Float):Int=when{v<-100f->Color.rgb(80,90,255);v<0f->blend(Color.rgb(80,90,255),Color.rgb(80,220,255),(v+100f)/100f);v<100f->blend(Color.rgb(80,220,255),Color.rgb(255,220,70),v/100f);v<700f->blend(Color.rgb(255,220,70),Color.rgb(255,70,20),(v-100f)/600f);else->blend(Color.rgb(255,70,20),Color.WHITE,(v-700f)/1200f)}
+    private fun materialColor(i:Int,t:Int):Int{if(t==AIR)return 0xff000018.toInt();var c=defs[t]?.color?:Color.MAGENTA;if(t==SEED&&(life[i].toInt() and 0xffff)>45)c=0xff59b95f.toInt();if(t==LAMP&&volt[i]>8f)c=0xfffff6aa.toInt();val tt=temp[i];if(tt>80f)c=blend(c,if(tt>900f)Color.WHITE else 0xffff5a22.toInt(),min(1f,(tt-80f)/900f))else if(tt<0f)c=blend(c,0xff62c8ff.toInt(),min(.75f,-tt/200f));return c}
+    private fun renderBitmap(){for(i in 0 until N){val t=type[i].toInt() and 255;pixels[i]=when(viewMode){ViewMode.MATERIAL->materialColor(i,t);ViewMode.HEAT->if(t==AIR)0xff05051a.toInt()else heatColor(temp[i]);ViewMode.ELECTRIC->if(t==AIR)0xff030315.toInt()else if(volt[i]>1f)blend(0xff423300.toInt(),0xffffff68.toInt(),min(1f,volt[i]/100f))else blend(materialColor(i,t),0xff0b1020.toInt(),.72f)}};bitmap.setPixels(pixels,0,GW,0,0,GW,GH)}
+    override fun onDraw(c:Canvas){super.onDraw(c);c.drawColor(0xff000018.toInt());simBottom=height*0.68f;controlsH=(height-simBottom)/4f;tileW=width/6f;tileH=controlsH;renderBitmap();dst.set(0f,0f,width.toFloat(),simBottom);p.isFilterBitmap=false;c.drawBitmap(bitmap,src,dst,p);drawControls(c);drawElements(c)}
+    private fun tile(c:Canvas,col:Int,rowTop:Float,bg:Int,label:String,sub:String="",active:Boolean=false){val l=col*tileW;val r=l+tileW;p.style=Paint.Style.FILL;p.color=if(active)blend(bg,0xffffffff.toInt(),.16f)else bg;c.drawRect(l,rowTop,r,rowTop+tileH,p);thin.color=0xff303030.toInt();thin.strokeWidth=max(2f,width/500f);c.drawRect(l,rowTop,r,rowTop+tileH,thin);text.color=Color.BLACK;text.textSize=tileH*.32f;c.drawText(label,l+tileW/2,rowTop+tileH*.47f,text);if(sub.isNotEmpty()){text.textSize=tileH*.105f;text.typeface=android.graphics.Typeface.DEFAULT_BOLD;c.drawText(sub,l+tileW/2,rowTop+tileH*.78f,text)}}
+    private fun drawControls(c:Canvas){val y=simBottom;tile(c,0,y,0xff858585.toInt(),"NEW","clear");tile(c,1,y,0xff858585.toInt(),when(viewMode){ViewMode.MATERIAL->"MAT";ViewMode.HEAT->"HOT";ViewMode.ELECTRIC->"ELE"},"view");tile(c,2,y,0xff858585.toInt(),if(paused)"▶"else"Ⅱ",if(paused)"play"else"pause");tile(c,3,y,0xff858585.toInt(),"ER","eraser",erasing);tile(c,4,y,0xff79dcf3.toInt(),"°C","heat",viewMode==ViewMode.HEAT);tile(c,5,y,0xffffff83.toInt(),"⚡","electric",viewMode==ViewMode.ELECTRIC)}
+    private fun categoryColor(d:Def)=when{d.id==ANT||d.id==SEED->0xffb9e98f.toInt();d.category==4->0xffd7c4ff.toInt();d.cold||d.motion==MotionKind.LIQUID->0xff81def3.toInt();d.hot||d.flammable->0xfffff287.toInt();d.motion==MotionKind.GAS->0xffd8e1e5.toInt();else->0xfff4f4f4.toInt()}
+    private fun drawElements(c:Canvas){val top=simBottom+tileH;val visibleH=height-top;val rows=ceil(list.size/6.0).toInt();val maxScroll=max(0f,rows*tileH-visibleH);elementScroll=elementScroll.coerceIn(0f,maxScroll);for(n in list.indices){val row=n/6;val col=n%6;val y=top+row*tileH-elementScroll;if(y+tileH<top||y>height)continue;val d=list[n];tile(c,col,y,categoryColor(d),d.short,d.name,d.id==selected&&!erasing)}}
+    override fun onTouchEvent(e:MotionEvent):Boolean{val x=e.x;val y=e.y;when(e.actionMasked){MotionEvent.ACTION_DOWN->{lastX=x;lastY=y;if(y<simBottom){touchInWorld=true;touchInPanel=false;paintWorld(x,y)}else{touchInWorld=false;touchInPanel=true;panelLastY=y}};MotionEvent.ACTION_MOVE->{if(touchInWorld){paintLine(lastX,lastY,x,y);lastX=x;lastY=y}else if(touchInPanel&&y>simBottom+tileH){val dy=y-panelLastY;elementScroll-=dy;panelLastY=y;invalidate()}};MotionEvent.ACTION_UP->{if(touchInPanel&&abs(y-lastY)<24f)handlePanelTap(x,y);touchInWorld=false;touchInPanel=false;performClick();invalidate()};MotionEvent.ACTION_CANCEL->{touchInWorld=false;touchInPanel=false}};return true}
+    override fun performClick():Boolean{super.performClick();return true}
+    private fun handlePanelTap(x:Float,y:Float){val col=(x/tileW).toInt().coerceIn(0,5);if(y<simBottom+tileH){when(col){0->newWorld();1->viewMode=when(viewMode){ViewMode.MATERIAL->ViewMode.HEAT;ViewMode.HEAT->ViewMode.ELECTRIC;ViewMode.ELECTRIC->ViewMode.MATERIAL};2->paused=!paused;3->erasing=!erasing;4->viewMode=ViewMode.HEAT;5->viewMode=ViewMode.ELECTRIC};return};val row=((y-(simBottom+tileH)+elementScroll)/tileH).toInt();val n=row*6+col;if(n in list.indices){selected=list[n].id;erasing=false}}
+    private fun worldPoint(px:Float,py:Float):Pair<Int,Int>{val x=(px/width*GW).toInt().coerceIn(0,GW-1);val y=(py/simBottom*GH).toInt().coerceIn(0,GH-1);return x to y}
+    private fun paintWorld(px:Float,py:Float){val(cx,cy)=worldPoint(px,py);val t=if(erasing)AIR else selected;for(dy in -brush..brush)for(dx in -brush..brush)if(dx*dx+dy*dy<=brush*brush){val x=cx+dx;val y=cy+dy;if(!inside(x,y))continue;val i=id(x,y);if(t==AIR)clearCell(i)else if((type[i].toInt() and 255)==AIR||defs[t]?.motion==MotionKind.STATIC||t==FIRE||t==SPARK||t==PLASMA)setCell(x,y,t)}}
+    private fun paintLine(x0:Float,y0:Float,x1:Float,y1:Float){val steps=max(1,(max(abs(x1-x0),abs(y1-y0))/10f).toInt());for(s in 0..steps){val f=s.toFloat()/steps;paintWorld(x0+(x1-x0)*f,y0+(y1-y0)*f)}}
+    private fun newWorld(){java.util.Arrays.fill(type,0);java.util.Arrays.fill(life,0);java.util.Arrays.fill(volt,0f);java.util.Arrays.fill(temp,20f);for(x in 0 until GW)setCell(x,GH-1,STONE)}
+    private fun demoWorld(){java.util.Arrays.fill(type,0);java.util.Arrays.fill(life,0);java.util.Arrays.fill(volt,0f);java.util.Arrays.fill(temp,20f);for(x in 0 until GW)setCell(x,GH-1,STONE);for(x in 10..45)for(y in 200 until GH-1)if(rnd.nextFloat()<.72f)setCell(x,y,SAND);for(x in 58..96)for(y in 208 until GH-1)if(rnd.nextFloat()<.72f)setCell(x,y,WATER);for(x in 110..138)setCell(x,214,WOOD);for(x in 116..132)for(y in 215 until GH-1)if(rnd.nextFloat()<.5f)setCell(x,y,OIL);for(x in 145..156)for(y in 220 until GH-1)if(rnd.nextFloat()<.65f)setCell(x,y,LAVA);for(x in 18..28)setCell(x,197,SEED);for(x in 72..80)setCell(x,202,LIQUID_NITROGEN);for(x in 32..38)setCell(x,196,ANT);for(x in 104..108)setCell(x,190,BATTERY);for(x in 109..130)setCell(x,190,WIRE);setCell(131,190,LAMP)}
 }
