@@ -1,20 +1,65 @@
 $ErrorActionPreference='Stop'
 Write-Host 'Sand:Box V3 Grafik-Update startet...' -ForegroundColor Cyan
 
-$roots=@(
-    "$env:USERPROFILE\AndroidStudioProjects",
-    "$env:USERPROFILE\Documents",
-    "$env:USERPROFILE\Desktop"
-) | Where-Object { Test-Path $_ }
+function Find-GameView {
+    $roots=@(
+        "$env:USERPROFILE\AndroidStudioProjects",
+        "$env:USERPROFILE\Documents",
+        "$env:USERPROFILE\Desktop",
+        "$env:USERPROFILE\Downloads",
+        "$env:USERPROFILE\OneDrive",
+        "$env:USERPROFILE\OneDrive\Documents",
+        "$env:USERPROFILE\OneDrive\Desktop"
+    ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
 
-$game=$null
-foreach($root in $roots){
-    $game=Get-ChildItem $root -Filter GameView.kt -Recurse -ErrorAction SilentlyContinue |
-        Where-Object { $_.FullName -match 'org\\sliqado\\sandbox' } |
+    foreach($root in $roots){
+        $g=Get-ChildItem $root -Filter GameView.kt -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match 'org\\sliqado\\sandbox' } |
+            Select-Object -First 1
+        if($g){ return $g }
+    }
+
+    Write-Host 'Projekt nicht in den Standardordnern gefunden. Suche im Benutzerordner...' -ForegroundColor Yellow
+    $g=Get-ChildItem $env:USERPROFILE -Filter GameView.kt -Recurse -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -match 'org\\sliqado\\sandbox' -and $_.FullName -notmatch '\\AppData\\Local\\Temp\\' } |
         Select-Object -First 1
-    if($game){break}
+    return $g
 }
-if(-not $game){throw 'GameView.kt wurde nicht gefunden. Öffne zuerst dein Sand:Box Projekt in Android Studio.'}
+
+$game=Find-GameView
+
+if(-not $game){
+    Write-Host 'Lokale Quelldateien wurden nicht gefunden.' -ForegroundColor Yellow
+    Write-Host 'Ich lade das Sand:Box Android Projekt jetzt automatisch von GitHub herunter...' -ForegroundColor Cyan
+
+    $projectRoot="$env:USERPROFILE\AndroidStudioProjects\SandBox"
+    $tmpZip="$env:TEMP\Sliqadius-main.zip"
+    $tmpDir="$env:TEMP\Sliqadius-main-extract"
+
+    if(Test-Path $tmpZip){Remove-Item $tmpZip -Force}
+    if(Test-Path $tmpDir){Remove-Item $tmpDir -Recurse -Force}
+    New-Item -ItemType Directory -Force (Split-Path $projectRoot) | Out-Null
+
+    Invoke-WebRequest -UseBasicParsing 'https://github.com/sliqadteam-beep/Sliqadius/archive/refs/heads/main.zip' -OutFile $tmpZip
+    Expand-Archive $tmpZip -DestinationPath $tmpDir -Force
+
+    $source=Join-Path $tmpDir 'Sliqadius-main\sandbox-android'
+    if(-not (Test-Path $source)){
+        throw 'Download war erfolgreich, aber sandbox-android wurde im ZIP nicht gefunden.'
+    }
+
+    if(Test-Path $projectRoot){
+        $old="$projectRoot.backup_$(Get-Date -Format yyyyMMdd_HHmmss)"
+        Move-Item $projectRoot $old
+        Write-Host "Vorhandener Projektordner gesichert: $old" -ForegroundColor DarkGray
+    }
+
+    New-Item -ItemType Directory -Force $projectRoot | Out-Null
+    Copy-Item (Join-Path $source '*') $projectRoot -Recurse -Force
+
+    $game=Get-Item "$projectRoot\app\src\main\java\org\sliqado\sandbox\GameView.kt" -ErrorAction Stop
+    Write-Host "Projekt heruntergeladen nach: $projectRoot" -ForegroundColor Green
+}
 
 $gamePath=$game.FullName
 $dir=$game.Directory.FullName
@@ -24,7 +69,7 @@ Copy-Item $gamePath $backup -Force
 Write-Host "Projekt: $gamePath" -ForegroundColor Green
 Write-Host "Backup:  $backup" -ForegroundColor DarkGray
 
-# PixelSprites direkt aus deinem GitHub-Projekt laden
+# Aktuelle PixelSprites direkt aus GitHub laden
 $spriteUrl='https://raw.githubusercontent.com/sliqadteam-beep/Sliqadius/main/sandbox-android/app/src/main/java/org/sliqado/sandbox/PixelSprites.kt'
 Invoke-WebRequest -UseBasicParsing $spriteUrl -OutFile $spritePath
 
@@ -89,12 +134,33 @@ $menu=@'
 '@
     $pat2='(?s)    private fun drawElements\(c:Canvas\)\{.*?    override fun onTouchEvent'
     $n=[regex]::Replace($s,$pat2,$menu,1)
-    if($n -eq $s){Copy-Item $backup $gamePath -Force;throw 'Menü-Patch konnte nicht eingesetzt werden. Original wurde wiederhergestellt.'}
+    if($n -eq $s){Copy-Item $backup $gamePath -Force;throw 'Menue-Patch konnte nicht eingesetzt werden. Original wurde wiederhergestellt.'}
     $s=$n
 }
 
 [IO.File]::WriteAllText($gamePath,$s,[Text.UTF8Encoding]::new($false))
+
+# Projektwurzel finden und optional Android Studio oeffnen
+$project=$gamePath
+while($project -and -not (Test-Path (Join-Path $project 'settings.gradle.kts'))){
+    $project=Split-Path $project -Parent
+}
+
 Write-Host ''
 Write-Host 'FERTIG: Sand:Box V3 Pixel-Grafik wurde eingebaut.' -ForegroundColor Green
-Write-Host 'Android Studio: Build > Rebuild Project, danach Run.' -ForegroundColor Cyan
-Write-Host "Falls etwas nicht stimmt, Backup: $backup" -ForegroundColor Yellow
+Write-Host "Projektordner: $project" -ForegroundColor Cyan
+Write-Host "Backup: $backup" -ForegroundColor DarkGray
+Write-Host ''
+
+$studio=@(
+    "$env:ProgramFiles\Android\Android Studio\bin\studio64.exe",
+    "${env:ProgramFiles(x86)}\Android\Android Studio\bin\studio64.exe",
+    "$env:LOCALAPPDATA\Programs\Android Studio\bin\studio64.exe"
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+if($studio -and $project){
+    Start-Process $studio -ArgumentList "`"$project`""
+    Write-Host 'Android Studio wurde geoeffnet. Warte auf Gradle Sync und druecke dann Run.' -ForegroundColor Green
+}else{
+    Write-Host 'Oeffne den Projektordner in Android Studio, warte auf Gradle Sync und druecke dann Run.' -ForegroundColor Yellow
+}
