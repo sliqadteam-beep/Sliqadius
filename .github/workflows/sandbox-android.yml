@@ -26,6 +26,17 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Give phone-test APK a separate app ID
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('sandbox-android/app/build.gradle.kts')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('applicationId = "org.sliqado.sandbox"', 'applicationId = "org.sliqado.sandbox.phonetest"')
+          s = s.replace('versionName = "3.0"', 'versionName = "3.0-phone-test"')
+          s = s.replace('versionName = "2.0-offline"', 'versionName = "3.0-phone-test"')
+          p.write_text(s, encoding='utf-8')
+          PY
       - name: Apply fire and steam lifetime fix
         run: |
           python - <<'PY'
@@ -46,5 +57,5 @@ jobs:
         run: gradle -p sandbox-android assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
         with:
-          name: SandBox-Phone-Test-APK
+          name: SandBox-Phone-Test-APK-Separate-ID
           path: sandbox-android/app/build/outputs/apk/debug/app-debug.apk
