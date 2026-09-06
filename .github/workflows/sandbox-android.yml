@@ -26,9 +26,74 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Apply fire and steam lifetime fix
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('sandbox-android/app/src/main/java/org/sliqado/sandbox/GameView.kt')
+          s = p.read_text(encoding='utf-8')
+
+          old_gas = '''            STEAM, SMOKE, GAS -> {
+                life[i] = ((life[i].toInt() and 0xffff) + 1).coerceAtMost(32767).toShort()
+                gas(x, y, 3)
+                if ((life[i].toInt() and 0xffff) > 420 && t != GAS) clearCell(i)
+            }
+'''
+          new_gas = '''            STEAM, SMOKE, GAS -> {
+                val age = (life[i].toInt() and 0xffff) + 1
+                life[i] = age.coerceAtMost(32767).toShort()
+                val j = gas(x, y, 3)
+                when (t) {
+                    STEAM -> {
+                        temp[j] -= .45f
+                        if (age >= 180) {
+                            type[j] = WATER.toByte()
+                            life[j] = 0
+                            temp[j] = min(temp[j], 82f)
+                        }
+                    }
+                    SMOKE -> if (age >= 260) clearCell(j)
+                    GAS -> Unit
+                }
+            }
+'''
+
+          old_fire = '''                val age = life[i].toInt() and 0xffff
+                if (age > 80 + rnd.nextInt(100)) {
+                    type[i] = if (rnd.nextFloat() < .55f) SMOKE.toByte() else ASH.toByte()
+                    life[i] = 0
+                    return
+                }
+                gas(x, y, 2)
+'''
+          new_fire = '''                val age = life[i].toInt() and 0xffff
+                if (age >= 110) {
+                    if (rnd.nextFloat() < .68f) {
+                        type[i] = SMOKE.toByte()
+                        life[i] = 0
+                        temp[i] = 170f
+                    } else if (rnd.nextFloat() < .55f) {
+                        type[i] = ASH.toByte()
+                        life[i] = 0
+                        temp[i] = 45f
+                    } else {
+                        clearCell(i)
+                    }
+                    return
+                }
+                gas(x, y, 2)
+'''
+
+          if old_gas not in s:
+              raise SystemExit('Expected steam block not found')
+          if old_fire not in s:
+              raise SystemExit('Expected fire block not found')
+          s = s.replace(old_gas, new_gas).replace(old_fire, new_fire)
+          p.write_text(s, encoding='utf-8')
+          PY
       - name: Build debug APK
         run: gradle -p sandbox-android assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
         with:
-          name: SandBox-Offline-APK
+          name: SandBox-Phone-Test-APK
           path: sandbox-android/app/build/outputs/apk/debug/app-debug.apk
