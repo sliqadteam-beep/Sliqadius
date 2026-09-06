@@ -30,7 +30,19 @@ jobs:
         run: python sandbox-android/phone_test_v32.py
       - name: Build debug APK
         run: gradle -p sandbox-android assembleDebug --stacktrace
+      - name: Re-sign for Android compatibility
+        shell: bash
+        run: |
+          set -e
+          PASS="$(openssl rand -hex 16)"
+          KEYSTORE="$RUNNER_TEMP/sandbox-test.jks"
+          ALIGNED="$RUNNER_TEMP/SandBox-V3.2-Fix-aligned.apk"
+          FINAL="$RUNNER_TEMP/SandBox-V3.2-Fix.apk"
+          keytool -genkeypair -noprompt -keystore "$KEYSTORE" -storepass "$PASS" -keypass "$PASS" -alias sandbox -keyalg RSA -keysize 2048 -validity 3650 -dname "CN=SandBox Test, OU=Test, O=Sliqado, L=Berlin, ST=Berlin, C=DE"
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -f 4 sandbox-android/app/build/outputs/apk/debug/app-debug.apk "$ALIGNED"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks "$KEYSTORE" --ks-pass "pass:$PASS" --key-pass "pass:$PASS" --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --out "$FINAL" "$ALIGNED"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$FINAL"
       - uses: actions/upload-artifact@v4
         with:
-          name: SandBox-V3.2-Phone-Test-APK
-          path: sandbox-android/app/build/outputs/apk/debug/app-debug.apk
+          name: SandBox-V3.2-Install-Fix-APK
+          path: ${{ runner.temp }}/SandBox-V3.2-Fix.apk
