@@ -11,8 +11,8 @@ android {
         applicationId = "org.sliqado.sandbox"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "2.0-offline"
+        versionCode = 3
+        versionName = "3.0"
     }
 
     buildTypes {
