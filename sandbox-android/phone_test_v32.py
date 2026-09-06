@@ -1,17 +1,18 @@
 from pathlib import Path
 
-# Give the phone-test build its own package so it can coexist with older test APKs.
+# Give this phone-test build a fresh package ID so Android never treats it as an
+# update of an APK signed by a different temporary CI key.
 gradle = Path('sandbox-android/app/build.gradle.kts')
 s = gradle.read_text(encoding='utf-8')
-s = s.replace('applicationId = "org.sliqado.sandbox"', 'applicationId = "org.sliqado.sandbox.phonetest.v32"')
-s = s.replace('versionCode = 2', 'versionCode = 32')
-s = s.replace('versionName = "3.0"', 'versionName = "3.2-phone-test"')
-s = s.replace('versionName = "2.0-offline"', 'versionName = "3.2-phone-test"')
+s = s.replace('applicationId = "org.sliqado.sandbox"', 'applicationId = "org.sliqado.sandbox.phonetest.v32fix1"')
+s = s.replace('versionCode = 2', 'versionCode = 321')
+s = s.replace('versionName = "3.0"', 'versionName = "3.2-phone-test-fix1"')
+s = s.replace('versionName = "2.0-offline"', 'versionName = "3.2-phone-test-fix1"')
 gradle.write_text(s, encoding='utf-8')
 
 manifest = Path('sandbox-android/app/src/main/AndroidManifest.xml')
 m = manifest.read_text(encoding='utf-8')
-m = m.replace('android:label="Sand:Box"', 'android:label="Sand:Box V3.2 Test"')
+m = m.replace('android:label="Sand:Box"', 'android:label="Sand:Box V3.2 Fix"')
 manifest.write_text(m, encoding='utf-8')
 
 game = Path('sandbox-android/app/src/main/java/org/sliqado/sandbox/GameView.kt')
