@@ -32,64 +32,15 @@ jobs:
           from pathlib import Path
           p = Path('sandbox-android/app/src/main/java/org/sliqado/sandbox/GameView.kt')
           s = p.read_text(encoding='utf-8')
-
-          old_gas = '''            STEAM, SMOKE, GAS -> {
-                life[i] = ((life[i].toInt() and 0xffff) + 1).coerceAtMost(32767).toShort()
-                gas(x, y, 3)
-                if ((life[i].toInt() and 0xffff) > 420 && t != GAS) clearCell(i)
-            }
-'''
-          new_gas = '''            STEAM, SMOKE, GAS -> {
-                val age = (life[i].toInt() and 0xffff) + 1
-                life[i] = age.coerceAtMost(32767).toShort()
-                val j = gas(x, y, 3)
-                when (t) {
-                    STEAM -> {
-                        temp[j] -= .45f
-                        if (age >= 180) {
-                            type[j] = WATER.toByte()
-                            life[j] = 0
-                            temp[j] = min(temp[j], 82f)
-                        }
-                    }
-                    SMOKE -> if (age >= 260) clearCell(j)
-                    GAS -> Unit
-                }
-            }
-'''
-
-          old_fire = '''                val age = life[i].toInt() and 0xffff
-                if (age > 80 + rnd.nextInt(100)) {
-                    type[i] = if (rnd.nextFloat() < .55f) SMOKE.toByte() else ASH.toByte()
-                    life[i] = 0
-                    return
-                }
-                gas(x, y, 2)
-'''
-          new_fire = '''                val age = life[i].toInt() and 0xffff
-                if (age >= 110) {
-                    if (rnd.nextFloat() < .68f) {
-                        type[i] = SMOKE.toByte()
-                        life[i] = 0
-                        temp[i] = 170f
-                    } else if (rnd.nextFloat() < .55f) {
-                        type[i] = ASH.toByte()
-                        life[i] = 0
-                        temp[i] = 45f
-                    } else {
-                        clearCell(i)
-                    }
-                    return
-                }
-                gas(x, y, 2)
-'''
-
+          old_gas = "            STEAM, SMOKE, GAS -> {\n                life[i] = ((life[i].toInt() and 0xffff) + 1).coerceAtMost(32767).toShort()\n                gas(x, y, 3)\n                if ((life[i].toInt() and 0xffff) > 420 && t != GAS) clearCell(i)\n            }\n"
+          new_gas = "            STEAM, SMOKE, GAS -> {\n                val age = (life[i].toInt() and 0xffff) + 1\n                life[i] = age.coerceAtMost(32767).toShort()\n                val j = gas(x, y, 3)\n                when (t) {\n                    STEAM -> {\n                        temp[j] -= .45f\n                        if (age >= 180) {\n                            type[j] = WATER.toByte()\n                            life[j] = 0\n                            temp[j] = min(temp[j], 82f)\n                        }\n                    }\n                    SMOKE -> if (age >= 260) clearCell(j)\n                    GAS -> Unit\n                }\n            }\n"
+          old_fire = "                val age = life[i].toInt() and 0xffff\n                if (age > 80 + rnd.nextInt(100)) {\n                    type[i] = if (rnd.nextFloat() < .55f) SMOKE.toByte() else ASH.toByte()\n                    life[i] = 0\n                    return\n                }\n                gas(x, y, 2)\n"
+          new_fire = "                val age = life[i].toInt() and 0xffff\n                if (age >= 110) {\n                    if (rnd.nextFloat() < .68f) {\n                        type[i] = SMOKE.toByte()\n                        life[i] = 0\n                        temp[i] = 170f\n                    } else if (rnd.nextFloat() < .55f) {\n                        type[i] = ASH.toByte()\n                        life[i] = 0\n                        temp[i] = 45f\n                    } else {\n                        clearCell(i)\n                    }\n                    return\n                }\n                gas(x, y, 2)\n"
           if old_gas not in s:
               raise SystemExit('Expected steam block not found')
           if old_fire not in s:
               raise SystemExit('Expected fire block not found')
-          s = s.replace(old_gas, new_gas).replace(old_fire, new_fire)
-          p.write_text(s, encoding='utf-8')
+          p.write_text(s.replace(old_gas, new_gas).replace(old_fire, new_fire), encoding='utf-8')
           PY
       - name: Build debug APK
         run: gradle -p sandbox-android assembleDebug --stacktrace
