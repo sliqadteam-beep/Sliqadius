@@ -1,0 +1,44 @@
+name: Patch SliqServer HD Logo
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-sliqserver-hd.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch website
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('server/index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('<link rel="stylesheet" href="/styles.css?v=5">', '<link rel="stylesheet" href="/styles.css?v=5">\n  <link rel="stylesheet" href="/server/logo-quality.css?v=2">')
+          old_style = '''  <style>\n    .brand-logo{width:36px;height:36px;display:block;object-fit:cover;border-radius:10px;background:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 8px 24px rgba(0,0,0,.2)}\n    .preview-logo{width:28px;height:28px;display:block;object-fit:cover;border-radius:8px;background:#fff}\n    @media(max-width:680px){.brand-logo{width:32px;height:32px;border-radius:9px}}\n  </style>\n'''
+          s = s.replace(old_style, '')
+          s = s.replace('<img class="brand-logo" src="/sliqado-logo.png" alt="Sliqado logo">', '<span class="logo-frame"><img src="/sliqado-logo.png?v=6" alt="Sliqado logo" decoding="async"></span>')
+          s = s.replace('<img class="preview-logo" src="/sliqado-logo.png" alt="">', '<span class="logo-frame preview"><img src="/sliqado-logo.png?v=6" alt="" decoding="async"></span>')
+          s = s.replace('https://sliqado.org/sliqado-logo.png"', 'https://sliqado.org/sliqado-logo.png?v=6"')
+          s = s.replace('href="/sliqado-logo.png"', 'href="/sliqado-logo.png?v=6"')
+          p.write_text(s, encoding='utf-8')
+      - name: Validate
+        run: |
+          grep -q 'logo-frame' server/index.html
+          grep -q 'logo-quality.css?v=2' server/index.html
+          git diff --check
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Fix SliqServer logo rendering and HD layout"
+          git pull --rebase origin main
+          git push origin HEAD:main
