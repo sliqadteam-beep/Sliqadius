@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 760" role="img" aria-label="Sliqado logo">
+  <rect width="760" height="760" rx="92" fill="#fff"/>
+  <g fill="#000" stroke="#000" stroke-linecap="round">
+    <line x1="184" y1="119" x2="572" y2="366" stroke-width="158"/>
+    <circle cx="570" cy="121" r="82" stroke="none"/>
+    <line x1="189" y1="404" x2="574" y2="648" stroke-width="152"/>
+    <circle cx="196" cy="629" r="81" stroke="none"/>
+  </g>
+</svg>
