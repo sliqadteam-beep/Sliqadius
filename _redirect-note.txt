@@ -1,0 +1,1 @@
+Root and all unknown public routes redirect to /server/.
