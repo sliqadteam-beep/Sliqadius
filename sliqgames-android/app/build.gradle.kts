@@ -15,6 +15,11 @@ android {
         versionName = "1.0"
     }
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -23,6 +28,10 @@ android {
     }
 
     sourceSets.getByName("main").assets.srcDir(layout.buildDirectory.dir("generated/offlineGames"))
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 val prepareOfflineGames by tasks.registering(Sync::class) {
