@@ -1,0 +1,63 @@
+name: Build SliqGames Hub APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sliqgames-android/**'
+      - 'crushers/**'
+      - 'sandbox/**'
+      - 'city/**'
+      - '.github/workflows/sliqgames-hub-android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK 35
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build offline SliqGames Hub APK
+        run: gradle -p sliqgames-android assembleDebug --stacktrace
+
+      - name: Verify APK
+        run: $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose sliqgames-android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Publish APK into website repository
+        shell: bash
+        run: |
+          set -e
+          cp sliqgames-android/app/build/outputs/apk/debug/app-debug.apk SliqGames-Hub.apk
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SliqGames-Hub.apk
+          if git diff --cached --quiet; then
+            echo 'APK unchanged.'
+          else
+            git commit -m 'Build SliqGames Hub Android APK'
+            git push origin HEAD:main
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SliqGames-Hub-APK
+          path: SliqGames-Hub.apk
