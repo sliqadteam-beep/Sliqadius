@@ -27,19 +27,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify SliqServer site
+      - name: Verify SliqServer-only routing
         run: |
           set -euo pipefail
           test -f site/index.html
-          test -f site/styles.css
           test -f site/404.html
           test -f site/CNAME
-          grep -q "SliqServer" site/index.html
-          grep -q "SliqServer-Windows.exe" site/index.html
-          grep -q "SliqServer-Android.apk" site/index.html
-          ! grep -qi "SliqGames" site/index.html
-          ! grep -qi "Sliqadius" site/index.html
-          ! grep -qi "Sliqado City" site/index.html
+          test -f site/styles.css
+          test -f site/server/index.html
+
+          # Root and every missing/old route must go to the one canonical page.
+          grep -q "url=/server/" site/index.html
+          grep -q "location.replace('/server/')" site/index.html
+          grep -q "url=/server/" site/404.html
+          grep -q "location.replace('/server/')" site/404.html
+
+          # The actual service exists only at /server/.
+          grep -q "SliqServer" site/server/index.html
+          grep -q "https://sliqado.org/server/" site/server/index.html
+          grep -q "SliqServer-Windows.exe" site/server/index.html
+          grep -q "SliqServer-Android.apk" site/server/index.html
+          ! grep -qi "SliqGames" site/server/index.html
+          ! grep -qi "Sliqadius" site/server/index.html
+          ! grep -qi "Sliqado City" site/server/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
