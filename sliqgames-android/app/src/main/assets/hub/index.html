@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#080a0d">
+  <title>SliqGames Hub</title>
+  <style>
+    :root{--bg:#080a0d;--panel:#12171e;--line:#29313b;--text:#f7f9fb;--muted:#9ca6b4;--green:#39ff88}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;min-height:100%;background:radial-gradient(circle at 15% -5%,#173524 0,transparent 37%),radial-gradient(circle at 90% 100%,#10233f 0,transparent 40%),var(--bg);color:var(--text);font-family:Inter,"Segoe UI",Arial,sans-serif}
+    body{padding:max(24px,env(safe-area-inset-top)) 18px max(28px,env(safe-area-inset-bottom))}
+    .wrap{width:min(760px,100%);margin:auto}.eyebrow{color:var(--green);font-size:12px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;margin:0 0 10px}.title{font-size:clamp(42px,11vw,72px);line-height:.92;letter-spacing:-.065em;margin:0}.lead{color:var(--muted);line-height:1.55;margin:17px 0 25px;max-width:620px}
+    .offline{display:inline-flex;gap:8px;align-items:center;border:1px solid #39ff8848;background:#39ff8810;color:#baffd0;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:800;margin-bottom:24px}.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 14px #39ff88}
+    .grid{display:grid;gap:13px}.game{display:block;padding:21px;border:1px solid var(--line);border-radius:23px;background:linear-gradient(145deg,#171d25e8,#0e1218e8);box-shadow:0 14px 45px #0004;transition:.16s}.game:active{transform:scale(.985);border-color:#39ff8870}.row{display:flex;align-items:center;justify-content:space-between;gap:16px}.num{font-size:11px;color:#6f7987;font-weight:900;letter-spacing:.14em}.go{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:var(--green);color:#04130a;font-size:22px;font-weight:1000;flex:0 0 auto}.game h2{font-size:28px;letter-spacing:-.045em;margin:24px 0 7px}.game p{margin:0;color:var(--muted);line-height:1.5;font-size:14px}.meta{margin-top:14px;color:#c5ccd5;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.foot{text-align:center;color:#606977;font-size:11px;margin:26px 0 0}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="eyebrow">Sliqado Games</p>
+    <h1 class="title">SliqGames<br>Hub</h1>
+    <p class="lead">All your SliqGames in one Android app. The games are stored inside the app, so they keep working without Wi‑Fi or mobile data.</p>
+    <div class="offline"><span class="dot"></span> Offline-ready after installation</div>
+
+    <section class="grid" aria-label="Offline games">
+      <a class="game" href="../crushers/index.html">
+        <div class="row"><span class="num">01 / MATCH-3</span><span class="go">→</span></div>
+        <h2>Crushers</h2>
+        <p>Endless match-3 with combos, special candies, animations and sound effects.</p>
+        <div class="meta">Play offline</div>
+      </a>
+
+      <a class="game" href="../sandbox/index.html">
+        <div class="row"><span class="num">02 / SANDBOX</span><span class="go">→</span></div>
+        <h2>Sand:Box</h2>
+        <p>Build and experiment with materials, liquids, fire and reactions.</p>
+        <div class="meta">Play offline</div>
+      </a>
+
+      <a class="game" href="../city/index.html">
+        <div class="row"><span class="num">03 / CITY BUILDER</span><span class="go">→</span></div>
+        <h2>Sliqado City</h2>
+        <p>Build roads, districts, services, traffic and a growing city.</p>
+        <div class="meta">Play offline</div>
+      </a>
+    </section>
+
+    <p class="foot">SliqGames™ · sliqado.org · 2026</p>
+  </main>
+</body>
+</html>
