@@ -1,0 +1,8 @@
+/* High-DPI logo/rendering fix */
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:geometricPrecision}
+img{image-rendering:auto}
+.logo-frame{width:42px;height:42px;display:grid;place-items:center;overflow:hidden;border-radius:12px;background:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 8px 24px rgba(0,0,0,.22);flex:0 0 auto}
+.logo-frame>img{width:100%;height:100%;display:block;object-fit:cover;transform:scale(1.72);transform-origin:center center;backface-visibility:hidden}
+.logo-frame.preview{width:30px;height:30px;border-radius:8px}
+@media (min-resolution:1.5dppx){.app-preview,.feature-card,.download-card,.multiversion-card{transform:translateZ(0)}}
+@media(max-width:680px){.logo-frame{width:36px;height:36px;border-radius:10px}.logo-frame.preview{width:28px;height:28px}}
