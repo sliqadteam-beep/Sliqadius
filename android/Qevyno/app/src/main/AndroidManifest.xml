@@ -3,7 +3,22 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <application android:allowBackup="false" android:label="Qevyno" android:icon="@drawable/ic_qevyno" android:roundIcon="@drawable/ic_qevyno" android:usesCleartextTraffic="true" android:theme="@android:style/Theme.Material.NoActionBar">
         <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="portrait">
-            <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="qevyno" android:host="add"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="sliqado.org" android:pathPrefix="/Qevyno/add"/>
+            </intent-filter>
         </activity>
     </application>
 </manifest>
