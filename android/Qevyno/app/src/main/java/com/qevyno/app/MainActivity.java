@@ -51,23 +51,29 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                String auth = readAsset("auth23.js");
-                String ui = readAsset("ui26.js");
-                String loading = readAsset("ui27.js");
-                String simple = readAsset("ui28.js");
 
-                runScript(view, auth, () ->
-                    runScript(view, ui, () ->
-                        runScript(view, loading, () ->
-                            runScript(view, simple, () -> view.setVisibility(View.VISIBLE))
-                        )
-                    )
-                );
+                // Inject the UI upgrades in one JS call instead of four nested
+                // evaluateJavascript calls. This removes a visible startup delay.
+                StringBuilder bundle = new StringBuilder();
+                appendAsset(bundle, "auth23.js");
+                appendAsset(bundle, "ui26.js");
+                appendAsset(bundle, "ui27.js");
+                appendAsset(bundle, "ui28.js");
+                appendAsset(bundle, "startup292.js");
+
+                runScript(view, bundle.toString(), () -> view.setVisibility(View.VISIBLE));
             }
         });
 
         setContentView(webView);
         webView.loadUrl("file:///android_asset/index.html");
+    }
+
+    private void appendAsset(StringBuilder bundle, String name) {
+        String script = readAsset(name);
+        if (script != null && !script.isEmpty()) {
+            bundle.append('\n').append(script).append('\n');
+        }
     }
 
     private void runScript(WebView view, String script, Runnable done) {
