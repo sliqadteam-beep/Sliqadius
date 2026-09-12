@@ -36,6 +36,7 @@ public class MainActivity extends Activity {
 
     private static final int REQUEST_PROFILE_PICTURE = 5201;
     private WebView webView;
+    private MediaBridge mediaBridge;
     private String pendingAddPhone = "";
     private String pendingShareText = "";
     private String pendingGroupInvite = "";
@@ -69,6 +70,8 @@ public class MainActivity extends Activity {
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
         webView.addJavascriptInterface(new DeviceInfoBridge(), "QevynoDevice");
+        mediaBridge = new MediaBridge(this, webView);
+        webView.addJavascriptInterface(mediaBridge, "SliqChatMedia");
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -133,6 +136,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (mediaBridge != null && mediaBridge.onActivityResult(requestCode, resultCode, data)) return;
         if (requestCode != REQUEST_PROFILE_PICTURE || resultCode != RESULT_OK || data == null || data.getData() == null) return;
         Uri uri = data.getData();
         try {
@@ -427,6 +431,12 @@ public class MainActivity extends Activity {
                 });
             } catch (Exception ignored) {}
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mediaBridge != null) mediaBridge.shutdown();
+        super.onDestroy();
     }
 
     @Override

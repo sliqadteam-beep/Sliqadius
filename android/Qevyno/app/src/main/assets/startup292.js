@@ -1,16 +1,27 @@
 (()=>{
-  // Load the stable send queue first, then chat polish, sharing/previews and
-  // finally the newest groups/conversation-list layer. The newest layer runs
-  // last so older UI scripts cannot move badges or phone numbers back again.
+  // Load the stable queue, chat polish, sharing/previews, groups and finally
+  // the native media layer. The newest layer runs last so older UI code cannot
+  // replace media bubbles or intercept the media send action.
+  function load307(){
+    try{
+      if(document.getElementById('qevyno307loader'))return;
+      const media=document.createElement('script');
+      media.id='qevyno307loader';
+      media.src='file:///android_asset/features307.js';
+      media.async=false;
+      document.head.appendChild(media);
+    }catch(e){}
+  }
   function load306(){
     try{
-      if(document.getElementById('qevyno306loader'))return;
+      if(document.getElementById('qevyno306loader')){load307();return;}
       const groups=document.createElement('script');
       groups.id='qevyno306loader';
       groups.src='file:///android_asset/features306.js';
       groups.async=false;
+      groups.onload=load307;
       document.head.appendChild(groups);
-    }catch(e){}
+    }catch(e){load307()}
   }
   function load305(){
     try{

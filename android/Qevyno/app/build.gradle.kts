@@ -6,8 +6,8 @@ android {
         applicationId = "com.qevyno.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 31
-        versionName = "2.9.19"
+        versionCode = 32
+        versionName = "2.9.20"
     }
     buildTypes { release { isMinifyEnabled = false } }
     compileOptions {
