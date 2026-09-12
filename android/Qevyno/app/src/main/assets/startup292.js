@@ -1,11 +1,23 @@
 (()=>{
   // Load feature layers in order. Newer layers run last so older patches cannot
   // overwrite chat-list, media, profile or visual-polish changes.
+  function load310(){
+    try{
+      if(document.getElementById('qevyno310loader'))return;
+      const s=document.createElement('script');s.id='qevyno310loader';s.src='file:///android_asset/features310.js';s.async=false;document.head.appendChild(s);
+    }catch(e){}
+  }
+  function load309(){
+    try{
+      if(document.getElementById('qevyno309loader')){load310();return;}
+      const s=document.createElement('script');s.id='qevyno309loader';s.src='file:///android_asset/features309.js';s.async=false;s.onload=load310;document.head.appendChild(s);
+    }catch(e){load310()}
+  }
   function load308(){
     try{
-      if(document.getElementById('qevyno308loader'))return;
-      const s=document.createElement('script');s.id='qevyno308loader';s.src='file:///android_asset/features308.js';s.async=false;document.head.appendChild(s);
-    }catch(e){}
+      if(document.getElementById('qevyno308loader')){load309();return;}
+      const s=document.createElement('script');s.id='qevyno308loader';s.src='file:///android_asset/features308.js';s.async=false;s.onload=load309;document.head.appendChild(s);
+    }catch(e){load309()}
   }
   function load307(){
     try{
@@ -44,7 +56,7 @@
   try{
     if(typeof show==='function')show('homeScreen');
     const hello=document.getElementById('hello');
-    const name=localStorage.getItem('qevyno_name')||'SliqChat';
+    const name=localStorage.getItem('qevyno_name')||'Skaysa';
     const phone=localStorage.getItem('qevyno_phone')||'';
     if(hello)hello.textContent=name+(phone?' • '+phone:'');
     document.getElementById('q27load')?.classList.remove('on');

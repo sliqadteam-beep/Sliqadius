@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.9.19';
+const VERSION='2.9.20';
 const BRAND='SliqChat';
 const GROUPS_KEY='sliqchat_groups_v1';
 const GROUP_MSG_PREFIX='sliqchat_group_messages_';
@@ -70,10 +70,15 @@ function decorateNormalRows(){
 let activeGroupId='';let lastRenderedGroupCount=0;
 function injectGroups(){
  const people=document.getElementById('people');if(!people)return;
- people.querySelectorAll('.q306groupSection,.q306groupRow').forEach(x=>x.remove());
  const search=String(document.getElementById('chatSearch')?.value||'').trim().toLowerCase();
  const groups=Object.values(loadGroups()).map(sanitizeGroup).filter(Boolean).filter(g=>g.members.some(m=>m.phone===mePhone()));
  const filtered=groups.filter(g=>{const last=groupLast(g);return!search||g.name.toLowerCase().includes(search)||String(last?.text||'').toLowerCase().includes(search)}).sort((a,b)=>Number(groupLast(b)?.sent_at||b.updated_at||0)-Number(groupLast(a)?.sent_at||a.updated_at||0));
+ const signature=JSON.stringify(filtered.map(g=>{const last=groupLast(g);return[g.id,g.name,Number(g.unread||0),g.members.length,String(last?.id||''),String(last?.text||''),Number(last?.sent_at||0)]}));
+ const existingRows=people.querySelectorAll('.q306groupRow').length;
+ const existingSection=!!people.querySelector('.q306groupSection');
+ if(people.dataset.q306GroupSignature===signature&&existingRows===filtered.length&&existingSection===Boolean(filtered.length))return;
+ people.dataset.q306GroupSignature=signature;
+ people.querySelectorAll('.q306groupSection,.q306groupRow').forEach(x=>x.remove());
  if(!filtered.length)return;
  const sec=document.createElement('div');sec.className='q306groupSection';sec.innerHTML=`<span>${esc(tx('groups'))}</span><span style="margin-left:auto">${filtered.length}</span>`;
  const help=people.querySelector('.q299helpRow');if(help)help.insertAdjacentElement('afterend',sec);else people.prepend(sec);
@@ -113,7 +118,7 @@ createBack.querySelector('.q306primary').onclick=async()=>{const name=String(cre
 const groupScreen=document.createElement('div');groupScreen.className='q306groupScreen';groupScreen.innerHTML=`<div class="q306top"><button class="q306backBtn">‹</button><div class="q306headAvatar"></div><div class="q306headInfo"><div class="q306headName"></div><div class="q306headMembers"></div></div><button class="q306inviteBtn">${esc(tx('invite'))}</button></div><div class="q306msgs"></div><div class="q306composer"><textarea maxlength="1800" rows="1" placeholder="${esc(tx('groupPlaceholder'))}"></textarea><button class="q306send">➤</button></div>`;document.body.appendChild(groupScreen);
 function closeGroup(){groupScreen.classList.remove('on');activeGroupId='';refreshList()}
 groupScreen.querySelector('.q306backBtn').onclick=closeGroup;
-function renderGroup(id,animateId=''){const g=getGroup(id);if(!g)return;const msgs=loadGroupMessages(id),box=groupScreen.querySelector('.q306msgs');groupScreen.querySelector('.q306headName').textContent=g.name;groupScreen.querySelector('.q306headAvatar').textContent=initials(g.name);groupScreen.querySelector('.q306headMembers').textContent=g.members.length+' '+(g.members.length===1?tx('member'):tx('membersN'));box.innerHTML='';if(!msgs.length){const e=document.createElement('div');e.className='q306empty';e.textContent=tx('noGroupMessages');box.appendChild(e)}for(const m of msgs){const mine=m.sender_phone===mePhone(),r=document.createElement('div');r.className='q306msg'+(mine?' mine':'')+(animateId&&m.id===animateId?' new':'');if(!mine){const s=document.createElement('div');s.className='q306sender';s.textContent=m.sender_name||displayMemberName(m.sender_phone);r.appendChild(s)}const b=document.createElement('div');b.className='q306bubble';b.innerHTML=`<div class="q306text">${esc(m.text||'')}</div><div class="q306time">${new Date(Number(m.sent_at||0)*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`;r.appendChild(b);box.appendChild(r)}box.scrollTop=box.scrollHeight}
+function renderGroup(id,animateId=''){const g=getGroup(id);if(!g)return;const msgs=loadGroupMessages(id),box=groupScreen.querySelector('.q306msgs');groupScreen.querySelector('.q306headName').textContent=g.name;groupScreen.querySelector('.q306headAvatar').textContent=initials(g.name);groupScreen.querySelector('.q306headMembers').textContent=g.members.length+' '+(g.members.length===1?tx('member'):tx('membersN'));box.innerHTML='';if(!msgs.length){const e=document.createElement('div');e.className='q306empty';e.textContent=tx('noGroupMessages');box.appendChild(e)}for(const m of msgs){const mine=m.sender_phone===mePhone(),r=document.createElement('div');r.className='q306msg'+(mine?' mine':'')+(animateId&&m.id===animateId?' new':'');if(!mine){const s=document.createElement('div');s.className='q306sender';s.dataset.phone=normPhone(m.sender_phone||'');s.textContent=m.sender_name||displayMemberName(m.sender_phone);r.appendChild(s)}const b=document.createElement('div');b.className='q306bubble';b.innerHTML=`<div class="q306text">${esc(m.text||'')}</div><div class="q306time">${new Date(Number(m.sent_at||0)*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`;r.appendChild(b);box.appendChild(r)}box.scrollTop=box.scrollHeight}
 function openGroup(id){const g=getGroup(id);if(!g)return;activeGroupId=id;g.unread=0;saveGroup(g);renderGroup(id);groupScreen.classList.add('on');setTimeout(()=>groupScreen.querySelector('textarea').focus(),120);refreshList()}
 async function sendGroupMessage(){const id=activeGroupId,g=getGroup(id),ta=groupScreen.querySelector('textarea');const text=String(ta.value||'').trim();if(!g||!text)return;const mid='gm_'+uuid(),m={id:mid,sender_phone:mePhone(),sender_name:meName(),text:text.slice(0,1800),sent_at:now()};const a=loadGroupMessages(id);a.push(m);saveGroupMessages(id,a);g.updated_at=m.sent_at;saveGroup(g);ta.value='';renderGroup(id,mid);refreshList();broadcastGroup(g,{type:'message',msgid:mid,text:m.text,sent_at:m.sent_at})}
 groupScreen.querySelector('.q306send').onclick=sendGroupMessage;groupScreen.querySelector('textarea').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendGroupMessage()}};

@@ -1,12 +1,16 @@
 package com.qevyno.app;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
@@ -35,6 +39,7 @@ import java.util.Locale;
 public class MainActivity extends Activity {
 
     private static final int REQUEST_PROFILE_PICTURE = 5201;
+    private static final int REQUEST_NOTIFICATIONS = 7301;
     private WebView webView;
     private MediaBridge mediaBridge;
     private String pendingAddPhone = "";
@@ -319,6 +324,30 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void setAppVisible(boolean visible) {
+        try {
+            getSharedPreferences(NotificationService.PREFS_NAME, MODE_PRIVATE)
+                .edit().putBoolean("app_visible", visible).apply();
+        } catch (Exception ignored) {}
+    }
+
+    private void startNotificationService() {
+        try {
+            Intent service = new Intent(this, NotificationService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(service);
+            else startService(service);
+        } catch (Exception ignored) {}
+    }
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= 33
+            && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            try {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQUEST_NOTIFICATIONS);
+            } catch (Exception ignored) {}
+        }
+    }
+
     private class DeviceInfoBridge {
         @JavascriptInterface
         public String getCountryIso() {
@@ -417,6 +446,40 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void configureNotifications(String authToken, String phone) {
+            final String t = authToken == null ? "" : authToken.trim();
+            final String p = phone == null ? "" : phone.trim();
+            if (t.isEmpty() || !p.matches("^\\+[1-9]\\d{7,14}$")) return;
+            runOnUiThread(() -> {
+                try {
+                    SharedPreferences prefs = getSharedPreferences(NotificationService.PREFS_NAME, MODE_PRIVATE);
+                    prefs.edit()
+                        .putString("token", t)
+                        .putString("phone", p)
+                        .putBoolean("enabled", true)
+                        .apply();
+                    requestNotificationPermissionIfNeeded();
+                    startNotificationService();
+                } catch (Exception ignored) {}
+            });
+        }
+
+        @JavascriptInterface
+        public void disableNotifications() {
+            runOnUiThread(() -> {
+                try {
+                    getSharedPreferences(NotificationService.PREFS_NAME, MODE_PRIVATE)
+                        .edit()
+                        .putBoolean("enabled", false)
+                        .remove("token")
+                        .remove("phone")
+                        .apply();
+                    stopService(new Intent(MainActivity.this, NotificationService.class));
+                } catch (Exception ignored) {}
+            });
+        }
+
+        @JavascriptInterface
         public void openExternal(String url) {
             if (url == null) return;
             try {
@@ -431,6 +494,18 @@ public class MainActivity extends Activity {
                 });
             } catch (Exception ignored) {}
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setAppVisible(true);
+    }
+
+    @Override
+    protected void onPause() {
+        setAppVisible(false);
+        super.onPause();
     }
 
     @Override

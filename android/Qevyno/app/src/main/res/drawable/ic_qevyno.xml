@@ -5,46 +5,23 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-
-    <!-- Turquoise rounded app tile, matching the selected Qevyno logo -->
     <path android:pathData="M16,4H92A12,12 0,0 1,104 16V92A12,12 0,0 1,92 104H16A12,12 0,0 1,4 92V16A12,12 0,0 1,16 4Z">
         <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="linear"
-                android:startX="10"
-                android:startY="6"
-                android:endX="98"
-                android:endY="104">
-                <item android:offset="0" android:color="#31E4DE"/>
-                <item android:offset="0.52" android:color="#11BEC1"/>
-                <item android:offset="1" android:color="#08727C"/>
+            <gradient android:type="linear" android:startX="8" android:startY="7" android:endX="100" android:endY="103">
+                <item android:offset="0" android:color="#B7DEFF"/>
+                <item android:offset="0.48" android:color="#8ABFF4"/>
+                <item android:offset="1" android:color="#5F86DE"/>
             </gradient>
         </aapt:attr>
     </path>
-
-    <!-- Subtle highlight from the selected artwork -->
-    <path
-        android:fillColor="#35FFFFFF"
-        android:pathData="M4,16A12,12 0,0 1,16 4H43C34,23 21,37 4,46Z"/>
-
-    <!-- White Q / conversation ring -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:fillType="evenOdd"
-        android:pathData="M54,20A34,34 0,1 0,54 88A34,34 0,1 0,54 20M54,32A22,22 0,1 1,54 76A22,22 0,1 1,54 32"/>
-
-    <!-- Small speech-bubble point -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M30,70L20,86C19,88 21,90 23,89L42,82Z"/>
-
-    <!-- Flowing Q tail -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M62,68C69,68 75,72 80,78L94,92C96,94 96,97 94,99C92,101 89,101 87,99L73,85C68,80 65,78 60,78Z"/>
-
-    <!-- Message dots -->
-    <path android:fillColor="#FFFFFF" android:pathData="M42,50A4,4 0,1 0,42 58A4,4 0,1 0,42 50"/>
-    <path android:fillColor="#FFFFFF" android:pathData="M54,50A4,4 0,1 0,54 58A4,4 0,1 0,54 50"/>
-    <path android:fillColor="#FFFFFF" android:pathData="M66,50A4,4 0,1 0,66 58A4,4 0,1 0,66 50"/>
+    <path android:fillColor="#25FFFFFF" android:pathData="M4,16A12,12 0,0 1,16 4H51C39,21 25,34 4,44Z"/>
+    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="7" android:strokeLineCap="round"
+        android:pathData="M27,72C32,52 42,39 56,34C69,29 79,34 87,46"/>
+    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="7" android:strokeLineCap="round"
+        android:pathData="M27,72C41,81 59,82 73,73C82,67 87,58 87,46"/>
+    <path android:fillColor="#00000000" android:strokeColor="#EFFFFFFF" android:strokeWidth="5" android:strokeLineCap="round"
+        android:pathData="M37,61C48,51 64,50 77,60"/>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M27,66A6,6 0,1 0,27 78A6,6 0,1 0,27 66"/>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M56,28A6,6 0,1 0,56 40A6,6 0,1 0,56 28"/>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M87,40A6,6 0,1 0,87 52A6,6 0,1 0,87 40"/>
 </vector>
