@@ -84,7 +84,7 @@
 
   function refreshOwnQr(){
     if(!mePhone)return;
-    qrData(mePhone); // Creates the device-local file if it does not exist.
+    qrData(mePhone);
     ensureSettingsQr();
     ensurePlusQr();
   }
@@ -111,8 +111,6 @@
     navNew.onclick=e=>{if(typeof oldClick==='function')oldClick.call(navNew,e);setTimeout(ensurePlusQr,30);};
   }
 
-  // If another user scans a Qevyno QR code, the deep link resolves the exact
-  // phone number through the normal authenticated exact-number lookup.
   async function openSharedPhone(phone){
     phone=String(phone||'').trim();
     if(!/^\+[1-9]\d{7,14}$/.test(phone))return;
@@ -138,8 +136,6 @@
   if(typeof oldSave==='function'){
     window.saveSession=function(d){
       oldSave(d);
-      // Account creation/login stores the QR image in the app's private device storage.
-      // If the file was removed, getOrCreateQr regenerates it automatically.
       try{if(d&&d.phone&&window.QevynoDevice&&QevynoDevice.getOrCreateQr)QevynoDevice.getOrCreateQr(d.phone);}catch(e){}
       setTimeout(()=>{
         refreshOwnQr();
@@ -149,5 +145,13 @@
     };
   }
 
-  setTimeout(()=>{document.querySelectorAll('.small').forEach(el=>{if(/Qevyno\s+2\./i.test(el.textContent||''))el.textContent='Qevyno 2.9.4 • Android 8+';});},120);
+  setTimeout(()=>{document.querySelectorAll('.small').forEach(el=>{if(/Qevyno\s+2\./i.test(el.textContent||''))el.textContent='Qevyno 2.9.6 • Android 8+';});},120);
+})();
+
+(()=>{
+  if(document.getElementById('qevyno296loader'))return;
+  const s=document.createElement('script');
+  s.id='qevyno296loader';
+  s.src='file:///android_asset/features296.js';
+  document.head.appendChild(s);
 })();
