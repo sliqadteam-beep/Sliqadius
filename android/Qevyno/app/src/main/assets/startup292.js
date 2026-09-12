@@ -1,4 +1,16 @@
 (()=>{
+  // Load the final language lock as a real asset script. Because this script is
+  // requested from the current file:// page, it runs after the concatenated UI
+  // bundle has finished and can correct any older feature that overwrote text.
+  try{
+    if(!document.getElementById('qevyno302loader')){
+      const languageFix=document.createElement('script');
+      languageFix.id='qevyno302loader';
+      languageFix.src='file:///android_asset/features302.js';
+      document.head.appendChild(languageFix);
+    }
+  }catch(e){}
+
   // Fast startup for users with an existing session.
   // The saved session is shown immediately while the normal server validation
   // continues in the background. This avoids a visible startup/loading flash.
@@ -52,7 +64,7 @@
   setTimeout(()=>{
     try{
       document.querySelectorAll('.small').forEach(el=>{
-        if(/Qevyno\s+2\./i.test(el.textContent||''))el.textContent='Qevyno 2.9.12 • Android 8+';
+        if(/Qevyno\s+2\./i.test(el.textContent||''))el.textContent='Qevyno 2.9.15 • Android 8+';
       });
     }catch(e){}
   },900);
