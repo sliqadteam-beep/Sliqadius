@@ -38,12 +38,14 @@ public class MainActivity extends Activity {
     private WebView webView;
     private String pendingAddPhone = "";
     private String pendingShareText = "";
+    private String pendingGroupInvite = "";
 
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         pendingAddPhone = extractAddPhone(getIntent());
         pendingShareText = extractSharedText(getIntent());
+        pendingGroupInvite = extractGroupInvite(getIntent());
 
         getWindow().setStatusBarColor(Color.rgb(255, 255, 255));
         getWindow().setNavigationBarColor(Color.rgb(255, 255, 255));
@@ -114,6 +116,15 @@ public class MainActivity extends Activity {
             pendingShareText = shared;
             if (webView != null) {
                 String js = "window.qevynoReceiveNativeShare&&window.qevynoReceiveNativeShare(" + JSONObject.quote(shared) + ");";
+                webView.evaluateJavascript(js, null);
+            }
+        }
+
+        String groupInvite = extractGroupInvite(intent);
+        if (!groupInvite.isEmpty()) {
+            pendingGroupInvite = groupInvite;
+            if (webView != null) {
+                String js = "window.sliqchatReceiveGroupInvite&&window.sliqchatReceiveGroupInvite(" + JSONObject.quote(groupInvite) + ");";
                 webView.evaluateJavascript(js, null);
             }
         }
@@ -190,6 +201,22 @@ public class MainActivity extends Activity {
             if (!text.matches("(?s).*https?://.*")) return "";
             if (text.length() > 10000) text = text.substring(0, 10000);
             return text;
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
+
+    private String extractGroupInvite(Intent intent) {
+        try {
+            if (intent == null) return "";
+            Uri data = intent.getData();
+            if (data == null) return "";
+            String code = data.getQueryParameter("g");
+            if (code == null) return "";
+            code = code.trim();
+            if (code.length() < 8 || code.length() > 12000) return "";
+            if (!code.matches("^[A-Za-z0-9_-]+$")) return "";
+            return code;
         } catch (Exception ignored) {
             return "";
         }
@@ -376,6 +403,13 @@ public class MainActivity extends Activity {
             String text = pendingShareText;
             pendingShareText = "";
             return text == null ? "" : text;
+        }
+
+        @JavascriptInterface
+        public String consumePendingGroupInvite() {
+            String code = pendingGroupInvite;
+            pendingGroupInvite = "";
+            return code == null ? "" : code;
         }
 
         @JavascriptInterface
