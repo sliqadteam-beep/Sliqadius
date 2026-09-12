@@ -1,6 +1,6 @@
 {
-  "versionCode": 0,
-  "versionName": "disabled",
+  "versionCode": 23,
+  "versionName": "2.9.11",
   "apkUrl": "https://sliqado.org/Qevyno/Qevyno.apk",
-  "notes": "Updates temporarily disabled while restoring the correct Qevyno app build."
+  "notes": "Update checking is now built into the current Qevyno app."
 }
