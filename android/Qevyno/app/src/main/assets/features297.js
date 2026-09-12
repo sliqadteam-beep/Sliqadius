@@ -9,10 +9,9 @@
     const d=dial();
     if(p.startsWith(d))p=p.slice(d.length);
     else if(p.startsWith('+')){
-      const codes=Object.values(DIALS).sort((a,b)=>b.length-a.length);
+      const codes=[...new Set(Object.values(DIALS))].sort((a,b)=>b.length-a.length);
       const hit=codes.find(x=>p.startsWith(x));
-      if(hit)p=p.slice(hit.length);
-      else p=p.slice(1);
+      p=hit?p.slice(hit.length):p.slice(1);
     }
     return p.replace(/^0+/,'');
   };
@@ -59,48 +58,40 @@
   document.head.appendChild(style);
 
   function replaceExactPhone(el){
-    if(!el||el.dataset.q297PhoneDone==='1')return;
+    if(!el)return;
     const raw=(el.textContent||'').trim();
     if(/^\+\d[\d\s().-]{6,}$/.test(raw)){
-      el.textContent=localNumber(raw);
+      const next=localNumber(raw);
+      if(next&&next!==raw)el.textContent=next;
       el.classList.add('q297localPhone');
-      el.dataset.q297PhoneDone='1';
     }
   }
 
   function fixVisiblePhones(root=document){
-    const ids=['accountInfo','infoPhone','q293qrphone','q293fullphone'];
-    ids.forEach(id=>replaceExactPhone(D(id)));
-    root.querySelectorAll?.('.q26profile small,.q26preview,.q26phone').forEach(el=>{
-      const raw=(el.textContent||'').trim();
-      if(/^\+\d[\d\s().-]{6,}$/.test(raw)){
-        el.textContent=localNumber(raw);
-        el.classList.add('q297localPhone');
-      }
-    });
+    ['accountInfo','infoPhone','q293qrphone','q293fullphone'].forEach(id=>replaceExactPhone(D(id)));
+    root.querySelectorAll?.('.q26profile small,.q26preview,.q26phone').forEach(replaceExactPhone);
   }
 
   function fixOverview(){
     const headline=document.querySelector('#homeScreen .q26headline');
-    if(headline)headline.textContent='Chats';
-    const search=D('chatSearch');if(search)search.placeholder='Search chats';
+    if(headline&&headline.textContent!=='Chats')headline.textContent='Chats';
+    const search=D('chatSearch');if(search&&search.placeholder!=='Search chats')search.placeholder='Search chats';
     document.querySelectorAll('#homeScreen .q26section span:first-child').forEach(x=>{
       if(/Recent chats/i.test(x.textContent||''))x.textContent='Chats';
     });
     const empty=document.querySelector('#homeScreen .q26empty p');
-    if(empty&&/Tap \+/i.test(empty.textContent||''))empty.textContent='Tap + to start a new chat.';
+    if(empty&&/Tap \+/i.test(empty.textContent||'')&&empty.textContent!=='Tap + to start a new chat.')empty.textContent='Tap + to start a new chat.';
     fixVisiblePhones(document);
   }
 
   function patchNewChat(){
     const input=D('findPhone'),btn=D('findBtn');
     if(input){
-      input.placeholder='Phone number';
+      if(input.placeholder!=='Phone number')input.placeholder='Phone number';
       input.setAttribute('inputmode','tel');
-      input.removeAttribute('data-q297PhoneDone');
     }
     const desc=document.querySelector('#newChatSheet .q26newChatDesc');
-    if(desc)desc.textContent='Enter the phone number. No country prefix is needed.';
+    if(desc&&desc.textContent!=='Enter the phone number. No country prefix is needed.')desc.textContent='Enter the phone number. No country prefix is needed.';
     if(btn&&!btn.dataset.q297Patched){
       btn.dataset.q297Patched='1';
       const old=btn.onclick;
@@ -108,7 +99,9 @@
         if(!input)return old&&old.call(btn,e);
         const shown=input.value;
         input.value=fullNumber(shown);
-        try{return old&&old.call(btn,e)}finally{setTimeout(()=>{if(document.body.contains(input)&&input.value.startsWith('+'))input.value=shown;},140)}
+        let out;
+        try{out=old&&old.call(btn,e)}finally{setTimeout(()=>{if(document.body.contains(input)&&input.value.startsWith('+'))input.value=shown;},180)}
+        return out;
       };
     }
     if(input&&!input.dataset.q297Enter){
@@ -117,18 +110,25 @@
         if(e.key!=='Enter')return;
         const shown=input.value;
         input.value=fullNumber(shown);
-        setTimeout(()=>{if(document.body.contains(input)&&input.value.startsWith('+'))input.value=shown;},140);
+        setTimeout(()=>{if(document.body.contains(input)&&input.value.startsWith('+'))input.value=shown;},180);
       },true);
     }
   }
 
+  let scheduled=false;
+  const refresh=()=>{
+    if(scheduled)return;
+    scheduled=true;
+    requestAnimationFrame(()=>{scheduled=false;fixOverview();patchNewChat();});
+  };
   const observer=new MutationObserver(ms=>{
-    let need=false;
-    for(const m of ms){if(m.addedNodes.length||m.type==='characterData'){need=true;break}}
-    if(need)requestAnimationFrame(()=>{fixOverview();patchNewChat();});
+    if(ms.some(m=>m.addedNodes&&m.addedNodes.length))refresh();
   });
-  observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+  observer.observe(document.body,{subtree:true,childList:true});
 
   fixOverview();patchNewChat();
-  setTimeout(()=>{fixOverview();patchNewChat();document.querySelectorAll('.small').forEach(el=>{if(/Qevyno\s+2\./i.test(el.textContent||''))el.textContent='Qevyno 2.9.7 • Android 8+';});},180);
+  setTimeout(()=>{
+    fixOverview();patchNewChat();
+    document.querySelectorAll('.small').forEach(el=>{if(/Qevyno\s+2\./i.test(el.textContent||'')&&el.textContent!=='Qevyno 2.9.7 • Android 8+')el.textContent='Qevyno 2.9.7 • Android 8+';});
+  },180);
 })();
