@@ -1,6 +1,20 @@
 {
-  "versionCode": 25,
-  "versionName": "2.9.13",
+  "versionCode": 26,
+  "versionName": "2.9.14",
   "apkUrl": "https://sliqado.org/Qevyno/Qevyno.apk",
-  "notes": "Stable signing fix. Future Qevyno versions use the same signing key so Android updates can be installed without uninstalling first."
+  "notes": "All visible Qevyno interface text now follows the correct app/device language.",
+  "notes_de": "Alle sichtbaren Qevyno-Texte werden jetzt in der richtigen App-/Gerätesprache angezeigt.",
+  "notes_es": "Todo el texto visible de Qevyno ahora aparece en el idioma correcto de la aplicación o del dispositivo.",
+  "notes_fr": "Tous les textes visibles de Qevyno s’affichent désormais dans la bonne langue de l’application ou de l’appareil.",
+  "notes_it": "Tutti i testi visibili di Qevyno ora seguono la lingua corretta dell’app o del dispositivo.",
+  "notes_pt": "Todo o texto visível do Qevyno passa agora a seguir o idioma correto da aplicação ou do dispositivo.",
+  "notes_nl": "Alle zichtbare Qevyno-tekst volgt nu de juiste taal van de app of het apparaat.",
+  "notes_pl": "Cały widoczny tekst Qevyno jest teraz wyświetlany we właściwym języku aplikacji lub urządzenia.",
+  "notes_tr": "Qevyno’daki tüm görünür metinler artık uygulamanın veya cihazın doğru dilini kullanıyor.",
+  "notes_uk": "Увесь видимий текст Qevyno тепер відображається правильною мовою застосунку або пристрою.",
+  "notes_ru": "Весь видимый текст Qevyno теперь отображается на правильном языке приложения или устройства.",
+  "notes_ja": "Qevyno のすべての表示テキストが、アプリまたは端末の正しい言語で表示されるようになりました。",
+  "notes_ko": "Qevyno의 모든 표시 텍스트가 이제 앱 또는 기기의 올바른 언어를 따릅니다.",
+  "notes_zh": "Qevyno 中所有可见文字现在都会使用应用或设备的正确语言。",
+  "notes_ar": "أصبحت كل النصوص الظاهرة في Qevyno تستخدم الآن اللغة الصحيحة للتطبيق أو الجهاز."
 }
