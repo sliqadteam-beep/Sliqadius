@@ -37,11 +37,13 @@ public class MainActivity extends Activity {
     private static final int REQUEST_PROFILE_PICTURE = 5201;
     private WebView webView;
     private String pendingAddPhone = "";
+    private String pendingShareText = "";
 
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         pendingAddPhone = extractAddPhone(getIntent());
+        pendingShareText = extractSharedText(getIntent());
 
         getWindow().setStatusBarColor(Color.rgb(255, 255, 255));
         getWindow().setNavigationBarColor(Color.rgb(255, 255, 255));
@@ -97,12 +99,23 @@ public class MainActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+
         String phone = extractAddPhone(intent);
-        if (phone.isEmpty()) return;
-        pendingAddPhone = phone;
-        if (webView != null) {
-            String js = "window.qevynoConsumeNativeAdd&&window.qevynoConsumeNativeAdd(" + JSONObject.quote(phone) + ");";
-            webView.evaluateJavascript(js, null);
+        if (!phone.isEmpty()) {
+            pendingAddPhone = phone;
+            if (webView != null) {
+                String js = "window.qevynoConsumeNativeAdd&&window.qevynoConsumeNativeAdd(" + JSONObject.quote(phone) + ");";
+                webView.evaluateJavascript(js, null);
+            }
+        }
+
+        String shared = extractSharedText(intent);
+        if (!shared.isEmpty()) {
+            pendingShareText = shared;
+            if (webView != null) {
+                String js = "window.qevynoReceiveNativeShare&&window.qevynoReceiveNativeShare(" + JSONObject.quote(shared) + ");";
+                webView.evaluateJavascript(js, null);
+            }
         }
     }
 
@@ -136,7 +149,9 @@ public class MainActivity extends Activity {
                 int nh = Math.max(1, (int)Math.round(h * scale));
                 Bitmap resized = Bitmap.createScaledBitmap(bitmap, nw, nh, true);
                 if (resized != bitmap) bitmap.recycle();
-                bitmap = resized; w = nw; h = nh;
+                bitmap = resized;
+                w = nw;
+                h = nh;
             }
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -159,7 +174,25 @@ public class MainActivity extends Activity {
             if (phone == null) return "";
             phone = phone.trim();
             return phone.matches("^\\+[1-9]\\d{7,14}$") ? phone : "";
-        } catch (Exception ignored) { return ""; }
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
+
+    private String extractSharedText(Intent intent) {
+        try {
+            if (intent == null || !Intent.ACTION_SEND.equals(intent.getAction())) return "";
+            String type = intent.getType();
+            if (type != null && !type.startsWith("text/")) return "";
+            CharSequence raw = intent.getCharSequenceExtra(Intent.EXTRA_TEXT);
+            if (raw == null) return "";
+            String text = raw.toString().trim();
+            if (!text.matches("(?s).*https?://.*")) return "";
+            if (text.length() > 10000) text = text.substring(0, 10000);
+            return text;
+        } catch (Exception ignored) {
+            return "";
+        }
     }
 
     private void appendAsset(StringBuilder bundle, String name) {
@@ -168,7 +201,10 @@ public class MainActivity extends Activity {
     }
 
     private void runScript(WebView view, String script, Runnable done) {
-        if (script == null || script.isEmpty()) { done.run(); return; }
+        if (script == null || script.isEmpty()) {
+            done.run();
+            return;
+        }
         view.evaluateJavascript(script, ignored -> done.run());
     }
 
@@ -181,14 +217,18 @@ public class MainActivity extends Activity {
         return null;
     }
 
-    private String qrPayloadForPhone(String phone) { return "https://sliqado.org/Qevyno/add/?phone=" + Uri.encode(phone); }
+    private String qrPayloadForPhone(String phone) {
+        return "https://sliqado.org/Qevyno/add/?phone=" + Uri.encode(phone);
+    }
 
     private byte[] generateQrPng(String text) throws Exception {
         final int size = 520;
         BitMatrix matrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, size, size);
         Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         int dark = Color.rgb(23, 33, 43), light = Color.WHITE;
-        for (int y = 0; y < size; y++) for (int x = 0; x < size; x++) bitmap.setPixel(x, y, matrix.get(x, y) ? dark : light);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) bitmap.setPixel(x, y, matrix.get(x, y) ? dark : light);
+        }
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
         bitmap.recycle();
@@ -209,12 +249,18 @@ public class MainActivity extends Activity {
         return dir;
     }
 
-    private File qrFileForPhone(String phone) throws Exception { return new File(privateDir("qevyno_qr"), "qr_" + phoneHash(phone) + ".png"); }
-    private File chatFileForPhone(String phone) throws Exception { return new File(privateDir("qevyno_chats"), "chat_" + phoneHash(phone) + ".json"); }
+    private File qrFileForPhone(String phone) throws Exception {
+        return new File(privateDir("qevyno_qr"), "qr_" + phoneHash(phone) + ".png");
+    }
+
+    private File chatFileForPhone(String phone) throws Exception {
+        return new File(privateDir("qevyno_chats"), "chat_" + phoneHash(phone) + ".json");
+    }
 
     private byte[] readFile(File file) throws Exception {
         try (FileInputStream in = new FileInputStream(file); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[8192]; int n;
+            byte[] buffer = new byte[8192];
+            int n;
             while ((n = in.read(buffer)) > 0) out.write(buffer, 0, n);
             return out.toByteArray();
         }
@@ -225,14 +271,21 @@ public class MainActivity extends Activity {
         phone = phone.trim();
         if (!phone.matches("^\\+[1-9]\\d{7,14}$")) return "";
         try {
-            File file = qrFileForPhone(phone); byte[] png;
-            if (file.isFile() && file.length() > 100) png = readFile(file);
-            else {
+            File file = qrFileForPhone(phone);
+            byte[] png;
+            if (file.isFile() && file.length() > 100) {
+                png = readFile(file);
+            } else {
                 png = generateQrPng(qrPayloadForPhone(phone));
-                try (FileOutputStream out = new FileOutputStream(file, false)) { out.write(png); out.flush(); }
+                try (FileOutputStream out = new FileOutputStream(file, false)) {
+                    out.write(png);
+                    out.flush();
+                }
             }
             return "data:image/png;base64," + Base64.encodeToString(png, Base64.NO_WRAP);
-        } catch (Exception ignored) { return ""; }
+        } catch (Exception ignored) {
+            return "";
+        }
     }
 
     private class DeviceInfoBridge {
@@ -252,13 +305,20 @@ public class MainActivity extends Activity {
             return "US";
         }
 
-        @JavascriptInterface public String makeQr(String text) {
+        @JavascriptInterface
+        public String makeQr(String text) {
             if (text == null || text.isEmpty()) return "";
-            try { return "data:image/png;base64," + Base64.encodeToString(generateQrPng(text), Base64.NO_WRAP); }
-            catch (Exception ignored) { return ""; }
+            try {
+                return "data:image/png;base64," + Base64.encodeToString(generateQrPng(text), Base64.NO_WRAP);
+            } catch (Exception ignored) {
+                return "";
+            }
         }
 
-        @JavascriptInterface public String getOrCreateQr(String phone) { return getOrCreateStoredQr(phone); }
+        @JavascriptInterface
+        public String getOrCreateQr(String phone) {
+            return getOrCreateStoredQr(phone);
+        }
 
         @JavascriptInterface
         public String loadChat(String phone) {
@@ -269,7 +329,9 @@ public class MainActivity extends Activity {
                 byte[] data = readFile(f);
                 if (data.length > 16 * 1024 * 1024) return "[]";
                 return new String(data, StandardCharsets.UTF_8);
-            } catch (Exception ignored) { return "[]"; }
+            } catch (Exception ignored) {
+                return "[]";
+            }
         }
 
         @JavascriptInterface
@@ -278,14 +340,22 @@ public class MainActivity extends Activity {
                 if (phone == null || !phone.matches("^\\+[1-9]\\d{7,14}$") || json == null) return false;
                 byte[] data = json.getBytes(StandardCharsets.UTF_8);
                 if (data.length > 16 * 1024 * 1024) return false;
-                File f = chatFileForPhone(phone), tmp = new File(f.getAbsolutePath() + ".tmp");
-                try (FileOutputStream out = new FileOutputStream(tmp, false)) { out.write(data); out.flush(); out.getFD().sync(); }
+                File f = chatFileForPhone(phone);
+                File tmp = new File(f.getAbsolutePath() + ".tmp");
+                try (FileOutputStream out = new FileOutputStream(tmp, false)) {
+                    out.write(data);
+                    out.flush();
+                    out.getFD().sync();
+                }
                 if (f.exists() && !f.delete()) return false;
                 return tmp.renameTo(f);
-            } catch (Exception ignored) { return false; }
+            } catch (Exception ignored) {
+                return false;
+            }
         }
 
-        @JavascriptInterface public void pickProfilePicture() {
+        @JavascriptInterface
+        public void pickProfilePicture() {
             runOnUiThread(() -> {
                 Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                 i.setType("image/*");
@@ -294,13 +364,40 @@ public class MainActivity extends Activity {
             });
         }
 
-        @JavascriptInterface public String consumePendingAddPhone() {
-            String phone = pendingAddPhone; pendingAddPhone = ""; return phone == null ? "" : phone;
+        @JavascriptInterface
+        public String consumePendingAddPhone() {
+            String phone = pendingAddPhone;
+            pendingAddPhone = "";
+            return phone == null ? "" : phone;
+        }
+
+        @JavascriptInterface
+        public String consumePendingShareText() {
+            String text = pendingShareText;
+            pendingShareText = "";
+            return text == null ? "" : text;
+        }
+
+        @JavascriptInterface
+        public void openExternal(String url) {
+            if (url == null) return;
+            try {
+                Uri uri = Uri.parse(url.trim());
+                String scheme = uri.getScheme();
+                if (scheme == null || !(scheme.equalsIgnoreCase("https") || scheme.equalsIgnoreCase("http"))) return;
+                runOnUiThread(() -> {
+                    try {
+                        Intent view = new Intent(Intent.ACTION_VIEW, uri);
+                        startActivity(view);
+                    } catch (Exception ignored) {}
+                });
+            } catch (Exception ignored) {}
         }
     }
 
     @Override
     public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) webView.goBack(); else super.onBackPressed();
+        if (webView != null && webView.canGoBack()) webView.goBack();
+        else super.onBackPressed();
     }
 }
