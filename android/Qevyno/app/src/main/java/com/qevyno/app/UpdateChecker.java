@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class UpdateChecker {
@@ -19,6 +20,40 @@ public final class UpdateChecker {
     private static final AtomicBoolean RUNNING = new AtomicBoolean(false);
 
     private UpdateChecker() {}
+
+    private static String language() {
+        String lang = Locale.getDefault().getLanguage();
+        if (lang == null) return "en";
+        lang = lang.toLowerCase(Locale.US);
+        if (lang.equals("ua")) lang = "uk";
+        switch (lang) {
+            case "de": case "es": case "fr": case "it": case "pt": case "nl":
+            case "pl": case "tr": case "uk": case "ru": case "ja": case "ko":
+            case "zh": case "ar": return lang;
+            default: return "en";
+        }
+    }
+
+    // title, later, download, generic update, version update
+    private static String[] ui(String lang) {
+        switch (lang) {
+            case "de": return new String[]{"Update verfügbar","Später","Update herunterladen","Ein neues Qevyno-Update ist verfügbar.","Qevyno %s ist verfügbar."};
+            case "es": return new String[]{"Actualización disponible","Más tarde","Descargar actualización","Hay una nueva actualización de Qevyno disponible.","Qevyno %s está disponible."};
+            case "fr": return new String[]{"Mise à jour disponible","Plus tard","Télécharger la mise à jour","Une nouvelle mise à jour de Qevyno est disponible.","Qevyno %s est disponible."};
+            case "it": return new String[]{"Aggiornamento disponibile","Più tardi","Scarica aggiornamento","È disponibile un nuovo aggiornamento di Qevyno.","Qevyno %s è disponibile."};
+            case "pt": return new String[]{"Atualização disponível","Mais tarde","Transferir atualização","Está disponível uma nova atualização do Qevyno.","Qevyno %s está disponível."};
+            case "nl": return new String[]{"Update beschikbaar","Later","Update downloaden","Er is een nieuwe Qevyno-update beschikbaar.","Qevyno %s is beschikbaar."};
+            case "pl": return new String[]{"Dostępna aktualizacja","Później","Pobierz aktualizację","Dostępna jest nowa aktualizacja Qevyno.","Qevyno %s jest dostępne."};
+            case "tr": return new String[]{"Güncelleme mevcut","Daha sonra","Güncellemeyi indir","Yeni bir Qevyno güncellemesi mevcut.","Qevyno %s mevcut."};
+            case "uk": return new String[]{"Доступне оновлення","Пізніше","Завантажити оновлення","Доступне нове оновлення Qevyno.","Доступна Qevyno %s."};
+            case "ru": return new String[]{"Доступно обновление","Позже","Скачать обновление","Доступно новое обновление Qevyno.","Доступна Qevyno %s."};
+            case "ja": return new String[]{"アップデートがあります","後で","アップデートをダウンロード","新しい Qevyno アップデートがあります。","Qevyno %s が利用できます。"};
+            case "ko": return new String[]{"업데이트 사용 가능","나중에","업데이트 다운로드","새 Qevyno 업데이트를 사용할 수 있습니다.","Qevyno %s을 사용할 수 있습니다."};
+            case "zh": return new String[]{"有可用更新","稍后","下载更新","有新的 Qevyno 更新可用。","Qevyno %s 已可用。"};
+            case "ar": return new String[]{"يتوفر تحديث","لاحقًا","تنزيل التحديث","يتوفر تحديث جديد لـ Qevyno.","يتوفر Qevyno %s."};
+            default: return new String[]{"Update available","Later","Download Update","A new Qevyno update is available.","Qevyno %s is available."};
+        }
+    }
 
     public static void check(Activity activity) {
         if (activity == null || activity.isFinishing()) return;
@@ -51,7 +86,6 @@ public final class UpdateChecker {
                 long remoteCode = metadata.optLong("versionCode", 0);
                 String remoteName = metadata.optString("versionName", "").trim();
                 String apkUrl = metadata.optString("apkUrl", "").trim();
-                String notes = metadata.optString("notes", "").trim();
 
                 android.content.pm.PackageInfo packageInfo =
                     activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0);
@@ -62,18 +96,27 @@ public final class UpdateChecker {
                 if (remoteCode <= currentCode) return;
                 if (!apkUrl.startsWith("https://sliqado.org/")) return;
 
+                String lang = language();
+                String[] text = ui(lang);
                 String versionLine = remoteName.isEmpty()
-                    ? "A new Qevyno update is available."
-                    : "Qevyno " + remoteName + " is available.";
-                String message = notes.isEmpty() ? versionLine : versionLine + "\n\n" + notes;
+                    ? text[3]
+                    : String.format(Locale.getDefault(), text[4], remoteName);
+
+                String localizedNotes = metadata.optString("notes_" + lang, "").trim();
+                if (localizedNotes.isEmpty() && lang.equals("en")) {
+                    localizedNotes = metadata.optString("notes", "").trim();
+                }
+                String message = localizedNotes.isEmpty()
+                    ? versionLine
+                    : versionLine + "\n\n" + localizedNotes;
 
                 activity.runOnUiThread(() -> {
                     if (activity.isFinishing() || activity.isDestroyed()) return;
                     new android.app.AlertDialog.Builder(activity)
-                        .setTitle("Update available")
+                        .setTitle(text[0])
                         .setMessage(message)
-                        .setNegativeButton("Later", null)
-                        .setPositiveButton("Download Update", (dialog, which) -> {
+                        .setNegativeButton(text[1], null)
+                        .setPositiveButton(text[2], (dialog, which) -> {
                             try {
                                 Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(apkUrl));
                                 activity.startActivity(browser);
