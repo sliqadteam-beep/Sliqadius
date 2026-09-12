@@ -11,6 +11,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 public class MainActivity extends Activity {
@@ -39,8 +41,22 @@ public class MainActivity extends Activity {
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
         webView.addJavascriptInterface(new DeviceInfoBridge(), "QevynoDevice");
-        webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                try (InputStream in = getAssets().open("auth23.js")) {
+                    byte[] data = new byte[in.available()];
+                    int read = in.read(data);
+                    if (read > 0) {
+                        String js = new String(data, 0, read, StandardCharsets.UTF_8);
+                        view.evaluateJavascript(js, null);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        });
 
         setContentView(webView);
         webView.loadUrl("file:///android_asset/index.html");
