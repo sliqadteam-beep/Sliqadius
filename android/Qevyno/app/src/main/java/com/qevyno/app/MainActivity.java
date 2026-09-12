@@ -83,6 +83,7 @@ public class MainActivity extends Activity {
                 appendAsset(bundle, "features297.js");
                 appendAsset(bundle, "features298.js");
                 appendAsset(bundle, "features299.js");
+                appendAsset(bundle, "features300.js");
                 runScript(view, bundle.toString(), () -> view.setVisibility(View.VISIBLE));
             }
         });
