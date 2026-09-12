@@ -24,11 +24,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
 
-        getWindow().setStatusBarColor(Color.rgb(10, 13, 18));
-        getWindow().setNavigationBarColor(Color.rgb(10, 13, 18));
+        getWindow().setStatusBarColor(Color.rgb(7, 16, 12));
+        getWindow().setNavigationBarColor(Color.rgb(7, 16, 12));
 
         webView = new WebView(this);
-        webView.setBackgroundColor(Color.rgb(10, 13, 18));
+        webView.setBackgroundColor(Color.rgb(7, 16, 12));
         webView.setVisibility(View.INVISIBLE);
 
         WebSettings s = webView.getSettings();
@@ -48,22 +48,39 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                try (InputStream in = getAssets().open("auth23.js")) {
-                    byte[] data = new byte[in.available()];
-                    int read = in.read(data);
-                    if (read > 0) {
-                        String js = new String(data, 0, read, StandardCharsets.UTF_8);
-                        view.evaluateJavascript(js, value -> view.setVisibility(View.VISIBLE));
-                        return;
-                    }
-                } catch (Exception ignored) {
+                String auth = readAsset("auth23.js");
+                String ui = readAsset("ui26.js");
+
+                if (auth != null) {
+                    view.evaluateJavascript(auth, ignored -> {
+                        if (ui != null) {
+                            view.evaluateJavascript(ui, value -> view.setVisibility(View.VISIBLE));
+                        } else {
+                            view.setVisibility(View.VISIBLE);
+                        }
+                    });
+                } else if (ui != null) {
+                    view.evaluateJavascript(ui, value -> view.setVisibility(View.VISIBLE));
+                } else {
+                    view.setVisibility(View.VISIBLE);
                 }
-                view.setVisibility(View.VISIBLE);
             }
         });
 
         setContentView(webView);
         webView.loadUrl("file:///android_asset/index.html");
+    }
+
+    private String readAsset(String name) {
+        try (InputStream in = getAssets().open(name)) {
+            byte[] data = new byte[in.available()];
+            int read = in.read(data);
+            if (read > 0) {
+                return new String(data, 0, read, StandardCharsets.UTF_8);
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
     private class DeviceInfoBridge {
