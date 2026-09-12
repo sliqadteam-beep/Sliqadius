@@ -42,7 +42,7 @@ jobs:
             cp "$RUNNER_TEMP/Qevyno.apk" Qevyno/Qevyno.apk
             git add Qevyno/Qevyno.apk
             if git diff --cached --quiet; then exit 0; fi
-            git commit -m "Restore correct Qevyno Android 2.9.10"
+            git commit -m "Build Qevyno Android 2.9.11"
             if git push origin main; then exit 0; fi
             sleep 3
           done
