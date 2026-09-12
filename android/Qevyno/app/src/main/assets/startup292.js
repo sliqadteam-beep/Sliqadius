@@ -1,16 +1,27 @@
 (()=>{
   // Run the final stability/queue layer after the concatenated UI bundle has
-  // completed. The current JavaScript call stack finishes before this local
-  // asset script can execute, so it safely overrides the older send/UI logic.
+  // completed, then load the chat-polish layer after it. This keeps the send
+  // queue authoritative while allowing the newest visual fixes to run last.
+  function load304(){
+    try{
+      if(document.getElementById('qevyno304loader'))return;
+      const polish=document.createElement('script');
+      polish.id='qevyno304loader';
+      polish.src='file:///android_asset/features304.js';
+      polish.async=false;
+      document.head.appendChild(polish);
+    }catch(e){}
+  }
   try{
     if(!document.getElementById('qevyno303loader')){
       const finalFix=document.createElement('script');
       finalFix.id='qevyno303loader';
       finalFix.src='file:///android_asset/features303.js';
       finalFix.async=false;
+      finalFix.onload=load304;
       document.head.appendChild(finalFix);
-    }
-  }catch(e){}
+    }else load304();
+  }catch(e){load304()}
 
   // Fast startup for users with an existing session.
   const hasSavedSession=!!localStorage.getItem('qevyno_token');
