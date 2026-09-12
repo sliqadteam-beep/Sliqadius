@@ -50,25 +50,26 @@ public class MainActivity extends Activity {
                 super.onPageFinished(view, url);
                 String auth = readAsset("auth23.js");
                 String ui = readAsset("ui26.js");
+                String loading = readAsset("ui27.js");
 
-                if (auth != null) {
-                    view.evaluateJavascript(auth, ignored -> {
-                        if (ui != null) {
-                            view.evaluateJavascript(ui, value -> view.setVisibility(View.VISIBLE));
-                        } else {
-                            view.setVisibility(View.VISIBLE);
-                        }
-                    });
-                } else if (ui != null) {
-                    view.evaluateJavascript(ui, value -> view.setVisibility(View.VISIBLE));
-                } else {
-                    view.setVisibility(View.VISIBLE);
-                }
+                runScript(view, auth, () ->
+                    runScript(view, ui, () ->
+                        runScript(view, loading, () -> view.setVisibility(View.VISIBLE))
+                    )
+                );
             }
         });
 
         setContentView(webView);
         webView.loadUrl("file:///android_asset/index.html");
+    }
+
+    private void runScript(WebView view, String script, Runnable done) {
+        if (script == null || script.isEmpty()) {
+            done.run();
+            return;
+        }
+        view.evaluateJavascript(script, ignored -> done.run());
     }
 
     private String readAsset(String name) {
