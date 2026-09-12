@@ -3,82 +3,81 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07110d">
-<title>Qevyno — Private messaging, simply.</title>
-<meta name="description" content="Download Qevyno for Android. Private 1-to-1 messaging through the official Qevyno server.">
+<meta name="theme-color" content="#ffffff">
+<title>Qevyno — Simple private messaging</title>
+<meta name="description" content="Download Qevyno for Android. A simple one-to-one messenger with exact-number lookup.">
 <style>
-:root{--bg:#07110d;--bg2:#0b1712;--card:#0f1d17;--card2:#13241c;--line:#203d30;--text:#f5fff9;--muted:#91a99d;--green:#39e58c;--green2:#24bf72;--greenSoft:#123b28;--shadow:0 30px 100px rgba(0,0,0,.35)}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 80% 0%,rgba(57,229,140,.12),transparent 31%),radial-gradient(circle at 0% 30%,rgba(57,229,140,.07),transparent 26%),linear-gradient(180deg,#07110d 0%,#08140f 55%,#050b08 100%);min-height:100vh}.noise{position:fixed;inset:0;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E")}a{color:inherit}.wrap{width:min(1180px,calc(100% - 36px));margin:auto}.nav{height:78px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:28px;font-weight:950;letter-spacing:-1.2px}.dot{color:var(--green)}.navRight{display:flex;align-items:center;gap:10px}.navTag{font-size:13px;color:var(--muted);border:1px solid var(--line);padding:9px 12px;border-radius:999px;background:rgba(255,255,255,.02)}.navBtn,.primary,.secondary{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:16px;font-weight:900;transition:.18s ease}.navBtn{height:42px;padding:0 16px;background:var(--green);color:#04110a}.navBtn:hover,.primary:hover{transform:translateY(-1px);background:#52efa0}.hero{min-height:650px;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:62px;padding:52px 0 76px}.eyebrow{display:inline-flex;align-items:center;gap:9px;background:var(--greenSoft);border:1px solid #21563c;color:#9affc7;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:850;letter-spacing:.02em}.pulse{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgba(57,229,140,.12)}h1{font-size:clamp(48px,7.2vw,88px);line-height:.94;letter-spacing:-4.8px;margin:22px 0 22px;max-width:720px}.heroText{font-size:18px;line-height:1.65;color:var(--muted);max-width:660px}.buttons{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.primary{min-height:58px;padding:0 22px;background:var(--green);color:#04110a;box-shadow:0 12px 40px rgba(57,229,140,.12)}.secondary{min-height:58px;padding:0 20px;border:1px solid var(--line);background:rgba(255,255,255,.025);color:var(--text)}.secondary:hover{background:rgba(255,255,255,.055)}.meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.meta span{font-size:12px;color:#b8c9c0;background:#0d1813;border:1px solid var(--line);padding:8px 10px;border-radius:11px}.phoneWrap{display:flex;justify-content:center;position:relative}.glow{position:absolute;width:390px;height:390px;border-radius:50%;background:rgba(57,229,140,.12);filter:blur(70px);top:100px}.phone{position:relative;width:min(360px,88vw);height:710px;border-radius:46px;padding:12px;background:linear-gradient(145deg,#26352e,#0a0f0d 48%,#203129);box-shadow:0 35px 100px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.08);transform:rotate(3deg)}.screen{height:100%;border-radius:36px;background:linear-gradient(180deg,#0b1511,#08100d);overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.045)}.notch{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:92px;height:25px;border-radius:20px;background:#020504;z-index:2}.appTop{padding:52px 20px 17px;border-bottom:1px solid rgba(255,255,255,.055);display:flex;align-items:center;gap:12px}.back{width:38px;height:38px;border-radius:13px;background:#14241c;display:grid;place-items:center;font-size:23px}.avatar{width:42px;height:42px;border-radius:50%;background:var(--green);color:#06110b;display:grid;place-items:center;font-weight:950}.chatInfo b{display:block;font-size:15px}.chatInfo span{font-size:11px;color:var(--green)}.messages{padding:22px 14px;display:flex;flex-direction:column;gap:12px}.bubble{max-width:79%;padding:11px 13px 8px;border-radius:18px 18px 18px 6px;background:#17271f;font-size:14px;line-height:1.4}.mine{align-self:flex-end;background:#19633e;border-radius:18px 18px 6px 18px}.time{display:block;text-align:right;color:#b3c2ba;font-size:9px;margin-top:4px}.composer{position:absolute;left:12px;right:12px;bottom:14px;background:#101d17;border:1px solid #213b2f;border-radius:18px;padding:9px 10px;display:flex;align-items:center;gap:8px}.composerText{flex:1;color:#6f867a;font-size:13px}.send{width:38px;height:38px;border-radius:13px;background:var(--green);color:#06110b;display:grid;place-items:center;font-weight:950}.section{padding:96px 0}.sectionHead{max-width:760px;margin-bottom:34px}.kicker{color:var(--green);font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.section h2{font-size:clamp(34px,5vw,58px);line-height:1;letter-spacing:-2.8px;margin:10px 0 14px}.sectionHead p{color:var(--muted);font-size:17px;line-height:1.6;margin:0}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.feature{background:linear-gradient(180deg,#0f1d17,#0b1712);border:1px solid var(--line);border-radius:24px;padding:24px;min-height:220px}.icon{width:48px;height:48px;border-radius:15px;background:var(--greenSoft);display:grid;place-items:center;font-size:23px;margin-bottom:22px}.feature h3{font-size:20px;margin:0 0 8px}.feature p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.step{position:relative;border-top:1px solid var(--line);padding:24px 6px 0}.stepNo{font-size:12px;color:var(--green);font-weight:900;margin-bottom:10px}.step h3{margin:0 0 8px;font-size:21px}.step p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}.serverCard{display:grid;grid-template-columns:1fr auto;align-items:center;gap:30px;background:linear-gradient(135deg,#10261b,#0d1813);border:1px solid #28523b;border-radius:30px;padding:30px}.serverTitle{font-size:28px;font-weight:950;letter-spacing:-1px}.serverUrl{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#aaffcf;margin-top:7px;font-size:14px}.serverSub{color:var(--muted);margin-top:8px;font-size:13px;line-height:1.5}.status{display:flex;align-items:center;gap:9px;padding:12px 15px;border-radius:999px;background:#123b28;color:#aaffce;font-weight:850;font-size:13px;white-space:nowrap}.warning{margin-top:16px;padding:18px 20px;border-radius:18px;background:#17170f;border:1px solid #3b3a20;color:#d4d1a1;font-size:13px;line-height:1.55}.cta{padding:90px 0 110px;text-align:center}.ctaBox{background:linear-gradient(145deg,#133523,#0b1712 70%);border:1px solid #2b5a40;border-radius:34px;padding:55px 24px;box-shadow:var(--shadow)}.ctaBox h2{font-size:clamp(38px,6vw,68px);letter-spacing:-3px;line-height:1;margin:0 0 15px}.ctaBox p{color:var(--muted);font-size:17px;margin:0 auto;max-width:680px;line-height:1.6}.footer{border-top:1px solid rgba(255,255,255,.06);padding:24px 0 40px;color:#6f8378;font-size:12px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}@media(max-width:900px){.hero{grid-template-columns:1fr;padding-top:38px}.phoneWrap{order:2}.grid3,.steps{grid-template-columns:1fr}.serverCard{grid-template-columns:1fr}.status{width:max-content}.hero{gap:34px}.phone{height:660px}}@media(max-width:600px){.wrap{width:min(100% - 24px,1180px)}.nav{height:68px}.navTag{display:none}.navBtn{height:40px;padding:0 13px}.hero{padding:36px 0 58px}.hero h1{letter-spacing:-3px}.heroText{font-size:16px}.buttons{display:grid}.primary,.secondary{width:100%}.phone{transform:none;width:330px;height:640px}.section{padding:72px 0}.feature{min-height:unset}.serverCard{padding:23px}.cta{padding:70px 0 85px}.ctaBox{padding:42px 18px}.footer{padding-bottom:28px}}
+:root{--bg:#f7fafc;--white:#ffffff;--ink:#17212b;--muted:#6f7f88;--line:#dce5e9;--soft:#edf7f7;--accent:#20c6c9;--accent2:#12aeb2;--shadow:0 24px 70px rgba(23,33,43,.10)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.wrap{width:min(1120px,calc(100% - 34px));margin:auto}a{color:inherit}.nav{height:74px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:27px;font-weight:800;letter-spacing:-1px}.brand span{color:var(--accent)}.navActions{display:flex;align-items:center;gap:10px}.smallTag{font-size:12px;color:var(--muted)}.download,.ghost{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-weight:700;border-radius:14px;transition:.15s ease}.download{height:44px;padding:0 18px;background:var(--accent);color:white}.download:hover{background:var(--accent2);transform:translateY(-1px)}.ghost{height:44px;padding:0 17px;background:var(--white);border:1px solid var(--line);color:var(--ink)}.hero{display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:70px;padding:72px 0 88px}.label{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:750;color:#137c7f;background:#e9f8f8;border:1px solid #c9eeee;padding:8px 11px;border-radius:999px}.labelDot{width:7px;height:7px;border-radius:50%;background:var(--accent)}h1{font-size:clamp(48px,7vw,82px);line-height:.98;letter-spacing:-4.4px;margin:20px 0 20px;font-weight:800;max-width:680px}.lead{font-size:18px;line-height:1.65;color:var(--muted);max-width:620px;margin:0}.heroButtons{display:flex;gap:11px;flex-wrap:wrap;margin-top:28px}.heroButtons .download,.heroButtons .ghost{height:56px;padding:0 22px}.facts{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;color:#75868e;font-size:12px}.phoneArea{display:flex;justify-content:center}.phone{width:min(350px,88vw);height:690px;border-radius:42px;background:#18242c;padding:10px;box-shadow:var(--shadow)}.phoneScreen{height:100%;border-radius:33px;background:#f2f6f7;overflow:hidden;position:relative}.phoneTop{height:78px;background:white;border-bottom:1px solid #e2e9ec;display:flex;align-items:flex-end;padding:0 14px 12px;gap:10px}.back{font-size:25px;color:#657780;line-height:36px;width:28px}.avatar{width:40px;height:40px;border-radius:50%;background:#d9eeee;color:#148387;display:grid;place-items:center;font-weight:800}.person{flex:1}.person b{display:block;font-size:14px}.person span{font-size:10px;color:var(--accent2)}.menu{font-size:22px;color:#6c7f87}.chat{padding:16px 11px 80px;display:flex;flex-direction:column;gap:8px}.msg{max-width:78%;background:white;border:1px solid #dfe7e9;border-radius:11px;padding:9px 10px 6px;font-size:13px;line-height:1.4}.msg.mine{align-self:flex-end;background:var(--accent);border-color:var(--accent);color:white}.time{display:block;text-align:right;font-size:8.5px;color:#83939a;margin-top:4px}.mine .time{color:rgba(255,255,255,.78)}.compose{position:absolute;left:9px;right:9px;bottom:10px;display:flex;gap:7px;align-items:center}.inputFake{height:48px;flex:1;background:white;border:1px solid #dce5e9;border-radius:24px;padding:0 15px;display:flex;align-items:center;color:#96a4aa;font-size:12px}.send{width:48px;height:48px;border-radius:50%;background:var(--accent);color:white;display:grid;place-items:center;font-size:18px;font-weight:800}.section{padding:88px 0}.sectionHead{max-width:680px;margin-bottom:34px}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2)}h2{font-size:clamp(34px,5vw,56px);line-height:1.03;letter-spacing:-2.6px;margin:10px 0 12px}.sectionHead p{margin:0;color:var(--muted);font-size:16px;line-height:1.65}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.feature{background:white;border:1px solid var(--line);border-radius:20px;padding:24px;min-height:190px}.featureNo{font-size:12px;font-weight:800;color:var(--accent2);margin-bottom:34px}.feature h3{margin:0 0 8px;font-size:20px}.feature p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}.how{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:start}.steps{background:white;border:1px solid var(--line);border-radius:22px;overflow:hidden}.step{padding:20px 22px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:40px 1fr;gap:10px}.step:last-child{border-bottom:0}.stepNo{width:30px;height:30px;border-radius:50%;background:var(--soft);color:var(--accent2);display:grid;place-items:center;font-size:12px;font-weight:800}.step b{display:block;margin-bottom:4px}.step p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}.note{background:#eef8f8;border:1px solid #cfeeee;border-radius:18px;padding:18px 20px;color:#48656a;font-size:13px;line-height:1.6;margin-top:16px}.cta{padding:82px 0 102px}.ctaBox{background:white;border:1px solid var(--line);border-radius:28px;padding:48px 28px;text-align:center;box-shadow:0 16px 50px rgba(23,33,43,.06)}.ctaBox h2{margin-top:0}.ctaBox p{color:var(--muted);max-width:620px;margin:0 auto 24px;line-height:1.6}.ctaBox .download{height:56px;padding:0 24px}.footer{border-top:1px solid var(--line);padding:24px 0 36px;color:#83939a;font-size:12px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
+@media(max-width:880px){.hero{grid-template-columns:1fr;gap:44px;padding-top:48px}.phoneArea{order:2}.features{grid-template-columns:1fr}.how{grid-template-columns:1fr}.section{padding:68px 0}}
+@media(max-width:580px){.wrap{width:min(100% - 24px,1120px)}.nav{height:66px}.smallTag{display:none}.download{padding:0 14px}.hero{padding:38px 0 58px}.hero h1{letter-spacing:-3px}.lead{font-size:16px}.heroButtons{display:grid}.heroButtons a{width:100%}.facts{gap:9px 14px}.phone{width:326px;height:630px}.section{padding:60px 0}.feature{min-height:unset}.cta{padding:60px 0 78px}.ctaBox{padding:38px 18px}.footer{padding-bottom:28px}}
 </style>
 </head>
 <body>
-<div class="noise"></div>
 <header class="wrap nav">
-  <div class="brand">Qevyno<span class="dot">.</span></div>
-  <div class="navRight">
-    <div class="navTag">Android 8+</div>
-    <a class="navBtn" href="./Qevyno.apk" download>Download APK</a>
+  <div class="brand">Qevyno<span>.</span></div>
+  <div class="navActions">
+    <div class="smallTag">Android 8+</div>
+    <a class="download" href="./Qevyno.apk" download>Download</a>
   </div>
 </header>
 <main>
   <section class="wrap hero">
     <div>
-      <div class="eyebrow"><span class="pulse"></span> Qevyno 2.3 is available</div>
-      <h1>Messaging that feels simple again.</h1>
-      <p class="heroText">Enter your phone number and Qevyno automatically detects whether you already have an account. New users choose a name and password; existing users go straight to their password.</p>
-      <div class="buttons">
-        <a class="primary" href="./Qevyno.apk" download>Download Qevyno for Android</a>
-        <a class="secondary" href="#how">See how it works</a>
+      <div class="label"><span class="labelDot"></span> Qevyno 2.9</div>
+      <h1>Messaging, kept simple.</h1>
+      <p class="lead">Qevyno is a clean one-to-one messenger. Enter a phone number, sign in or create an account, and start chatting without a public user directory.</p>
+      <div class="heroButtons">
+        <a class="download" href="./Qevyno.apk" download>Download Qevyno</a>
+        <a class="ghost" href="#how">How it works</a>
       </div>
-      <div class="meta"><span>Version 2.3.0</span><span>Android 8.0+</span><span>HTTPS transport</span><span>No public number list</span></div>
+      <div class="facts"><span>Version 2.9.0</span><span>Android 8.0+</span><span>HTTPS transport</span><span>Exact-number lookup</span></div>
     </div>
-    <div class="phoneWrap">
-      <div class="glow"></div>
+    <div class="phoneArea">
       <div class="phone">
-        <div class="screen">
-          <div class="notch"></div>
-          <div class="appTop"><div class="back">‹</div><div class="avatar">A</div><div class="chatInfo"><b>Alex</b><span>● Online</span></div></div>
-          <div class="messages">
-            <div class="bubble">Hey! Did Qevyno work on your phone?<span class="time">12:41</span></div>
-            <div class="bubble mine">Yep. Installed it from sliqado.org and it connected instantly. ✓✓<span class="time">12:42</span></div>
-            <div class="bubble">Nice. Send me another one 😄<span class="time">12:42</span></div>
-            <div class="bubble mine">Qevyno is online. <span class="time">12:43 ✓✓</span></div>
+        <div class="phoneScreen">
+          <div class="phoneTop"><div class="back">‹</div><div class="avatar">A</div><div class="person"><b>Alex</b><span>Online</span></div><div class="menu">⋮</div></div>
+          <div class="chat">
+            <div class="msg">Are you using Qevyno now?<span class="time">14:20</span></div>
+            <div class="msg mine">Yes. The new design is much cleaner.<span class="time">14:21</span></div>
+            <div class="msg">Looks good. Send me another message.<span class="time">14:21</span></div>
+            <div class="msg mine">Done.<span class="time">14:22</span></div>
           </div>
-          <div class="composer"><div class="composerText">Message</div><div class="send">➤</div></div>
+          <div class="compose"><div class="inputFake">Message</div><div class="send">›</div></div>
         </div>
       </div>
     </div>
   </section>
 
   <section class="wrap section">
-    <div class="sectionHead"><div class="kicker">Built around simplicity</div><h2>Just the things a messenger actually needs.</h2><p>No public phone-number directory and no server setup inside the app. Qevyno points to the official HTTPS endpoint automatically.</p></div>
-    <div class="grid3">
-      <article class="feature"><div class="icon">⌕</div><h3>Exact-number lookup</h3><p>Enter the exact international phone number of another Qevyno account. There is no public list of everyone using the service.</p></article>
-      <article class="feature"><div class="icon">💬</div><h3>1-to-1 chats</h3><p>Message another Qevyno user, see recent chats, online status, unread counts and message read ticks.</p></article>
-      <article class="feature"><div class="icon">↗</div><h3>Works from anywhere</h3><p>The app connects to <strong>qevyno.sliqado.org</strong> over HTTPS, so it can reach your tablet server outside the home network too.</p></article>
+    <div class="sectionHead"><div class="eyebrow">Simple by design</div><h2>Only what you need.</h2><p>No crowded dashboard, no public list of phone numbers, and no complicated setup inside the app.</p></div>
+    <div class="features">
+      <article class="feature"><div class="featureNo">01</div><h3>Find by number</h3><p>Enter the exact international phone number of another Qevyno account to start a conversation.</p></article>
+      <article class="feature"><div class="featureNo">02</div><h3>One-to-one chats</h3><p>Recent conversations, unread counts, online status and message read ticks stay easy to understand.</p></article>
+      <article class="feature"><div class="featureNo">03</div><h3>Works remotely</h3><p>The Android app connects to the official Qevyno endpoint over HTTPS from outside your home network.</p></article>
     </div>
   </section>
 
   <section class="wrap section" id="how">
-    <div class="sectionHead"><div class="kicker">How it works</div><h2>Three steps. That’s it.</h2><p>Install the APK, enter your phone number, and Qevyno automatically chooses the correct account flow.</p></div>
-    <div class="steps">
-      <div class="step"><div class="stepNo">01 — INSTALL</div><h3>Download the APK</h3><p>Tap the download button and install Qevyno on an Android 8.0 or newer device.</p></div>
-      <div class="step"><div class="stepNo">02 — NUMBER</div><h3>Enter your number</h3><p>Your country code is selected automatically from the device/network region and can be changed by tapping it.</p></div>
-      <div class="step"><div class="stepNo">03 — CONTINUE</div><h3>Qevyno recognizes the account</h3><p>Existing numbers go to password login. New numbers continue to name and password creation.</p></div>
+    <div class="how">
+      <div class="sectionHead"><div class="eyebrow">How it works</div><h2>From install to chat in a few steps.</h2><p>Qevyno keeps registration and login in one simple phone-first flow.</p><div class="note">Passwords are stored by the Qevyno server as password hashes, not plain-text passwords. Messages are transported over HTTPS. Qevyno is not currently end-to-end encrypted.</div></div>
+      <div class="steps">
+        <div class="step"><div class="stepNo">1</div><div><b>Install Qevyno</b><p>Download the APK and install it on Android 8.0 or newer.</p></div></div>
+        <div class="step"><div class="stepNo">2</div><div><b>Enter your number</b><p>The country code is chosen from the device or mobile-network region and can be changed manually.</p></div></div>
+        <div class="step"><div class="stepNo">3</div><div><b>Continue automatically</b><p>Existing accounts go to password login. New numbers continue to name and password creation.</p></div></div>
+        <div class="step"><div class="stepNo">4</div><div><b>Start a chat</b><p>Enter another Qevyno user's exact phone number and send a message.</p></div></div>
+      </div>
     </div>
-  </section>
-
-  <section class="wrap section">
-    <div class="serverCard">
-      <div><div class="serverTitle">Official Qevyno server</div><div class="serverUrl">https://qevyno.sliqado.org</div><div class="serverSub">The Android app uses this endpoint automatically. Your dedicated tablet hosts the Qevyno backend and Cloudflare Tunnel provides the public HTTPS route.</div></div>
-      <div class="status"><span class="pulse"></span> Server configured</div>
-    </div>
-    <div class="warning"><strong>Important:</strong> Phone numbers are currently account identifiers only. SMS ownership verification is not enabled yet. Qevyno currently uses HTTPS for transport, but messages are not end-to-end encrypted.</div>
   </section>
 
   <section class="wrap cta">
-    <div class="ctaBox"><h2>Ready to try Qevyno?</h2><p>Install the newest Android version and connect directly to the official Qevyno server.</p><div class="buttons" style="justify-content:center"><a class="primary" href="./Qevyno.apk" download>Download Qevyno 2.3</a></div></div>
+    <div class="ctaBox">
+      <h2>Ready to use Qevyno?</h2>
+      <p>Download the latest Android build directly from this page.</p>
+      <a class="download" href="./Qevyno.apk" download>Download APK</a>
+    </div>
   </section>
 </main>
-<footer class="wrap footer"><span>Qevyno 2.3 • Android 8+</span><span>© 2026 Qevyno</span></footer>
+<footer class="wrap footer"><span>Qevyno 2.9 • Android 8+</span><span>© 2026 Qevyno</span></footer>
 </body>
 </html>
