@@ -3,13 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta http-equiv="refresh" content="0; url=/server/">
-  <link rel="canonical" href="https://sliqado.org/server/">
   <meta name="robots" content="noindex,follow">
-  <title>Redirecting to SliqServer</title>
-  <script>window.location.replace('/server/');</script>
+  <title>Redirecting…</title>
+  <script>
+    (function () {
+      const path = window.location.pathname;
+      if (/^\/Qevyno(?:\/|$)/i.test(path)) {
+        if (!/^\/Qevyno\/index\.html$/i.test(path)) {
+          window.location.replace('/Qevyno/index.html?v=21');
+        }
+        return;
+      }
+      window.location.replace('/server/');
+    })();
+  </script>
 </head>
 <body>
-  <p>Redirecting to <a href="/server/">SliqServer</a>…</p>
+  <p>If you are looking for Qevyno, <a href="/Qevyno/index.html?v=21">open Qevyno here</a>.</p>
+  <p>Otherwise, <a href="/server/">open SliqServer</a>.</p>
 </body>
 </html>
