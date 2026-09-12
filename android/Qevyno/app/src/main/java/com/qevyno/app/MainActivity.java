@@ -79,6 +79,8 @@ public class MainActivity extends Activity {
                 appendAsset(bundle, "qr293.js");
                 appendAsset(bundle, "i18n294.js");
                 appendAsset(bundle, "features295.js");
+                appendAsset(bundle, "features296.js");
+                appendAsset(bundle, "features297.js");
                 runScript(view, bundle.toString(), () -> view.setVisibility(View.VISIBLE));
             }
         });
