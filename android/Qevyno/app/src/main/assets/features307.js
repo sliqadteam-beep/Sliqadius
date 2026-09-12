@@ -45,7 +45,7 @@ function parseMarker(text){
   }catch(_){return null}
 }
 function humanSize(n){n=Number(n||0);if(n>=1024*1024)return (n/(1024*1024)).toFixed(n>=10*1024*1024?0:1)+' MB';if(n>=1024)return Math.round(n/1024)+' KB';return n+' B'}
-function friendly(info){if(!info)return tx('media');const p=info.kind==='video'?'🎬 '+tx('video'):'📷 '+tx('image');return info.caption?`${p} · ${info.caption}`:p}
+function friendly(info){if(!info)return tx('media');const p=info.kind==='video'?'🎬 '+tx('video'):String(info.mime||'').toLowerCase()==='image/gif'?'🌀 GIF':'📷 '+tx('image');return info.caption?`${p} · ${info.caption}`:p}
 function loadMeta(){try{return JSON.parse(localStorage.getItem(META_KEY)||'{}')||{}}catch(_){return{}}}
 function saveMeta(x){try{localStorage.setItem(META_KEY,JSON.stringify(x||{}))}catch(_){}}
 function readChat(phone){try{if(window.QevynoDevice&&QevynoDevice.loadChat)return JSON.parse(QevynoDevice.loadChat(phone)||'[]')||[]}catch(_){}try{return JSON.parse(localStorage.getItem('qevyno_chat_'+phone)||'[]')||[]}catch(_){return[]}}
@@ -147,7 +147,7 @@ function renderDraft(){
   if(!selected)return;
   const type=selected.context.type,host=draftHost(type);if(!host)return;
   const media=document.createElement(selected.kind==='video'?'video':'img');media.className='q307draftMedia';media.src=selected.uri;if(selected.kind==='video'){media.muted=true;media.playsInline=true;media.preload='metadata'}
-  const info=document.createElement('div');info.className='q307draftInfo';info.innerHTML=`<div class="q307draftName">${esc(selected.name)}</div><div class="q307draftSize">${esc(selected.kind==='video'?tx('video'):tx('image'))} · ${humanSize(selected.size)} / 120 MB</div>`;
+  const info=document.createElement('div');info.className='q307draftInfo';info.innerHTML=`<div class="q307draftName">${esc(selected.name)}</div><div class="q307draftSize">${esc(selected.kind==='video'?tx('video'):(selected.mime==='image/gif'?'GIF':tx('image')))} · ${humanSize(selected.size)} / 120 MB</div>`;
   const rm=document.createElement('button');rm.className='q307draftRemove';rm.type='button';rm.textContent='×';rm.title=tx('remove');rm.onclick=()=>clearDraft(true);
   host.append(media,info,rm);
   const box=textBoxFor(type);if(box){if(box.dataset.q307oldPlaceholder===undefined)box.dataset.q307oldPlaceholder=box.placeholder||'';box.placeholder=selected.kind==='video'?tx('captionVideo'):tx('captionImage');}
@@ -279,7 +279,7 @@ function makeMediaCard(row,m,loc,info){
     const st=document.createElement('div');st.className='q307mediaStatus';st.innerHTML='<span class="q307spin"></span><span></span>';st.querySelector('span:last-child').textContent=info.pending?tx('uploading')+'…':tx('preparing');card.appendChild(st);
     if(!info.pending&&info.token)requestDownload(loc,m,info);
   }
-  const fb=document.createElement('div');fb.className='q307filebar';fb.innerHTML=`<span>${info.kind==='video'?'🎬':'📷'}</span><b>${esc(info.name||tx(info.kind==='video'?'video':'image'))}</b><span>${humanSize(info.size)}</span>`;card.appendChild(fb);
+  const fb=document.createElement('div');fb.className='q307filebar';const isGif=String(info.mime||'').toLowerCase()==='image/gif';fb.innerHTML=`<span>${info.kind==='video'?'🎬':isGif?'🌀':'📷'}</span><b>${esc(info.name||(isGif?'GIF':tx(info.kind==='video'?'video':'image')))}</b><span>${humanSize(info.size)}</span>`;card.appendChild(fb);
   if(info.pending){
     const pr=document.createElement('div');pr.className='q307progress';pr.innerHTML='<i></i>';pr.querySelector('i').style.width=Math.max(0,Math.min(100,Number(info.progress||0)))+'%';card.appendChild(pr);
   }
