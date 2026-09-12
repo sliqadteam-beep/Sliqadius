@@ -1,6 +1,18 @@
 (()=>{
-  // Fast startup for users with an existing session. UI stability, language
-  // locking and send queue handling are applied by the final feature layer.
+  // Run the final stability/queue layer after the concatenated UI bundle has
+  // completed. The current JavaScript call stack finishes before this local
+  // asset script can execute, so it safely overrides the older send/UI logic.
+  try{
+    if(!document.getElementById('qevyno303loader')){
+      const finalFix=document.createElement('script');
+      finalFix.id='qevyno303loader';
+      finalFix.src='file:///android_asset/features303.js';
+      finalFix.async=false;
+      document.head.appendChild(finalFix);
+    }
+  }catch(e){}
+
+  // Fast startup for users with an existing session.
   const hasSavedSession=!!localStorage.getItem('qevyno_token');
   if(!hasSavedSession)return;
 
