@@ -24,11 +24,14 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
 
-        getWindow().setStatusBarColor(Color.rgb(32, 44, 51));
-        getWindow().setNavigationBarColor(Color.rgb(11, 20, 26));
+        getWindow().setStatusBarColor(Color.rgb(255, 255, 255));
+        getWindow().setNavigationBarColor(Color.rgb(255, 255, 255));
+        getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        );
 
         webView = new WebView(this);
-        webView.setBackgroundColor(Color.rgb(11, 20, 26));
+        webView.setBackgroundColor(Color.rgb(247, 250, 252));
         webView.setVisibility(View.INVISIBLE);
 
         WebSettings s = webView.getSettings();
