@@ -1,16 +1,27 @@
 (()=>{
-  // Run the stable queue layer first, then visual chat polish, then the newest
-  // SliqChat sharing/link-preview/branding layer last so older UI code cannot
-  // overwrite these changes.
+  // Load the stable send queue first, then chat polish, sharing/previews and
+  // finally the newest groups/conversation-list layer. The newest layer runs
+  // last so older UI scripts cannot move badges or phone numbers back again.
+  function load306(){
+    try{
+      if(document.getElementById('qevyno306loader'))return;
+      const groups=document.createElement('script');
+      groups.id='qevyno306loader';
+      groups.src='file:///android_asset/features306.js';
+      groups.async=false;
+      document.head.appendChild(groups);
+    }catch(e){}
+  }
   function load305(){
     try{
-      if(document.getElementById('qevyno305loader'))return;
+      if(document.getElementById('qevyno305loader')){load306();return;}
       const newest=document.createElement('script');
       newest.id='qevyno305loader';
       newest.src='file:///android_asset/features305.js';
       newest.async=false;
+      newest.onload=load306;
       document.head.appendChild(newest);
-    }catch(e){}
+    }catch(e){load306()}
   }
   function load304(){
     try{
