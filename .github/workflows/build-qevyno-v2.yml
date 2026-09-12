@@ -1,4 +1,4 @@
-name: Build Qevyno Android v2
+name: Validate Qevyno Android
 on:
   push:
     branches: [main]
@@ -7,9 +7,9 @@ on:
       - '.github/workflows/build-qevyno-v2.yml'
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
-  group: qevyno-v2-publish
+  group: qevyno-android-validation
   cancel-in-progress: true
 jobs:
   build:
@@ -20,30 +20,8 @@ jobs:
         with: {distribution: temurin, java-version: '17'}
       - uses: android-actions/setup-android@v3
       - run: yes | sdkmanager "platforms;android-35" "build-tools;35.0.0"
-      - uses: actions/cache@v4
-        with:
-          path: ~/.android/debug.keystore
-          key: qevyno-debug-keystore-v1
       - uses: gradle/actions/setup-gradle@v4
         with: {gradle-version: '8.10.2'}
-      - name: Build APK
+      - name: Validate unsigned release build
         working-directory: android/Qevyno
-        run: gradle --no-daemon clean assembleDebug
-      - name: Publish APK only to /Qevyno
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          cp android/Qevyno/app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/Qevyno.apk"
-          for attempt in 1 2 3; do
-            git fetch origin main
-            git reset --hard origin/main
-            mkdir -p Qevyno
-            cp "$RUNNER_TEMP/Qevyno.apk" Qevyno/Qevyno.apk
-            git add Qevyno/Qevyno.apk
-            if git diff --cached --quiet; then exit 0; fi
-            git commit -m "Build Qevyno Android 2.9.12"
-            if git push origin main; then exit 0; fi
-            sleep 3
-          done
-          exit 1
+        run: gradle --no-daemon clean assembleRelease
