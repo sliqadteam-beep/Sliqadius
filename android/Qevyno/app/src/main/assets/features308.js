@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.9.21';
+const VERSION='2.9.22';
 const VERIFIED_PHONE='+4915229463681';
 const SUP=['en','de','es','fr','it','pt','nl','pl','tr','uk','ru','ja','ko','zh','ar'];
 const T={

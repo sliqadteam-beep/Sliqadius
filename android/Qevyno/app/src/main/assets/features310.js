@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const BRAND='Skaysa', VERSION='2.9.21', HELP='0000000000';
+const BRAND='Skaysa', VERSION='2.9.22', HELP='0000000000';
 const LOGO=`<svg viewBox="0 0 108 108" aria-hidden="true" focusable="false">
 <defs><linearGradient id="sklg" x1="8" y1="7" x2="100" y2="103" gradientUnits="userSpaceOnUse">
 <stop offset="0" stop-color="#B7DEFF"/><stop offset=".48" stop-color="#8ABFF4"/><stop offset="1" stop-color="#5F86DE"/>

@@ -1,11 +1,17 @@
 (()=>{
   // Load feature layers in order. Newer layers run last so older patches cannot
   // overwrite chat-list, media, profile or visual-polish changes.
+  function load311(){
+    try{
+      if(document.getElementById('qevyno311loader'))return;
+      const s=document.createElement('script');s.id='qevyno311loader';s.src='file:///android_asset/features311.js';s.async=false;document.head.appendChild(s);
+    }catch(e){}
+  }
   function load310(){
     try{
-      if(document.getElementById('qevyno310loader'))return;
-      const s=document.createElement('script');s.id='qevyno310loader';s.src='file:///android_asset/features310.js';s.async=false;document.head.appendChild(s);
-    }catch(e){}
+      if(document.getElementById('qevyno310loader')){load311();return;}
+      const s=document.createElement('script');s.id='qevyno310loader';s.src='file:///android_asset/features310.js';s.async=false;s.onload=load311;document.head.appendChild(s);
+    }catch(e){load311()}
   }
   function load309(){
     try{

@@ -1,20 +1,7 @@
 {
-  "versionCode": 33,
-  "versionName": "2.9.21",
+  "versionCode": 34,
+  "versionName": "2.9.22",
   "apkUrl": "https://sliqado.org/Qevyno/Qevyno.apk",
-  "notes": "The messenger is now Skaysa, with a new abstract letter-free logo. The old server-unreachable banner is hidden while automatic retries continue. All media, GIF, profile, group and notification improvements remain included.",
-  "notes_de": "Der Messenger heißt jetzt Skaysa und hat ein neues abstraktes Logo ohne Buchstaben. Die Meldung „Server konnte nicht erreicht werden“ wird nicht mehr eingeblendet; automatische Wiederholungsversuche laufen im Hintergrund weiter. Medien, GIFs, Profil, Gruppen und Benachrichtigungen bleiben enthalten.",
-  "notes_es": "El messenger ahora se llama Skaysa y tiene un nuevo logotipo abstracto sin letras. Ya no se muestra el aviso de servidor inaccesible mientras continúan los reintentos automáticos.",
-  "notes_fr": "Le messenger s’appelle désormais Skaysa avec un nouveau logo abstrait sans lettres. L’avertissement de serveur inaccessible n’est plus affiché pendant les nouvelles tentatives automatiques.",
-  "notes_it": "Il messenger ora si chiama Skaysa e ha un nuovo logo astratto senza lettere. L’avviso di server non raggiungibile non viene più mostrato mentre continuano i tentativi automatici.",
-  "notes_pt": "O messenger chama-se agora Skaysa e tem um novo logótipo abstrato sem letras. O aviso de servidor inacessível deixa de aparecer enquanto continuam as tentativas automáticas.",
-  "notes_nl": "De messenger heet nu Skaysa en heeft een nieuw abstract logo zonder letters. De melding dat de server niet bereikbaar is wordt niet meer getoond terwijl automatisch opnieuw wordt geprobeerd.",
-  "notes_pl": "Messenger nazywa się teraz Skaysa i ma nowe abstrakcyjne logo bez liter. Komunikat o niedostępnym serwerze nie jest już wyświetlany podczas automatycznych ponownych prób.",
-  "notes_tr": "Messenger artık Skaysa adını taşıyor ve harfsiz yeni soyut bir logoya sahip. Otomatik yeniden denemeler sürerken sunucuya ulaşılamıyor uyarısı artık gösterilmiyor.",
-  "notes_uk": "Месенджер тепер називається Skaysa та має новий абстрактний логотип без літер. Повідомлення про недоступний сервер більше не показується під час автоматичних повторних спроб.",
-  "notes_ru": "Мессенджер теперь называется Skaysa и получил новый абстрактный логотип без букв. Сообщение о недоступном сервере больше не показывается во время автоматических повторных попыток.",
-  "notes_ja": "メッセンジャー名が Skaysa になり、文字を使わない新しい抽象ロゴになりました。自動再試行中にサーバー到達不能の警告は表示されません。",
-  "notes_ko": "메신저 이름이 Skaysa로 변경되고 글자 없는 새로운 추상 로고가 적용되었습니다. 자동 재시도 중 서버 연결 불가 안내는 더 이상 표시되지 않습니다.",
-  "notes_zh": "聊天应用现更名为 Skaysa，并采用全新的无字母抽象图标。自动重试期间不再显示服务器无法连接提示。",
-  "notes_ar": "أصبح اسم تطبيق المراسلة Skaysa مع شعار تجريدي جديد بلا أحرف. لم تعد رسالة تعذر الوصول إلى الخادم تظهر أثناء استمرار إعادة المحاولة تلقائيًا."
+  "notes": "Group creation now only allows contacts you already added. Verified accounts show exactly one purple badge, and the badge can be tapped anywhere to explain verification. All Skaysa media, GIF, profile, QR, group and notification features remain included.",
+  "notes_de": "Beim Erstellen einer Gruppe können jetzt nur bereits hinzugefügte Kontakte ausgewählt werden. Verifizierte Accounts zeigen genau einen lila Haken; der Haken kann überall angetippt werden und erklärt die Verifizierung. Alle Skaysa-Funktionen für Medien, GIFs, Profil, QR, Gruppen und Benachrichtigungen bleiben enthalten."
 }
