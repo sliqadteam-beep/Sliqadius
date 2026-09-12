@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -28,6 +29,7 @@ public class MainActivity extends Activity {
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.rgb(10, 13, 18));
+        webView.setVisibility(View.INVISIBLE);
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
@@ -51,10 +53,12 @@ public class MainActivity extends Activity {
                     int read = in.read(data);
                     if (read > 0) {
                         String js = new String(data, 0, read, StandardCharsets.UTF_8);
-                        view.evaluateJavascript(js, null);
+                        view.evaluateJavascript(js, value -> view.setVisibility(View.VISIBLE));
+                        return;
                     }
                 } catch (Exception ignored) {
                 }
+                view.setVisibility(View.VISIBLE);
             }
         });
 
