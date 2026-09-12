@@ -1,6 +1,6 @@
 {
-  "versionCode": 23,
-  "versionName": "2.9.11",
+  "versionCode": 24,
+  "versionName": "2.9.12",
   "apkUrl": "https://sliqado.org/Qevyno/Qevyno.apk",
-  "notes": "Update checking is now built into the current Qevyno app."
+  "notes": "Qevyno Help is now created once and stays stable instead of repeatedly disappearing and reappearing."
 }
