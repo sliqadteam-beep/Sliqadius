@@ -24,11 +24,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
 
-        getWindow().setStatusBarColor(Color.rgb(7, 16, 12));
-        getWindow().setNavigationBarColor(Color.rgb(7, 16, 12));
+        getWindow().setStatusBarColor(Color.rgb(32, 44, 51));
+        getWindow().setNavigationBarColor(Color.rgb(11, 20, 26));
 
         webView = new WebView(this);
-        webView.setBackgroundColor(Color.rgb(7, 16, 12));
+        webView.setBackgroundColor(Color.rgb(11, 20, 26));
         webView.setVisibility(View.INVISIBLE);
 
         WebSettings s = webView.getSettings();
@@ -51,10 +51,13 @@ public class MainActivity extends Activity {
                 String auth = readAsset("auth23.js");
                 String ui = readAsset("ui26.js");
                 String loading = readAsset("ui27.js");
+                String simple = readAsset("ui28.js");
 
                 runScript(view, auth, () ->
                     runScript(view, ui, () ->
-                        runScript(view, loading, () -> view.setVisibility(View.VISIBLE))
+                        runScript(view, loading, () ->
+                            runScript(view, simple, () -> view.setVisibility(View.VISIBLE))
+                        )
                     )
                 );
             }
