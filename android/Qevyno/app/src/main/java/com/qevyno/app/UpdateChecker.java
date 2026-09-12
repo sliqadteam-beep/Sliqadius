@@ -37,21 +37,21 @@ public final class UpdateChecker {
     // title, later, download, generic update, version update
     private static String[] ui(String lang) {
         switch (lang) {
-            case "de": return new String[]{"Update verfügbar","Später","Update herunterladen","Ein neues Qevyno-Update ist verfügbar.","Qevyno %s ist verfügbar."};
-            case "es": return new String[]{"Actualización disponible","Más tarde","Descargar actualización","Hay una nueva actualización de Qevyno disponible.","Qevyno %s está disponible."};
-            case "fr": return new String[]{"Mise à jour disponible","Plus tard","Télécharger la mise à jour","Une nouvelle mise à jour de Qevyno est disponible.","Qevyno %s est disponible."};
-            case "it": return new String[]{"Aggiornamento disponibile","Più tardi","Scarica aggiornamento","È disponibile un nuovo aggiornamento di Qevyno.","Qevyno %s è disponibile."};
-            case "pt": return new String[]{"Atualização disponível","Mais tarde","Transferir atualização","Está disponível uma nova atualização do Qevyno.","Qevyno %s está disponível."};
-            case "nl": return new String[]{"Update beschikbaar","Later","Update downloaden","Er is een nieuwe Qevyno-update beschikbaar.","Qevyno %s is beschikbaar."};
-            case "pl": return new String[]{"Dostępna aktualizacja","Później","Pobierz aktualizację","Dostępna jest nowa aktualizacja Qevyno.","Qevyno %s jest dostępne."};
-            case "tr": return new String[]{"Güncelleme mevcut","Daha sonra","Güncellemeyi indir","Yeni bir Qevyno güncellemesi mevcut.","Qevyno %s mevcut."};
-            case "uk": return new String[]{"Доступне оновлення","Пізніше","Завантажити оновлення","Доступне нове оновлення Qevyno.","Доступна Qevyno %s."};
-            case "ru": return new String[]{"Доступно обновление","Позже","Скачать обновление","Доступно новое обновление Qevyno.","Доступна Qevyno %s."};
-            case "ja": return new String[]{"アップデートがあります","後で","アップデートをダウンロード","新しい Qevyno アップデートがあります。","Qevyno %s が利用できます。"};
-            case "ko": return new String[]{"업데이트 사용 가능","나중에","업데이트 다운로드","새 Qevyno 업데이트를 사용할 수 있습니다.","Qevyno %s을 사용할 수 있습니다."};
-            case "zh": return new String[]{"有可用更新","稍后","下载更新","有新的 Qevyno 更新可用。","Qevyno %s 已可用。"};
-            case "ar": return new String[]{"يتوفر تحديث","لاحقًا","تنزيل التحديث","يتوفر تحديث جديد لـ Qevyno.","يتوفر Qevyno %s."};
-            default: return new String[]{"Update available","Later","Download Update","A new Qevyno update is available.","Qevyno %s is available."};
+            case "de": return new String[]{"Update verfügbar","Später","Update herunterladen","Ein neues SliqChat-Update ist verfügbar.","SliqChat %s ist verfügbar."};
+            case "es": return new String[]{"Actualización disponible","Más tarde","Descargar actualización","Hay una nueva actualización de SliqChat disponible.","SliqChat %s está disponible."};
+            case "fr": return new String[]{"Mise à jour disponible","Plus tard","Télécharger la mise à jour","Une nouvelle mise à jour de SliqChat est disponible.","SliqChat %s est disponible."};
+            case "it": return new String[]{"Aggiornamento disponibile","Più tardi","Scarica aggiornamento","È disponibile un nuovo aggiornamento di SliqChat.","SliqChat %s è disponibile."};
+            case "pt": return new String[]{"Atualização disponível","Mais tarde","Transferir atualização","Está disponível uma nova atualização do SliqChat.","SliqChat %s está disponível."};
+            case "nl": return new String[]{"Update beschikbaar","Later","Update downloaden","Er is een nieuwe SliqChat-update beschikbaar.","SliqChat %s is beschikbaar."};
+            case "pl": return new String[]{"Dostępna aktualizacja","Później","Pobierz aktualizację","Dostępna jest nowa aktualizacja SliqChat.","SliqChat %s jest dostępne."};
+            case "tr": return new String[]{"Güncelleme mevcut","Daha sonra","Güncellemeyi indir","Yeni bir SliqChat güncellemesi mevcut.","SliqChat %s mevcut."};
+            case "uk": return new String[]{"Доступне оновлення","Пізніше","Завантажити оновлення","Доступне нове оновлення SliqChat.","Доступний SliqChat %s."};
+            case "ru": return new String[]{"Доступно обновление","Позже","Скачать обновление","Доступно новое обновление SliqChat.","Доступен SliqChat %s."};
+            case "ja": return new String[]{"アップデートがあります","後で","アップデートをダウンロード","新しい SliqChat アップデートがあります。","SliqChat %s が利用できます。"};
+            case "ko": return new String[]{"업데이트 사용 가능","나중에","업데이트 다운로드","새 SliqChat 업데이트를 사용할 수 있습니다.","SliqChat %s을 사용할 수 있습니다."};
+            case "zh": return new String[]{"有可用更新","稍后","下载更新","有新的 SliqChat 更新可用。","SliqChat %s 已可用。"};
+            case "ar": return new String[]{"يتوفر تحديث","لاحقًا","تنزيل التحديث","يتوفر تحديث جديد لـ SliqChat.","يتوفر SliqChat %s."};
+            default: return new String[]{"Update available","Later","Download Update","A new SliqChat update is available.","SliqChat %s is available."};
         }
     }
 
@@ -125,11 +125,11 @@ public final class UpdateChecker {
                         .show();
                 });
             } catch (Exception ignored) {
-                // Update checks must never prevent Qevyno from starting.
+                // Update checks must never prevent SliqChat from starting.
             } finally {
                 if (connection != null) connection.disconnect();
                 RUNNING.set(false);
             }
-        }, "Qevyno-Update-Check").start();
+        }, "SliqChat-Update-Check").start();
     }
 }
