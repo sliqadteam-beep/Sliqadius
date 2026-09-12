@@ -1,6 +1,6 @@
 {
-  "versionCode": 24,
-  "versionName": "2.9.12",
+  "versionCode": 25,
+  "versionName": "2.9.13",
   "apkUrl": "https://sliqado.org/Qevyno/Qevyno.apk",
-  "notes": "Qevyno Help is now created once and stays stable instead of repeatedly disappearing and reappearing."
+  "notes": "Stable signing fix. Future Qevyno versions use the same signing key so Android updates can be installed without uninstalling first."
 }
