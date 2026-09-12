@@ -84,6 +84,7 @@ public class MainActivity extends Activity {
                 appendAsset(bundle, "features298.js");
                 appendAsset(bundle, "features299.js");
                 appendAsset(bundle, "features300.js");
+                appendAsset(bundle, "features301.js");
                 runScript(view, bundle.toString(), () -> view.setVisibility(View.VISIBLE));
             }
         });
@@ -289,7 +290,7 @@ public class MainActivity extends Activity {
                 Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                 i.setType("image/*");
                 i.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(Intent.createChooser(i, "Choose profile picture"), REQUEST_PROFILE_PICTURE);
+                startActivityForResult(Intent.createChooser(i, null), REQUEST_PROFILE_PICTURE);
             });
         }
 
