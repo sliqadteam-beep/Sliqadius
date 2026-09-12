@@ -1,12 +1,17 @@
 package com.qevyno.app;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import java.util.Locale;
 
 public class MainActivity extends Activity {
 
@@ -33,11 +38,38 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(true);
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
+        webView.addJavascriptInterface(new DeviceInfoBridge(), "QevynoDevice");
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
 
         setContentView(webView);
         webView.loadUrl("file:///android_asset/index.html");
+    }
+
+    private class DeviceInfoBridge {
+        @JavascriptInterface
+        public String getCountryIso() {
+            try {
+                TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                if (tm != null) {
+                    String network = tm.getNetworkCountryIso();
+                    if (network != null && network.length() == 2) {
+                        return network.toUpperCase(Locale.US);
+                    }
+                    String sim = tm.getSimCountryIso();
+                    if (sim != null && sim.length() == 2) {
+                        return sim.toUpperCase(Locale.US);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+
+            String localeCountry = Locale.getDefault().getCountry();
+            if (localeCountry != null && localeCountry.length() == 2) {
+                return localeCountry.toUpperCase(Locale.US);
+            }
+            return "DE";
+        }
     }
 
     @Override
