@@ -1,16 +1,27 @@
 (()=>{
-  // Run the final stability/queue layer after the concatenated UI bundle has
-  // completed, then load the chat-polish layer after it. This keeps the send
-  // queue authoritative while allowing the newest visual fixes to run last.
+  // Run the stable queue layer first, then visual chat polish, then the newest
+  // SliqChat sharing/link-preview/branding layer last so older UI code cannot
+  // overwrite these changes.
+  function load305(){
+    try{
+      if(document.getElementById('qevyno305loader'))return;
+      const newest=document.createElement('script');
+      newest.id='qevyno305loader';
+      newest.src='file:///android_asset/features305.js';
+      newest.async=false;
+      document.head.appendChild(newest);
+    }catch(e){}
+  }
   function load304(){
     try{
-      if(document.getElementById('qevyno304loader'))return;
+      if(document.getElementById('qevyno304loader')){load305();return;}
       const polish=document.createElement('script');
       polish.id='qevyno304loader';
       polish.src='file:///android_asset/features304.js';
       polish.async=false;
+      polish.onload=load305;
       document.head.appendChild(polish);
-    }catch(e){}
+    }catch(e){load305()}
   }
   try{
     if(!document.getElementById('qevyno303loader')){
@@ -35,7 +46,7 @@
   try{
     if(typeof show==='function')show('homeScreen');
     const hello=document.getElementById('hello');
-    const name=localStorage.getItem('qevyno_name')||'Qevyno';
+    const name=localStorage.getItem('qevyno_name')||'SliqChat';
     const phone=localStorage.getItem('qevyno_phone')||'';
     if(hello)hello.textContent=name+(phone?' • '+phone:'');
     const overlay=document.getElementById('q27load');
