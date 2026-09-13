@@ -3,7 +3,7 @@
 if(window.__skaysa315Installed)return;
 window.__skaysa315Installed=true;
 
-const VERSION='2.9.39';
+const VERSION='2.9.40';
 const GROUPS_KEY='sliqchat_groups_v1';
 const GROUP_MSG_PREFIX='sliqchat_group_messages_';
 const DELETE_KEY='skaysa_deleted_chats_v1';

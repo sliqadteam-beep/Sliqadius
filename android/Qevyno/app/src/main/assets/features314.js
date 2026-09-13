@@ -106,6 +106,7 @@ function install(){
       const r=oldSave.apply(this,arguments);
       const img=pendingImage;
       pendingImage='';
+      if(img)window.__skaysaOwnAvatarPreview=img;
       if(img){
         setTimeout(async()=>{try{await api('/api/profile-picture','POST',{image:img});window.dispatchEvent(new Event('focus'))}catch(_){}},120);
       }

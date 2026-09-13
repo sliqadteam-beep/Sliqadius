@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.9.39';
+const VERSION='2.9.40';
 
 function lang(){
   try{

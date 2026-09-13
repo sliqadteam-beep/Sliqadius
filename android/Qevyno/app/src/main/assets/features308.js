@@ -68,9 +68,73 @@ const style=document.createElement('style');style.id='sliqchat308style';style.te
 `;document.head.appendChild(style);
 
 let own={phone:myPhone(),name:myName(),avatar:'',verified:isVerifiedPhone(myPhone())};
-function applyAvatar(el){if(!el)return;const u=own.avatar;if(u){el.textContent='';el.style.backgroundImage=`url("${u.replace(/"/g,'%22')}")`}else{el.style.backgroundImage='';el.textContent=initials(own.name)}}
-function refreshChip(){const chip=document.querySelector('.q308profileChip');if(!chip)return;chip.querySelector('.q308miniName').textContent=own.name||own.phone;const vb=chip.querySelector('.q308miniVerified');if(vb)vb.innerHTML=own.verified?verifiedHtml():'';chip.querySelector('.q308miniPhone').textContent=own.phone;applyAvatar(chip.querySelector('.q308miniAvatar'))}
-async function refreshOwn(){own.phone=myPhone();own.name=myName();try{const cached=localStorage.getItem('sliqchat_own_avatar')||'';if(cached)own.avatar=cached}catch(_){}refreshChip();try{if(typeof window.api==='function'&&own.phone){const d=await window.api('/api/me');if(d&&d.ok){own.name=String(d.display_name||own.name);own.phone=String(d.phone||own.phone);own.avatar=absAvatar(d.avatar_url||'');own.verified=d.verified===true||isVerifiedPhone(own.phone);try{localStorage.setItem('qevyno_name',own.name);localStorage.setItem('sliqchat_own_avatar',own.avatar)}catch(_){}refreshChip();refreshSheet()}}}catch(_){}}
+let ownAvatarObjectUrl='';
+function avatarFallback(el){
+  if(!el)return;
+  el.style.backgroundImage='';
+  el.textContent=initials(own.name||own.phone||'?');
+}
+function applyAvatar(el){
+  if(!el)return;
+  const u=String(own.avatar||'');
+  if(!u){avatarFallback(el);return}
+  el.textContent='';
+  el.style.backgroundImage=`url("${u.replace(/"/g,'%22')}")`;
+}
+function refreshChip(){
+  const chip=document.querySelector('.q308profileChip');if(!chip)return;
+  chip.querySelector('.q308miniName').textContent=own.name||own.phone;
+  const vb=chip.querySelector('.q308miniVerified');if(vb)vb.innerHTML=own.verified?verifiedHtml():'';
+  chip.querySelector('.q308miniPhone').textContent=own.phone;
+  applyAvatar(chip.querySelector('.q308miniAvatar'));
+}
+async function resolveOwnAvatar(raw){
+  const u=absAvatar(raw||'');if(!u)return'';
+  if(/^data:image\//i.test(u))return u;
+  for(let attempt=0;attempt<2;attempt++){
+    try{
+      const sep=u.includes('?')?'&':'?';
+      const r=await fetch(u+sep+'skaysa_avatar='+(Date.now()+attempt),{cache:'no-store',credentials:'omit'});
+      if(!r.ok)continue;
+      const blob=await r.blob();
+      if(!String(blob.type||'').toLowerCase().startsWith('image/'))continue;
+      const next=URL.createObjectURL(blob);
+      if(ownAvatarObjectUrl){try{URL.revokeObjectURL(ownAvatarObjectUrl)}catch(_){}}
+      ownAvatarObjectUrl=next;
+      return next;
+    }catch(_){}
+    await new Promise(resolve=>setTimeout(resolve,120));
+  }
+  return'';
+}
+async function refreshOwn(){
+  own.phone=myPhone();own.name=myName();
+  const preview=String(window.__skaysaOwnAvatarPreview||'');
+  own.avatar=/^data:image\//i.test(preview)?preview:'';
+  refreshChip();
+  try{
+    if(typeof window.api==='function'&&own.phone){
+      const d=await window.api('/api/me');
+      if(d&&d.ok){
+        own.name=String(d.display_name||own.name);
+        own.phone=String(d.phone||own.phone);
+        own.verified=d.verified===true||isVerifiedPhone(own.phone);
+        const remote=absAvatar(d.avatar_url||'');
+        let resolved=await resolveOwnAvatar(remote);
+        if(!resolved&&preview)resolved=preview;
+        own.avatar=resolved||'';
+        try{
+          localStorage.setItem('qevyno_name',own.name);
+          if(remote)localStorage.setItem('sliqchat_own_avatar',remote);
+          else localStorage.removeItem('sliqchat_own_avatar');
+        }catch(_){}
+        refreshChip();refreshSheet();
+      }
+    }
+  }catch(_){
+    if(!own.avatar){avatarFallback(document.querySelector('.q308miniAvatar'));avatarFallback(document.querySelector('.q308bigAvatar'))}
+  }
+}
 function ensureChip(){const bar=document.querySelector('#homeScreen .topbar');if(!bar||bar.querySelector('.q308profileChip'))return;const chip=document.createElement('button');chip.type='button';chip.className='q308profileChip';chip.setAttribute('aria-label',tx('profile'));chip.innerHTML='<span class="q308miniAvatar"></span><span class="q308miniInfo"><span class="q308miniNameLine"><span class="q308miniName"></span><span class="q308miniVerified"></span></span><span class="q308miniPhone"></span></span>';const settings=bar.querySelector('#settingsBtn');if(settings)bar.insertBefore(chip,settings);else bar.appendChild(chip);chip.onclick=openProfile;refreshChip()}
 
 const back=document.createElement('div');back.className='q308back';back.innerHTML=`<div class="q308sheet"><div class="q308handle"></div><div class="q308head"><div class="q308bigAvatar"></div><div class="q308headText"><div class="q308titleLine"><div class="q308title"></div><span class="q308sheetVerified"></span></div><div class="q308phone"></div></div></div><div class="q308qrBox"><div class="q308qrLabel"></div><img class="q308qr" alt="QR"><div class="q308qrHint"></div></div><div class="q308actions"><button class="q308edit"></button><button class="q308close"></button></div></div>`;document.body.appendChild(back);

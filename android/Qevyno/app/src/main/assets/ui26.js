@@ -85,7 +85,7 @@
 
   const newSheet=document.createElement('div');
   newSheet.className='sheetBack';newSheet.id='newChatSheet';
-  newSheet.innerHTML=`<div class="sheet"><div class="q26handle"></div><div class="q26sheetHead"><h2>New chat</h2><button class="q26sheetClose" id="closeNewChat">×</button></div><p class="q26newChatDesc">Enter the exact international phone number. Skaysa never shows a public phone-number directory.</p><input class="field" id="findPhone" inputmode="tel" autocomplete="tel" placeholder="+49 176 12345678"><div class="error" id="findError"></div><button class="q26sheetBtn primaryish" id="findBtn">Find Skaysa user</button></div>`;
+  newSheet.innerHTML=`<div class="sheet"><div class="q26handle"></div><div class="q26sheetHead"><h2>New chat</h2><button class="q26sheetClose" id="closeNewChat">×</button></div><p class="q26newChatDesc">Enter the phone number. Skaysa never shows a public phone-number directory.</p><input class="field" id="findPhone" inputmode="tel" autocomplete="tel" placeholder="Phone number"><div class="error" id="findError"></div><button class="q26sheetBtn primaryish" id="findBtn">Find Skaysa user</button></div>`;
   document.body.appendChild(newSheet);
 
   const infoSheet=document.createElement('div');
@@ -138,8 +138,8 @@
 
   const oldFind=window.findPerson;
   window.findPerson=async function(){
-    const phone=normalizePhone(D('findPhone').value);D('findError').textContent='';
-    if(!/^\+[1-9]\d{7,14}$/.test(phone)){D('findError').textContent='Enter the full international number, e.g. +49…';return;}
+    const rawPhone=String(D('findPhone').value||'').trim();const phone=(typeof window.qevynoFullPhone==='function'?window.qevynoFullPhone(rawPhone):normalizePhone(rawPhone));D('findError').textContent='';
+    if(!/^\+[1-9]\d{7,14}$/.test(phone)){D('findError').textContent='Enter a valid phone number.';return;}
     D('findBtn').disabled=true;D('findBtn').textContent='Searching…';
     const r=await api('/api/find?phone='+encodeURIComponent(phone));
     D('findBtn').disabled=false;D('findBtn').textContent='Find Skaysa user';
