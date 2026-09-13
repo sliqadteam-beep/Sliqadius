@@ -42,7 +42,7 @@
 
   function autoCountry(){
     let iso='';
-    try{if(window.SkaysaDevice&&SkaysaDevice.getCountryIso)iso=SkaysaDevice.getCountryIso()||'';}catch(e){}
+    try{if(window.QevynoDevice&&QevynoDevice.getCountryIso)iso=QevynoDevice.getCountryIso()||'';}catch(e){}
     if(!iso){
       const lang=(navigator.languages&&navigator.languages[0])||navigator.language||'';
       const m=lang.match(/[-_]([A-Za-z]{2})$/);

@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.9.38';
+const VERSION='2.9.39';
 const META_KEY='qevyno_local_conversations_v2';
 const HELP='0000000000';
 const BADGES='.q295verified,.q308verified,.q309verified,.q311verified';

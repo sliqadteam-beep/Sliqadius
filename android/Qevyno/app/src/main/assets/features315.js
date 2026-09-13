@@ -3,7 +3,7 @@
 if(window.__skaysa315Installed)return;
 window.__skaysa315Installed=true;
 
-const VERSION='2.9.38';
+const VERSION='2.9.39';
 const GROUPS_KEY='sliqchat_groups_v1';
 const GROUP_MSG_PREFIX='sliqchat_group_messages_';
 const DELETE_KEY='skaysa_deleted_chats_v1';
@@ -37,6 +37,13 @@ const T={
  ar:{groupPhoto:'صورة المجموعة',groupPhotoSub:'اختر صورة للمجموعة. يمكنك تخطي هذه الخطوة.',choosePhoto:'اختيار صورة',skip:'تخطي',deleteTitle:'حذف المحادثة؟',deleteQ:'هل تريد حقاً حذف هذه المحادثة؟',delete:'حذف',cancel:'إلغاء',react:'التفاعل مع الرسالة',copy:'نسخ',reacted:'تفاعل',badImage:'تعذر استخدام هذه الصورة.'}
 };
 function tx(k){const d=T[lang()]||T.en;return d[k]||T.en[k]||k}
+const REMOVE_PHOTO={
+ en:'Remove picture',de:'Bild entfernen',es:'Quitar imagen',fr:'Supprimer l’image',
+ it:'Rimuovi immagine',pt:'Remover imagem',nl:'Afbeelding verwijderen',
+ pl:'Usuń zdjęcie',tr:'Resmi kaldır',uk:'Видалити фото',ru:'Удалить фото',
+ ja:'画像を削除',ko:'사진 삭제',zh:'移除图片',ar:'إزالة الصورة'
+};
+function removePhotoText(){return REMOVE_PHOTO[lang()]||REMOVE_PHOTO.en}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function norm(v){return String(v||'').trim().replace(/[\s().-]/g,'').replace(/^00/,'+')}
 function now(){return Math.floor(Date.now()/1000)}
@@ -62,18 +69,18 @@ const style=document.createElement('style');
 style.id='skaysa315style';
 style.textContent=`
 .q315groupPhotoField{margin:12px 0 4px;padding:12px;border:1px solid #dce6ee;border-radius:18px;background:#f8fbfd;display:flex;align-items:center;gap:12px}
-.q315groupPhotoPreview{width:64px;height:64px;min-width:64px;border-radius:19px;background:#dcecff;color:#47739c;display:grid;place-items:center;font-size:24px;font-weight:900;background-size:cover;background-position:center;overflow:hidden}
+.q315groupPhotoPreview{width:72px;height:72px;min-width:72px;border-radius:24px;background:#dcecff;color:#47739c;display:grid;place-items:center;font-size:26px;font-weight:900;background-size:cover;background-position:center;overflow:hidden;border:2px solid #fff;box-shadow:0 5px 16px rgba(36,73,108,.12)}
 .q315groupPhotoInfo{min-width:0;flex:1}.q315groupPhotoTitle{font-size:13px;font-weight:900;color:#17212b}.q315groupPhotoSub{font-size:10.5px;line-height:1.4;color:#7b8d97;margin-top:3px}
 .q315groupPhotoActions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.q315groupPhotoActions button{height:34px;padding:0 10px;border-radius:11px;font-size:10.5px;font-weight:850}
-.q315choose{background:#8ABFF4;color:#102335}.q315skip{background:#edf2f5;color:#667982}
+.q315choose{background:#8ABFF4;color:#102335}.q315skip{background:#edf2f5;color:#667982}.q315skip.remove{background:#fff0f1;color:#bd4e58}
 .q306groupAvatar,.q306headAvatar{background-size:cover!important;background-position:center!important;overflow:hidden!important}
 .q315confirmBack,.q315reactionBack{position:fixed;inset:0;z-index:2500;background:rgba(23,33,43,.48);display:flex;align-items:flex-end;opacity:0;visibility:hidden;pointer-events:none;transition:.15s}
 .q315confirmBack.on,.q315reactionBack.on{opacity:1;visibility:visible;pointer-events:auto}
 .q315sheet{width:100%;max-width:560px;margin:auto;background:#fff;color:#17212b;border-radius:25px 25px 0 0;padding:12px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -18px 55px rgba(23,33,43,.18)}
 .q315handle{width:40px;height:4px;background:#d7e1e7;border-radius:99px;margin:1px auto 15px}.q315title{font-size:19px;font-weight:950}.q315text{font-size:12px;color:#71838d;line-height:1.5;margin:7px 0 14px}
 .q315actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.q315actions button{height:48px;border-radius:15px;font-weight:900}.q315cancel{background:#eef3f5;color:#51646b}.q315delete{background:#ef5d67;color:#fff}
-.q315emojiRow{display:flex;justify-content:space-between;gap:5px;margin:12px 0}.q315emoji{flex:1;height:50px;border-radius:15px;background:#f3f7f9;font-size:24px}.q315copy{width:100%;height:44px;border-radius:13px;background:#edf3f6;color:#536870;font-weight:850}
-.q315reactionLine{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}.q315reactionPill{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border:1px solid #d9e5ec;background:#f7fbfd;border-radius:999px;font-size:12px;line-height:1}
+.q315emojiRow{display:flex;justify-content:space-between;gap:5px;margin:12px 0}.q315emoji{flex:1;height:50px;border-radius:15px;background:#f3f7f9;font-size:24px;transition:.13s}.q315emoji.active{background:#e2f0ff;outline:2px solid #8ABFF4;transform:scale(1.05)}.q315copy{width:100%;height:44px;border-radius:13px;background:#edf3f6;color:#536870;font-weight:850}
+.q315reactionLine{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}.q315reactionPill{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border:1px solid #d9e5ec;background:#f7fbfd;border-radius:999px;font-size:12px;line-height:1;cursor:pointer}.q315holding{transform:scale(.985)!important;filter:brightness(.985)}
 .mine .q315reactionPill,.q306msg.mine .q315reactionPill{background:#edf7ff;border-color:#cfe4f7}
 `;
 document.head.appendChild(style);
@@ -106,13 +113,27 @@ async function compactGroupImage(data){
 function updateGroupPhotoUi(){
   const box=document.querySelector('.q315groupPhotoField');if(!box)return;
   const img=String(window.__skaysaPendingGroupImage||'');
-  const p=box.querySelector('.q315groupPhotoPreview');if(!p)return;
-  if(p.dataset.q315src===img)return;
-  p.dataset.q315src=img;
-  if(img){if(p.textContent)p.textContent='';p.style.backgroundImage=`url("${img.replace(/"/g,'%22')}")`}
-  else{p.style.backgroundImage='';if(p.textContent!=='👥')p.textContent='👥'}
+  const p=box.querySelector('.q315groupPhotoPreview'),skip=box.querySelector('.q315skip');if(!p)return;
+  if(p.dataset.q315src!==img){
+    p.dataset.q315src=img;
+    if(img){if(p.textContent)p.textContent='';p.style.backgroundImage=`url("${img.replace(/"/g,'%22')}")`}
+    else{p.style.backgroundImage='';if(p.textContent!=='👥')p.textContent='👥'}
+  }
+  if(skip){
+    const wanted=img?removePhotoText():tx('skip');
+    if(skip.textContent!==wanted)skip.textContent=wanted;
+    skip.classList.toggle('remove',!!img);
+  }
 }
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('.q306group')){window.__skaysaPendingGroupImage='';setTimeout(()=>{ensureGroupPhoto();updateGroupPhotoUi()},30)}},true);
+let creatorWasOpen=false;
+function syncGroupCreatorLifecycle(){
+  const input=document.querySelector('.q306groupName'),back=input?.closest('.q306back');
+  const open=!!back?.classList.contains('on');
+  if(open&&!creatorWasOpen){window.__skaysaPendingGroupImage='';setTimeout(updateGroupPhotoUi,0)}
+  if(!open&&creatorWasOpen){window.__skaysaPendingGroupImage=''}
+  creatorWasOpen=open;
+}
 function ensureGroupPhoto(){
   const input=document.querySelector('.q306groupName');
   const back=input?.closest('.q306back');
@@ -160,10 +181,10 @@ function applyGroupAvatars(){
   document.querySelectorAll('.q306groupRow[data-group-id]').forEach(row=>{
     const g=groups[row.dataset.groupId],av=row.querySelector('.q306groupAvatar');if(!g||!av)return;
     if(g.image){av.style.backgroundImage=`url("${String(g.image).replace(/"/g,'%22')}")`;av.textContent=''}
-    else{av.style.backgroundImage=''}
+    else{av.style.backgroundImage='';if(!av.textContent)av.textContent=String(g.name||'?').trim().split(/\s+/).map(x=>x[0]||'').join('').slice(0,2).toUpperCase()}
   });
   const screen=document.querySelector('.q306groupScreen'),gid=screen?.dataset.groupId||'',g=groups[gid],head=screen?.querySelector('.q306headAvatar');
-  if(head&&g){if(g.image){head.style.backgroundImage=`url("${String(g.image).replace(/"/g,'%22')}")`;head.textContent=''}else head.style.backgroundImage=''}
+  if(head&&g){if(g.image){head.style.backgroundImage=`url("${String(g.image).replace(/"/g,'%22')}")`;head.textContent=''}else{head.style.backgroundImage='';if(!head.textContent)head.textContent=String(g.name||'?').trim().split(/\s+/).map(x=>x[0]||'').join('').slice(0,2).toUpperCase()}}
 }
 
 /* ---------------- Delete chat by long press ---------------- */
@@ -177,8 +198,10 @@ function openDelete(row){
   const gid=String(row.dataset.groupId||'');
   const phone=norm(row.dataset.phone||row.querySelector('.q305phone')?.textContent||'');
   if(!gid&&!phone)return;
-  deleteTarget=gid?{kind:'group',id:gid}:{kind:'direct',id:phone};
-  confirmBack.querySelector('.q315title').textContent=tx('deleteTitle');
+  let name=String(row.querySelector('.q26name')?.textContent||'').trim();
+  if(gid&&!name){name=String(readJson(GROUPS_KEY,{})[gid]?.name||'').trim()}
+  deleteTarget=gid?{kind:'group',id:gid,name}:{kind:'direct',id:phone,name};
+  confirmBack.querySelector('.q315title').textContent=name||tx('deleteTitle');
   confirmBack.querySelector('.q315text').textContent=tx('deleteQ');
   confirmBack.querySelector('.q315cancel').textContent=tx('cancel');
   confirmBack.querySelector('.q315delete').textContent=tx('delete');
@@ -211,10 +234,16 @@ document.addEventListener('pointerdown',e=>{
   if(!row||row.classList.contains('q299helpRow')||e.target.closest('.q26pin'))return;
   holdRow=row;holdX=e.clientX;holdY=e.clientY;
   clearTimeout(holdTimer);
-  holdTimer=setTimeout(()=>{suppressUntil=Date.now()+900;openDelete(row)},620);
+  row.classList.add('q315holding');
+  holdTimer=setTimeout(()=>{
+    suppressUntil=Date.now()+900;
+    try{navigator.vibrate&&navigator.vibrate(24)}catch(_){}
+    row.classList.remove('q315holding');
+    openDelete(row)
+  },540);
 },true);
-document.addEventListener('pointermove',e=>{if(holdRow&&Math.hypot(e.clientX-holdX,e.clientY-holdY)>12){clearTimeout(holdTimer);holdRow=null}},true);
-['pointerup','pointercancel'].forEach(ev=>document.addEventListener(ev,()=>{clearTimeout(holdTimer);holdRow=null},true));
+document.addEventListener('pointermove',e=>{if(holdRow&&Math.hypot(e.clientX-holdX,e.clientY-holdY)>12){clearTimeout(holdTimer);holdRow.classList.remove('q315holding');holdRow=null}},true);
+['pointerup','pointercancel'].forEach(ev=>document.addEventListener(ev,()=>{clearTimeout(holdTimer);if(holdRow)holdRow.classList.remove('q315holding');holdRow=null},true));
 document.addEventListener('click',e=>{if(Date.now()<suppressUntil&&e.target.closest&&e.target.closest('#people .q26row')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation()}},true);
 
 /* ---------------- Reactions ---------------- */
@@ -259,8 +288,13 @@ function openReactions(ctx){
   reactionContext=ctx;
   reactionBack.querySelector('.q315title').textContent=tx('react');
   reactionBack.querySelector('.q315copy').textContent=tx('copy');
+  const active=String((ctx&&typeof ctx.current==='function'?ctx.current():'')||'');
   const row=reactionBack.querySelector('.q315emojiRow');row.innerHTML='';
-  EMOJIS.forEach(emoji=>{const b=document.createElement('button');b.className='q315emoji';b.textContent=emoji;b.onclick=()=>{const c=reactionContext;closeReactions();if(c)c.react(emoji)};row.appendChild(b)});
+  EMOJIS.forEach(emoji=>{
+    const b=document.createElement('button');b.className='q315emoji'+(active===emoji?' active':'');b.textContent=emoji;
+    b.onclick=()=>{const c=reactionContext;closeReactions();if(c)c.react(emoji)};
+    row.appendChild(b)
+  });
   reactionBack.querySelector('.q315copy').onclick=()=>{const c=reactionContext;closeReactions();if(c)copyText315(c.text||'')};
   reactionBack.classList.add('on');
 }
@@ -275,6 +309,11 @@ function bindLongReaction(bubble,ctxFactory){
   bubble.addEventListener('pointermove',e=>{if(Math.hypot(e.clientX-x,e.clientY-y)>10)clearTimeout(timer)},true);
   ['pointerup','pointercancel','pointerleave'].forEach(ev=>bubble.addEventListener(ev,()=>clearTimeout(timer),true));
   bubble.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();openReactions(ctxFactory())},true);
+  bubble.addEventListener('click',e=>{
+    if(e.target.closest&&e.target.closest('.q315reactionPill')){
+      e.preventDefault();e.stopPropagation();openReactions(ctxFactory())
+    }
+  },true);
 }
 async function sendDirectReaction(phone,target,emoji){
   const me=norm(localStorage.getItem('qevyno_phone')||'');if(!phone||!target||!me)return;
@@ -304,7 +343,7 @@ function decorateDirectMessages(arr,phone){
     const id=messageKey(m,i),bubble=row.querySelector('.bubble');if(!bubble)return;
     row.dataset.messageId=id;
     addReactionLine(bubble,getDirectReactions(phone,id));
-    bindLongReaction(bubble,()=>({text:String(m.text||''),react:emoji=>sendDirectReaction(phone,id,emoji)}));
+    bindLongReaction(bubble,()=>({text:String(m.text||''),current:()=>getDirectReactions(phone,id)[norm(localStorage.getItem('qevyno_phone')||'')]||'',react:emoji=>sendDirectReaction(phone,id,emoji)}));
   });
 }
 function installDirectWrappers(){
@@ -347,7 +386,7 @@ function decorateGroupMessages(){
   screen.querySelectorAll('.q306msg[data-message-id]').forEach(row=>{
     const m=byId.get(String(row.dataset.messageId||'')),bubble=row.querySelector('.q306bubble');if(!m||!bubble)return;
     addReactionLine(bubble,m.reactions||{});
-    bindLongReaction(bubble,()=>({text:String(m.text||''),react:emoji=>{try{window.skaysaReactGroupMessage&&window.skaysaReactGroupMessage(String(m.id||''),emoji)}catch(_){}}}));
+    bindLongReaction(bubble,()=>({text:String(m.text||''),current:()=>String((m.reactions||{})[norm(localStorage.getItem('qevyno_phone')||'')]||''),react:emoji=>{try{window.skaysaReactGroupMessage&&window.skaysaReactGroupMessage(String(m.id||''),emoji)}catch(_){}}}));
   });
 }
 
@@ -360,6 +399,22 @@ const ERROR_MAP={
  'Password needs at least 6 characters.':{de:'Das Passwort braucht mindestens 6 Zeichen.',es:'La contraseña necesita al menos 6 caracteres.',fr:'Le mot de passe doit contenir au moins 6 caractères.',it:'La password deve avere almeno 6 caratteri.',pt:'A palavra-passe precisa de pelo menos 6 caracteres.',nl:'Het wachtwoord moet minstens 6 tekens hebben.',pl:'Hasło musi mieć co najmniej 6 znaków.',tr:'Şifre en az 6 karakter olmalı.',uk:'Пароль має містити щонайменше 6 символів.',ru:'Пароль должен содержать не менее 6 символов.',ja:'パスワードは6文字以上必要です。',ko:'비밀번호는 6자 이상이어야 합니다.',zh:'密码至少需要 6 个字符。',ar:'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.'},
  'Wrong password.':{de:'Falsches Passwort.',es:'Contraseña incorrecta.',fr:'Mot de passe incorrect.',it:'Password errata.',pt:'Palavra-passe incorreta.',nl:'Onjuist wachtwoord.',pl:'Nieprawidłowe hasło.',tr:'Yanlış şifre.',uk:'Неправильний пароль.',ru:'Неверный пароль.',ja:'パスワードが違います。',ko:'비밀번호가 올바르지 않습니다.',zh:'密码错误。',ar:'كلمة المرور غير صحيحة.'}
 };
+function brandifyVisible(root=document){
+  try{
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
+    while((n=walker.nextNode())){
+      const p=n.parentElement;if(!p||/^(SCRIPT|STYLE|NOSCRIPT)$/i.test(p.tagName))continue;
+      const old=n.nodeValue||'',next=old.replace(/Qevyno|SliqChat/g,'Skaysa');
+      if(next!==old)n.nodeValue=next;
+    }
+    root.querySelectorAll?.('[title],[aria-label],[placeholder]').forEach(el=>{
+      ['title','aria-label','placeholder'].forEach(a=>{
+        const old=el.getAttribute(a);if(!old)return;
+        const next=old.replace(/Qevyno|SliqChat/g,'Skaysa');if(next!==old)el.setAttribute(a,next)
+      })
+    });
+  }catch(_){}
+}
 function translateDynamicErrors(){
   const l=lang();if(l==='en')return;
   document.querySelectorAll('#authScreen .error').forEach(el=>{
@@ -371,7 +426,7 @@ function refresh315(){
   if(refreshQueued)return;refreshQueued=true;
   requestAnimationFrame(()=>{
     refreshQueued=false;
-    ensureGroupPhoto();applyGroupAvatars();installDirectWrappers();decorateGroupMessages();translateDynamicErrors();
+    syncGroupCreatorLifecycle();ensureGroupPhoto();applyGroupAvatars();installDirectWrappers();decorateGroupMessages();translateDynamicErrors();brandifyVisible();
   });
 }
 new MutationObserver(refresh315).observe(document.body,{subtree:true,childList:true});

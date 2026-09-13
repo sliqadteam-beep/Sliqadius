@@ -1,7 +1,7 @@
 {
-  "versionCode": 50,
-  "versionName": "2.9.38",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.38.apk",
-  "notes": "Group pictures, long-press chat deletion with confirmation, complete translation polish across all 15 Skaysa languages, and message reactions in private chats and groups. FCM is intentionally not included.",
-  "notes_de": "Gruppenbilder, Chat-Loeschen per Langdruck mit Sicherheitsabfrage, vervollstaendigte Uebersetzungen fuer alle 15 Skaysa-Sprachen und Nachrichten-Reaktionen in privaten Chats und Gruppen. FCM ist bewusst nicht enthalten."
+  "versionCode": 51,
+  "versionName": "2.9.39",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.39.apk",
+  "notes": "Polished group pictures, safer named long-press chat deletion, improved 15-language UI cleanup, and clearer private/group reactions with selected-state feedback. Technical Android bridge names are protected. FCM is intentionally not included.",
+  "notes_de": "Verbesserte Gruppenbilder, sichereres Chat-Loeschen per Langdruck mit Chatname, robustere 15-Sprachen-Uebersetzung und deutlichere private/Gruppen-Reaktionen mit Auswahl-Markierung. Technische Android-Bridge-Namen bleiben geschuetzt. FCM ist bewusst nicht enthalten."
 }
