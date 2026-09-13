@@ -15,8 +15,9 @@
       document.head.appendChild(style);
       const boot=document.createElement('div');
       boot.id='skaysaBoot';
-      const isDe=String(navigator.language||'').toLowerCase().startsWith('de');
-      boot.innerHTML='<div class="skaysaBootInner"><div class="skaysaBootSpinner" aria-hidden="true"></div><div class="skaysaBootText">'+(isDe?'Skaysa wird geladen…':'Loading Skaysa…')+'</div></div>';
+      let bl='en';try{bl=String(localStorage.getItem('qevyno_ui_lang')||navigator.language||'en').toLowerCase().split(/[-_]/)[0];if(bl==='ua')bl='uk'}catch(_){}
+      const bootText={en:'Loading Skaysa…',de:'Skaysa wird geladen…',es:'Cargando Skaysa…',fr:'Chargement de Skaysa…',it:'Caricamento di Skaysa…',pt:'A carregar Skaysa…',nl:'Skaysa wordt geladen…',pl:'Ładowanie Skaysa…',tr:'Skaysa yükleniyor…',uk:'Skaysa завантажується…',ru:'Загрузка Skaysa…',ja:'Skaysaを読み込み中…',ko:'Skaysa 불러오는 중…',zh:'正在加载 Skaysa…',ar:'جارٍ تحميل Skaysa…'};
+      boot.innerHTML='<div class="skaysaBootInner"><div class="skaysaBootSpinner" aria-hidden="true"></div><div class="skaysaBootText">'+(bootText[bl]||bootText.en)+'</div></div>';
       document.body.appendChild(boot);
       window.skaysaHideBoot=()=>{
         const b=document.getElementById('skaysaBoot');

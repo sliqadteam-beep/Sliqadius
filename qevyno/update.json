@@ -1,7 +1,7 @@
 {
-  "versionCode": 39,
-  "versionName": "2.9.27",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.27.apk",
-  "notes": "Search stability fix and new startup loading screen. Only one search layer handles filtering now, while the old Qevyno base UI is covered until the final Skaysa interface is ready.",
-  "notes_de": "Such-Stabilitaetsfix und neuer Start-Ladescreen. Nur noch eine Such-Ebene filtert die Chats. Die alte Qevyno-Basisoberflaeche bleibt verdeckt, bis die fertige Skaysa-Oberflaeche bereit ist."
+  "versionCode": 40,
+  "versionName": "2.9.28",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.28.apk",
+  "notes": "Language and notification polish: late Skaysa UI elements now follow all 15 supported languages. Notification channel/status text and message previews are localized while notifications remain active.",
+  "notes_de": "Sprach- und Benachrichtigungs-Polish: Auch spaet geladene Skaysa-Oberflaechen folgen jetzt allen 15 unterstuetzten Sprachen. Benachrichtigungskanal, Status und Nachrichtenvorschau sind lokalisiert; Benachrichtigungen bleiben aktiv."
 }

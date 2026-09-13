@@ -33,22 +33,18 @@ public class NotificationService extends Service {
     private volatile boolean running = false;
     private Thread worker;
 
-    @Override
-    public void onCreate() {
+    @Override public void onCreate() {
         super.onCreate();
         createChannels();
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    @Override public int onStartCommand(Intent intent, int flags, int startId) {
         SharedPreferences p = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         if (!p.getBoolean("enabled", false) || p.getString("token", "").isEmpty()) {
             stopSelf();
             return START_NOT_STICKY;
         }
-        try {
-            startForeground(STATUS_ID, buildStatusNotification());
-        } catch (Exception ignored) {}
+        try { startForeground(STATUS_ID, buildStatusNotification()); } catch (Exception ignored) {}
         startWorker();
         return START_STICKY;
     }
@@ -58,15 +54,9 @@ public class NotificationService extends Service {
         running = true;
         worker = new Thread(() -> {
             while (running) {
-                try {
-                    pollOnce();
-                } catch (Exception ignored) {}
-                try {
-                    Thread.sleep(12000L);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+                try { pollOnce(); } catch (Exception ignored) {}
+                try { Thread.sleep(12000L); }
+                catch (InterruptedException e) { Thread.currentThread().interrupt(); break; }
             }
         }, "SkaysaNotifications");
         worker.start();
@@ -74,15 +64,13 @@ public class NotificationService extends Service {
 
     private void pollOnce() {
         SharedPreferences p = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        if (!p.getBoolean("enabled", false)) return;
-        if (p.getBoolean("app_visible", false)) return;
+        if (!p.getBoolean("enabled", false) || p.getBoolean("app_visible", false)) return;
         String token = p.getString("token", "");
         if (token == null || token.isEmpty()) return;
 
         HttpURLConnection c = null;
         try {
-            URL url = new URL(SERVER + "/api/events");
-            c = (HttpURLConnection) url.openConnection();
+            c = (HttpURLConnection) new URL(SERVER + "/api/events").openConnection();
             c.setRequestMethod("GET");
             c.setConnectTimeout(6000);
             c.setReadTimeout(9000);
@@ -98,8 +86,7 @@ public class NotificationService extends Service {
             }
             if (code != 200) return;
 
-            String raw = readAll(c.getInputStream());
-            JSONObject root = new JSONObject(raw);
+            JSONObject root = new JSONObject(readAll(c.getInputStream()));
             if (!root.optBoolean("ok", false)) return;
             JSONArray events = root.optJSONArray("events");
             if (events == null) return;
@@ -107,7 +94,6 @@ public class NotificationService extends Service {
             Set<String> seen = loadSeenSet(p);
             ArrayDeque<String> order = loadSeenOrder(p);
             boolean changed = false;
-
             for (int i = 0; i < events.length(); i++) {
                 JSONObject e = events.optJSONObject(i);
                 if (e == null || !"message".equals(e.optString("type"))) continue;
@@ -116,14 +102,10 @@ public class NotificationService extends Service {
                 if (postMessageNotification(e, id)) {
                     seen.add(id);
                     order.addLast(id);
-                    while (order.size() > MAX_SEEN) {
-                        String old = order.removeFirst();
-                        seen.remove(old);
-                    }
+                    while (order.size() > MAX_SEEN) seen.remove(order.removeFirst());
                     changed = true;
                 }
             }
-
             if (changed) saveSeenOrder(p, order);
         } catch (Exception ignored) {
         } finally {
@@ -141,9 +123,7 @@ public class NotificationService extends Service {
             Intent open = new Intent(this, MainActivity.class);
             open.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent pi = PendingIntent.getActivity(
-                this,
-                Math.abs(id.hashCode()),
-                open,
+                this, Math.abs(id.hashCode()), open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
 
@@ -161,7 +141,7 @@ public class NotificationService extends Service {
              .setWhen(System.currentTimeMillis())
              .setShowWhen(true);
 
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
             if (nm == null) return false;
             nm.notify(12000 + Math.abs(id.hashCode() % 100000), b.build());
             return true;
@@ -172,36 +152,135 @@ public class NotificationService extends Service {
         }
     }
 
+    private String language() {
+        String l = Locale.getDefault().getLanguage().toLowerCase(Locale.ROOT);
+        if ("ua".equals(l)) l = "uk";
+        switch (l) {
+            case "de": case "es": case "fr": case "it": case "pt": case "nl":
+            case "pl": case "tr": case "uk": case "ru": case "ja": case "ko":
+            case "zh": case "ar": return l;
+            default: return "en";
+        }
+    }
+
+    private String tr(String key) {
+        String l = language();
+        if ("status".equals(key)) {
+            switch (l) {
+                case "de": return "Skaysa-Benachrichtigungszugriff aktiv";
+                case "es": return "Acceso a notificaciones de Skaysa activo";
+                case "fr": return "Accès aux notifications Skaysa actif";
+                case "it": return "Accesso alle notifiche Skaysa attivo";
+                case "pt": return "Acesso às notificações Skaysa ativo";
+                case "nl": return "Skaysa-meldingstoegang actief";
+                case "pl": return "Dostęp do powiadomień Skaysa aktywny";
+                case "tr": return "Skaysa bildirim erişimi etkin";
+                case "uk": return "Доступ Skaysa до сповіщень активний";
+                case "ru": return "Доступ Skaysa к уведомлениям активен";
+                case "ja": return "Skaysaの通知アクセスが有効です";
+                case "ko": return "Skaysa 알림 접근이 활성화됨";
+                case "zh": return "Skaysa 通知访问已启用";
+                case "ar": return "وصول Skaysa إلى الإشعارات مفعّل";
+                default: return "Skaysa notification access active";
+            }
+        }
+        if ("statusChannel".equals(key)) {
+            return "de".equals(l) ? "Skaysa Hintergrund-Benachrichtigungen" : "Skaysa background notifications";
+        }
+        if ("statusDesc".equals(key)) {
+            return "de".equals(l) ? "Hält Skaysa-Benachrichtigungen im Hintergrund aktiv." : "Keeps Skaysa notifications active in the background.";
+        }
+        if ("messageChannel".equals(key)) {
+            return "de".equals(l) ? "Skaysa Nachrichten" : "Skaysa messages";
+        }
+        if ("messageDesc".equals(key)) {
+            return "de".equals(l) ? "Benachrichtigungen für neue Skaysa-Nachrichten." : "Notifications for new Skaysa messages.";
+        }
+        if ("group".equals(key)) {
+            switch (l) {
+                case "de": return "Neue Gruppennachricht";
+                case "es": return "Nuevo mensaje de grupo";
+                case "fr": return "Nouveau message de groupe";
+                case "it": return "Nuovo messaggio di gruppo";
+                case "pt": return "Nova mensagem de grupo";
+                case "nl": return "Nieuw groepsbericht";
+                case "pl": return "Nowa wiadomość grupowa";
+                case "tr": return "Yeni grup mesajı";
+                case "uk": return "Нове групове повідомлення";
+                case "ru": return "Новое сообщение в группе";
+                case "ja": return "新しいグループメッセージ";
+                case "ko": return "새 그룹 메시지";
+                case "zh": return "新的群组消息";
+                case "ar": return "رسالة مجموعة جديدة";
+                default: return "New group message";
+            }
+        }
+        if ("media".equals(key)) {
+            switch (l) {
+                case "de": return "Bild, GIF oder Video";
+                case "es": return "Foto, GIF o vídeo";
+                case "fr": return "Photo, GIF ou vidéo";
+                case "it": return "Foto, GIF o video";
+                case "pt": return "Foto, GIF ou vídeo";
+                case "nl": return "Foto, GIF of video";
+                case "pl": return "Zdjęcie, GIF lub wideo";
+                case "tr": return "Fotoğraf, GIF veya video";
+                case "uk": return "Фото, GIF або відео";
+                case "ru": return "Фото, GIF или видео";
+                case "ja": return "写真、GIF、または動画";
+                case "ko": return "사진, GIF 또는 동영상";
+                case "zh": return "图片、GIF 或视频";
+                case "ar": return "صورة أو GIF أو فيديو";
+                default: return "Photo, GIF or video";
+            }
+        }
+        if ("new".equals(key)) {
+            switch (l) {
+                case "de": return "Neue Nachricht";
+                case "es": return "Nuevo mensaje";
+                case "fr": return "Nouveau message";
+                case "it": return "Nuovo messaggio";
+                case "pt": return "Nova mensagem";
+                case "nl": return "Nieuw bericht";
+                case "pl": return "Nowa wiadomość";
+                case "tr": return "Yeni mesaj";
+                case "uk": return "Нове повідомлення";
+                case "ru": return "Новое сообщение";
+                case "ja": return "新しいメッセージ";
+                case "ko": return "새 메시지";
+                case "zh": return "新消息";
+                case "ar": return "رسالة جديدة";
+                default: return "New message";
+            }
+        }
+        return key;
+    }
+
     private String cleanPreview(String text) {
         text = text == null ? "" : text.trim();
-        boolean de = Locale.getDefault().getLanguage().toLowerCase(Locale.ROOT).startsWith("de");
-        if (text.startsWith("[[SLIQCHAT_GROUP_V1:")) return de ? "Neue Gruppennachricht" : "New group message";
-        if (text.startsWith("[[SLIQCHAT_MEDIA_V1:")) return de ? "Bild, GIF oder Video" : "Photo, GIF or video";
-        if (text.isEmpty()) return de ? "Neue Nachricht" : "New message";
+        if (text.startsWith("[[SLIQCHAT_GROUP_V1:")) return tr("group");
+        if (text.startsWith("[[SLIQCHAT_MEDIA_V1:")) return tr("media");
+        if (text.isEmpty()) return tr("new");
         text = text.replaceAll("\\s+", " ").trim();
         return text.length() > 180 ? text.substring(0, 177) + "…" : text;
     }
 
     private void createChannels() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         if (nm == null) return;
 
         NotificationChannel status = new NotificationChannel(
-            STATUS_CHANNEL,
-            "Skaysa Hintergrunddienst",
-            NotificationManager.IMPORTANCE_MIN
+            STATUS_CHANNEL, tr("statusChannel"), NotificationManager.IMPORTANCE_MIN
         );
-        status.setDescription("Hält Skaysa-Benachrichtigungen aktiv.");
+        status.setDescription(tr("statusDesc"));
         status.setShowBadge(false);
         nm.createNotificationChannel(status);
 
         NotificationChannel messages = new NotificationChannel(
-            MESSAGE_CHANNEL,
-            "Skaysa Nachrichten",
-            NotificationManager.IMPORTANCE_HIGH
+            MESSAGE_CHANNEL, tr("messageChannel"), NotificationManager.IMPORTANCE_HIGH
         );
-        messages.setDescription("Benachrichtigungen für neue Skaysa-Nachrichten.");
+        messages.setDescription(tr("messageDesc"));
         messages.enableVibration(true);
         nm.createNotificationChannel(messages);
     }
@@ -209,15 +288,14 @@ public class NotificationService extends Service {
     private Notification buildStatusNotification() {
         Intent open = new Intent(this, MainActivity.class);
         PendingIntent pi = PendingIntent.getActivity(
-            this, 9102, open,
-            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            this, 9102, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
         Notification.Builder b = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             ? new Notification.Builder(this, STATUS_CHANNEL)
             : new Notification.Builder(this);
         return b.setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("Skaysa")
-            .setContentText("Benachrichtigungen aktiv")
+            .setContentText(tr("status"))
             .setContentIntent(pi)
             .setOngoing(true)
             .setCategory(Notification.CATEGORY_SERVICE)
@@ -238,8 +316,7 @@ public class NotificationService extends Service {
         ArrayDeque<String> out = new ArrayDeque<>();
         String raw = p.getString("seen_ids", "");
         if (raw == null || raw.isEmpty()) return out;
-        String[] parts = raw.split("\\n");
-        for (String x : parts) if (!x.isEmpty()) out.addLast(x);
+        for (String x : raw.split("\\n")) if (!x.isEmpty()) out.addLast(x);
         while (out.size() > MAX_SEEN) out.removeFirst();
         return out;
     }
@@ -257,16 +334,12 @@ public class NotificationService extends Service {
         p.edit().putString("seen_ids", s.toString()).apply();
     }
 
-    @Override
-    public void onDestroy() {
+    @Override public void onDestroy() {
         running = false;
         if (worker != null) worker.interrupt();
         worker = null;
         super.onDestroy();
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
+    @Override public IBinder onBind(Intent intent) { return null; }
 }
