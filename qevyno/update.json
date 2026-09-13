@@ -1,7 +1,7 @@
 {
-  "versionCode": 40,
-  "versionName": "2.9.28",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.28.apk",
-  "notes": "Language and notification polish: late Skaysa UI elements now follow all 15 supported languages. Notification channel/status text and message previews are localized while notifications remain active.",
-  "notes_de": "Sprach- und Benachrichtigungs-Polish: Auch spaet geladene Skaysa-Oberflaechen folgen jetzt allen 15 unterstuetzten Sprachen. Benachrichtigungskanal, Status und Nachrichtenvorschau sind lokalisiert; Benachrichtigungen bleiben aktiv."
+  "versionCode": 41,
+  "versionName": "2.9.29",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.29.apk",
+  "notes": "Signup profile-picture step, no legacy UI flash at startup, and messenger-style message notifications with sender name plus message text.",
+  "notes_de": "Profilbild-Schritt bei der Registrierung, kein Aufblitzen der alten UI beim Start und Messenger-Benachrichtigungen mit Absendername plus Nachrichtentext."
 }

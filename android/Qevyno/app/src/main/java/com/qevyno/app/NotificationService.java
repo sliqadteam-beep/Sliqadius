@@ -55,7 +55,7 @@ public class NotificationService extends Service {
         worker = new Thread(() -> {
             while (running) {
                 try { pollOnce(); } catch (Exception ignored) {}
-                try { Thread.sleep(12000L); }
+                try { Thread.sleep(6000L); }
                 catch (InterruptedException e) { Thread.currentThread().interrupt(); break; }
             }
         }, "SkaysaNotifications");
@@ -136,6 +136,9 @@ public class NotificationService extends Service {
              .setContentText(body)
              .setStyle(new Notification.BigTextStyle().bigText(body))
              .setContentIntent(pi)
+             .setSubText("Skaysa")
+             .setPriority(Notification.PRIORITY_HIGH)
+             .setVisibility(Notification.VISIBILITY_PRIVATE)
              .setAutoCancel(true)
              .setCategory(Notification.CATEGORY_MESSAGE)
              .setWhen(System.currentTimeMillis())

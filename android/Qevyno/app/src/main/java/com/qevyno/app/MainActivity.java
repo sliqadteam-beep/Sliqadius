@@ -97,7 +97,8 @@ public class MainActivity extends Activity {
                 appendAsset(bundle, "features299.js");
                 appendAsset(bundle, "features300.js");
                 appendAsset(bundle, "features301.js");
-                runScript(view, bundle.toString(), () -> view.setVisibility(View.VISIBLE));
+                appendAsset(bundle, "features314.js");
+                runScript(view, bundle.toString(), () -> showWhenSkaysaReady(view, 0));
             }
         });
 
@@ -236,6 +237,17 @@ public class MainActivity extends Activity {
         if (script != null && !script.isEmpty()) bundle.append('\n').append(script).append('\n');
     }
 
+    private void showWhenSkaysaReady(WebView view, int attempt) {
+        if (view == null) return;
+        view.evaluateJavascript("(window.__skaysaReady===true)", value -> {
+            boolean ready = "true".equals(String.valueOf(value));
+            if (ready || attempt >= 45) {
+                view.setVisibility(View.VISIBLE);
+                return;
+            }
+            view.postDelayed(() -> showWhenSkaysaReady(view, attempt + 1), 70L);
+        });
+    }
     private void runScript(WebView view, String script, Runnable done) {
         if (script == null || script.isEmpty()) {
             done.run();
