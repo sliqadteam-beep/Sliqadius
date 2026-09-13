@@ -143,12 +143,36 @@
 
   const oldRefresh=window.refreshPresence;window.refreshPresence=async function(){if(!peer)return;const r=await api('/api/find?phone='+encodeURIComponent(peer.phone));if(r&&r.ok){const u=r.user;peer.name=u.display_name||peer.name;touchMeta(u.phone,{display_name:u.display_name||u.phone,online:!!u.online,verified:verified(u.phone,u.verified),avatar_url:u.avatar_url||null});if(D('chatPresence'))D('chatPresence').textContent=u.phone+' • '+(u.online?'Online':'Offline');decorateChat(getMeta(u.phone))}else if(typeof oldRefresh==='function')return oldRefresh()};
 
-  function ensureProfileSettings(){const sheet=document.querySelector('#sheetBack .sheet');if(!sheet||!mePhone)return;let sec=D('q295photo');if(!sec){sec=document.createElement('div');sec.id='q295photo';sec.className='q295photoRow';sec.innerHTML=`<div class="q295photoHead"><div class="q295profilePreview" id="q295profilePreview">${esc(initials(meName||mePhone))}</div><div class="q295photoText"><b>${tx('photo')}</b><span>${tx('photoSub')}</span></div></div><div class="q295photoBtns"><button id="q295pick">${tx('changePhoto')}</button><button class="remove" id="q295remove">${tx('removePhoto')}</button></div><div class="q295privacy">${tx('messagesDevice')}<br>${tx('offlineWarn')}</div>`;const profile=sheet.querySelector('.q26profile');if(profile)profile.after(sec);else sheet.prepend(sec);D('q295pick').onclick=()=>{try{QevynoDevice.pickProfilePicture()}catch(e){}};D('q295remove').onclick=async()=>{const r=await api('/api/profile-picture/delete','POST',{});if(r&&r.ok){ownMeta={...ownMeta,...r,avatar_url:null};applyOwnProfile();}}}applyOwnProfile()}
-  function applyOwnProfile(){const url=absAvatar(ownMeta.avatar_url);const p=D('q295profilePreview');if(p){p.textContent=url?'':initials(meName||mePhone);p.style.backgroundImage=url?`url("${url}")`:''}const a=D('settingsAvatar');if(a){a.textContent=url?'':initials(meName||mePhone);a.classList.toggle('q295avatarPic',!!url);a.style.backgroundImage=url?`url("${url}")`:''}const n=D('settingsName');if(n){n.textContent=meName||'Qevyno';if(verified(mePhone,ownMeta.verified)){const b=document.createElement('span');b.className='q295verified';b.textContent='✓';n.appendChild(b)}}}
-  window.qevynoProfilePicked=async function(dataUrl,w,h){if(w>1600||h>1600)return alert(tx('badPhoto'));const r=await api('/api/profile-picture','POST',{image:dataUrl});if(r&&r.ok){ownMeta={...ownMeta,...r};applyOwnProfile();}else alert(tx('badPhoto'))};window.qevynoProfilePickFailed=()=>alert(tx('badPhoto'));
+  function ensureProfileSettings(){const sheet=document.querySelector('#sheetBack .sheet');if(!sheet||!mePhone)return;let sec=D('q295photo');if(!sec){sec=document.createElement('div');sec.id='q295photo';sec.className='q295photoRow';sec.innerHTML=`<div class="q295photoHead"><div class="q295profilePreview" id="q295profilePreview">${esc(initials(meName||mePhone))}</div><div class="q295photoText"><b>${tx('photo')}</b><span>${tx('photoSub')}</span></div></div><div class="q295photoBtns"><button id="q295pick">${tx('changePhoto')}</button><button class="remove" id="q295remove">${tx('removePhoto')}</button></div><div class="q295privacy">${tx('messagesDevice')}<br>${tx('offlineWarn')}</div>`;const profile=sheet.querySelector('.q26profile');if(profile)profile.after(sec);else sheet.prepend(sec);D('q295pick').onclick=()=>{try{QevynoDevice.pickProfilePicture()}catch(e){}};D('q295remove').onclick=async()=>{const r=await api('/api/profile-picture/delete','POST',{});if(r&&r.ok){ownMeta={...ownMeta,...r,avatar_url:null,avatar_data:''};applyOwnProfile();window.dispatchEvent(new CustomEvent('skaysa-profile-changed',{detail:{...r,avatar_url:'',avatarData:''}}));}}}applyOwnProfile()}
+  function applyOwnProfile(){let cached='';try{const c=JSON.parse(localStorage.getItem('skaysa_profile_cache_v4')||'null');if(c&&(!c.phone||c.phone===mePhone))cached=String(c.avatar_data||'')}catch(_){}const url=cached||String(ownMeta.avatar_data||'')||absAvatar(ownMeta.avatar_url);const p=D('q295profilePreview');if(p){p.textContent=url?'':initials(meName||mePhone);p.style.backgroundImage=url?`url("${url}")`:''}const a=D('settingsAvatar');if(a){a.textContent=url?'':initials(meName||mePhone);a.classList.toggle('q295avatarPic',!!url);a.style.backgroundImage=url?`url("${url}")`:''}const n=D('settingsName');if(n){n.textContent=meName||'Qevyno';if(verified(mePhone,ownMeta.verified)){const b=document.createElement('span');b.className='q295verified';b.textContent='✓';n.appendChild(b)}}}
+  window.qevynoProfilePicked=async function(dataUrl,w,h){if(w>1600||h>1600)return alert(tx('badPhoto'));const r=await api('/api/profile-picture','POST',{image:dataUrl});if(r&&r.ok){ownMeta={...ownMeta,...r,avatar_data:dataUrl};applyOwnProfile();window.dispatchEvent(new CustomEvent('skaysa-profile-changed',{detail:{...r,avatarData:dataUrl}}));}else alert(tx('badPhoto'))};window.qevynoProfilePickFailed=()=>alert(tx('badPhoto'));
   const oldOpenSettings=window.openSettings;if(typeof oldOpenSettings==='function')window.openSettings=function(){oldOpenSettings();setTimeout(ensureProfileSettings,30)};
 
-  async function loadOwn(){if(!token)return;const r=await api('/api/me');if(r&&r.ok){ownMeta={...r,verified:verified(r.phone,r.verified)};meName=r.display_name||meName;localStorage.setItem('qevyno_name',meName);applyOwnProfile();}}
+  async function loadOwn(){
+  if(!token)return;
+  let r=null;
+  try{
+    for(let i=0;i<12&&typeof window.skaysaLoadOwnProfileOnce!=='function';i++){
+      await new Promise(resolve=>setTimeout(resolve,50));
+    }
+    if(typeof window.skaysaLoadOwnProfileOnce==='function')r=await window.skaysaLoadOwnProfileOnce();
+    else{
+      try{r=JSON.parse(localStorage.getItem('skaysa_profile_cache_v4')||'null')}catch(_){}
+    }
+  }catch(_){}
+  if(r){
+    ownMeta={
+      ...ownMeta,...r,
+      display_name:r.display_name||r.name||ownMeta.display_name,
+      avatar_url:r.avatar_url||ownMeta.avatar_url||null,
+      avatar_data:r.avatar_data||'',
+      verified:verified(r.phone||mePhone,r.verified)
+    };
+    meName=r.display_name||r.name||meName;
+    try{localStorage.setItem('qevyno_name',meName)}catch(_){}
+    applyOwnProfile();
+  }
+}
   const oldSave=window.saveSession;if(typeof oldSave==='function')window.saveSession=function(d){oldSave(d);ownMeta={...ownMeta,...d,verified:verified(d&&d.phone,d&&d.verified)};setTimeout(()=>{loadOwn();if(window.qevynoRefreshOwnQr)window.qevynoRefreshOwnQr()},150)};
 
   try{if(pollHome){clearInterval(pollHome);pollHome=setInterval(window.loadConversations,2500)}if(pollChat){clearInterval(pollChat);pollChat=setInterval(window.loadMessages,1500)}}catch(e){}

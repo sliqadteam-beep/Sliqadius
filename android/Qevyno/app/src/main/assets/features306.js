@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.9.40';
+const VERSION='2.9.41';
 const BRAND='Skaysa';
 const GROUPS_KEY='sliqchat_groups_v1';
 const GROUP_MSG_PREFIX='sliqchat_group_messages_';
@@ -154,7 +154,7 @@ const groupScreen=document.createElement('div');groupScreen.className='q306group
 function closeGroup(){groupScreen.classList.remove('on');activeGroupId='';refreshList()}
 groupScreen.querySelector('.q306backBtn').onclick=closeGroup;
 function renderGroup(id,animateId=''){const g=getGroup(id);if(!g)return;const msgs=loadGroupMessages(id),box=groupScreen.querySelector('.q306msgs');groupScreen.querySelector('.q306headName').textContent=g.name;groupScreen.querySelector('.q306headAvatar').textContent=initials(g.name);groupScreen.querySelector('.q306headMembers').textContent=g.members.length+' '+(g.members.length===1?tx('member'):tx('membersN'));box.innerHTML='';if(!msgs.length){const e=document.createElement('div');e.className='q306empty';e.textContent=tx('noGroupMessages');box.appendChild(e)}for(const m of msgs){const mine=m.sender_phone===mePhone(),r=document.createElement('div');r.className='q306msg'+(mine?' mine':'')+(animateId&&m.id===animateId?' new':'');r.dataset.messageId=String(m.id||'');if(!mine){const s=document.createElement('div');s.className='q306sender';s.dataset.phone=normPhone(m.sender_phone||'');s.textContent=m.sender_name||displayMemberName(m.sender_phone);r.appendChild(s)}const b=document.createElement('div');b.className='q306bubble';b.innerHTML=`<div class="q306text">${esc(m.text||'')}</div><div class="q306time">${new Date(Number(m.sent_at||0)*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`;r.appendChild(b);box.appendChild(r)}box.scrollTop=box.scrollHeight}
-function openGroup(id){const g=getGroup(id);if(!g)return;activeGroupId=id;groupScreen.dataset.groupId=id;groupScreen.dataset.groupId=id;groupScreen.dataset.groupId=id;g.unread=0;saveGroup(g);renderGroup(id);groupScreen.classList.add('on');setTimeout(()=>groupScreen.querySelector('textarea').focus(),120);refreshList()}
+function openGroup(id){const g=getGroup(id);if(!g)return;activeGroupId=id;groupScreen.dataset.groupId=id;groupScreen.dataset.groupId=id;groupScreen.dataset.groupId=id;groupScreen.dataset.groupId=id;g.unread=0;saveGroup(g);renderGroup(id);groupScreen.classList.add('on');setTimeout(()=>groupScreen.querySelector('textarea').focus(),120);refreshList()}
 async function sendGroupMessage(){const id=activeGroupId,g=getGroup(id),ta=groupScreen.querySelector('textarea');const text=String(ta.value||'').trim();if(!g||!text)return;const mid='gm_'+uuid(),m={id:mid,sender_phone:mePhone(),sender_name:meName(),text:text.slice(0,1800),sent_at:now()};const a=loadGroupMessages(id);a.push(m);saveGroupMessages(id,a);g.updated_at=m.sent_at;saveGroup(g);ta.value='';renderGroup(id,mid);refreshList();broadcastGroup(g,{type:'message',msgid:mid,text:m.text,sent_at:m.sent_at})}
 window.skaysaReactGroupMessage=async function(messageId,emoji){
   const g=getGroup(activeGroupId);if(!g)return;

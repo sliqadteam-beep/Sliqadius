@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.9.22';
+const VERSION='2.9.41';
 const VERIFIED_PHONE='+4915229463681';
 const SUP=['en','de','es','fr','it','pt','nl','pl','tr','uk','ru','ja','ko','zh','ar'];
 const T={
@@ -68,7 +68,34 @@ const style=document.createElement('style');style.id='sliqchat308style';style.te
 `;document.head.appendChild(style);
 
 let own={phone:myPhone(),name:myName(),avatar:'',verified:isVerifiedPhone(myPhone())};
+const PROFILE_CACHE_KEY='skaysa_profile_cache_v4';
 let ownAvatarObjectUrl='';
+let profileLoadPromise=null;
+let profileLoadedThisStart=false;
+
+function readOwnProfileCache(){
+  try{
+    const c=JSON.parse(localStorage.getItem(PROFILE_CACHE_KEY)||'null');
+    if(!c||typeof c!=='object')return null;
+    const current=String(myPhone()||'');
+    if(c.phone&&current&&String(c.phone)!==current)return null;
+    return c;
+  }catch(_){return null}
+}
+function writeOwnProfileCache(c){
+  try{
+    const out={
+      phone:String(c?.phone||own.phone||myPhone()||''),
+      name:String(c?.name||c?.display_name||own.name||myName()||''),
+      verified:c?.verified===true,
+      avatar_url:String(c?.avatar_url||''),
+      avatar_data:String(c?.avatar_data||''),
+      updated_at:Date.now()
+    };
+    localStorage.setItem(PROFILE_CACHE_KEY,JSON.stringify(out));
+    return out;
+  }catch(_){return null}
+}
 function avatarFallback(el){
   if(!el)return;
   el.style.backgroundImage='';
@@ -88,60 +115,158 @@ function refreshChip(){
   chip.querySelector('.q308miniPhone').textContent=own.phone;
   applyAvatar(chip.querySelector('.q308miniAvatar'));
 }
-async function resolveOwnAvatar(raw){
+function hydrateOwnProfileCache(){
+  const c=readOwnProfileCache();if(!c)return null;
+  own.phone=String(c.phone||myPhone()||own.phone||'');
+  own.name=String(c.name||myName()||own.name||own.phone);
+  own.verified=c.verified===true||isVerifiedPhone(own.phone);
+  own.avatar=String(c.avatar_data||'');
+  refreshChip();
+  try{refreshSheet()}catch(_){}
+  return c;
+}
+function dataUrlFromBlob(blob){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(String(r.result||''));
+    r.onerror=reject;
+    r.readAsDataURL(blob);
+  });
+}
+function imageFromDataUrl(data){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>resolve(img);
+    img.onerror=reject;
+    img.src=data;
+  });
+}
+async function compactProfileAvatar(blob){
+  try{
+    const raw=await dataUrlFromBlob(blob);
+    const img=await imageFromDataUrl(raw);
+    const size=192,c=document.createElement('canvas');
+    c.width=size;c.height=size;
+    const x=c.getContext('2d');
+    const scale=Math.max(size/img.naturalWidth,size/img.naturalHeight);
+    const w=img.naturalWidth*scale,h=img.naturalHeight*scale;
+    x.drawImage(img,(size-w)/2,(size-h)/2,w,h);
+    return c.toDataURL('image/jpeg',0.82);
+  }catch(_){return''}
+}
+async function downloadProfileAvatar(raw){
   const u=absAvatar(raw||'');if(!u)return'';
   if(/^data:image\//i.test(u))return u;
-  for(let attempt=0;attempt<2;attempt++){
-    try{
-      const sep=u.includes('?')?'&':'?';
-      const r=await fetch(u+sep+'skaysa_avatar='+(Date.now()+attempt),{cache:'no-store',credentials:'omit'});
-      if(!r.ok)continue;
-      const blob=await r.blob();
-      if(!String(blob.type||'').toLowerCase().startsWith('image/'))continue;
-      const next=URL.createObjectURL(blob);
-      if(ownAvatarObjectUrl){try{URL.revokeObjectURL(ownAvatarObjectUrl)}catch(_){}}
-      ownAvatarObjectUrl=next;
-      return next;
-    }catch(_){}
-    await new Promise(resolve=>setTimeout(resolve,120));
-  }
-  return'';
-}
-async function refreshOwn(){
-  own.phone=myPhone();own.name=myName();
-  const preview=String(window.__skaysaOwnAvatarPreview||'');
-  own.avatar=/^data:image\//i.test(preview)?preview:'';
-  refreshChip();
   try{
-    if(typeof window.api==='function'&&own.phone){
-      const d=await window.api('/api/me');
-      if(d&&d.ok){
-        own.name=String(d.display_name||own.name);
-        own.phone=String(d.phone||own.phone);
-        own.verified=d.verified===true||isVerifiedPhone(own.phone);
-        const remote=absAvatar(d.avatar_url||'');
-        let resolved=await resolveOwnAvatar(remote);
-        if(!resolved&&preview)resolved=preview;
-        own.avatar=resolved||'';
-        try{
-          localStorage.setItem('qevyno_name',own.name);
-          if(remote)localStorage.setItem('sliqchat_own_avatar',remote);
-          else localStorage.removeItem('sliqchat_own_avatar');
-        }catch(_){}
-        refreshChip();refreshSheet();
-      }
-    }
-  }catch(_){
-    if(!own.avatar){avatarFallback(document.querySelector('.q308miniAvatar'));avatarFallback(document.querySelector('.q308bigAvatar'))}
-  }
+    const sep=u.includes('?')?'&':'?';
+    const r=await fetch(u+sep+'skaysa_profile=' + Date.now(),{
+      cache:'no-store',
+      credentials:'omit'
+    });
+    if(!r.ok)return'';
+    const blob=await r.blob();
+    if(!String(blob.type||'').toLowerCase().startsWith('image/'))return'';
+    return await compactProfileAvatar(blob);
+  }catch(_){return''}
 }
+async function applyProfileChanged(detail){
+  detail=detail&&typeof detail==='object'?detail:{};
+  const old=readOwnProfileCache()||{};
+  own.phone=String(detail.phone||old.phone||myPhone()||own.phone||'');
+  own.name=String(detail.display_name||detail.name||old.name||myName()||own.name||own.phone);
+  own.verified=detail.verified===true||isVerifiedPhone(own.phone);
+
+  let avatarUrl=('avatar_url' in detail)?absAvatar(detail.avatar_url||''):String(old.avatar_url||'');
+  let avatarData=('avatarData' in detail)?String(detail.avatarData||''):String(old.avatar_data||'');
+
+  if(avatarData&&!/^data:image\//i.test(avatarData))avatarData='';
+  if(avatarData&&/^data:image\//i.test(avatarData)){
+    try{
+      const b=await (await fetch(avatarData)).blob();
+      avatarData=(await compactProfileAvatar(b))||avatarData;
+    }catch(_){}
+  }
+  if(!avatarData&&avatarUrl&&avatarUrl!==String(old.avatar_url||'')){
+    avatarData=await downloadProfileAvatar(avatarUrl);
+  }
+  if(('avatar_url' in detail)&&!detail.avatar_url){
+    avatarUrl='';avatarData='';
+  }
+
+  own.avatar=avatarData;
+  const saved=writeOwnProfileCache({
+    phone:own.phone,name:own.name,verified:own.verified,
+    avatar_url:avatarUrl,avatar_data:avatarData
+  });
+  refreshChip();
+  try{refreshSheet()}catch(_){}
+  return saved||detail;
+}
+async function refreshOwn(force=false){
+  hydrateOwnProfileCache();
+  own.phone=myPhone();own.name=myName();
+
+  // No account/session yet: don't consume the one startup refresh.
+  if(!own.phone||typeof window.api!=='function')return readOwnProfileCache();
+
+  // Concurrent callers share the exact same request.
+  if(profileLoadPromise)return profileLoadPromise;
+  if(!force&&profileLoadedThisStart)return readOwnProfileCache();
+
+  profileLoadedThisStart=true;
+  profileLoadPromise=(async()=>{
+
+    try{
+      const d=await window.api('/api/me');
+      if(!d||!d.ok)return readOwnProfileCache();
+
+      const old=readOwnProfileCache()||{};
+      const remote=absAvatar(d.avatar_url||'');
+      let avatarData=String(old.avatar_data||'');
+
+      // Download the picture only when it changed or no cached copy exists.
+      if(!remote)avatarData='';
+      else if(remote!==String(old.avatar_url||'')||!avatarData){
+        avatarData=await downloadProfileAvatar(remote);
+      }
+
+      own.name=String(d.display_name||own.name);
+      own.phone=String(d.phone||own.phone);
+      own.verified=d.verified===true||isVerifiedPhone(own.phone);
+      own.avatar=avatarData;
+
+      const saved=writeOwnProfileCache({
+        phone:own.phone,name:own.name,verified:own.verified,
+        avatar_url:remote,avatar_data:avatarData
+      });
+      try{localStorage.setItem('qevyno_name',own.name)}catch(_){}
+      refreshChip();
+      try{refreshSheet()}catch(_){}
+      return saved||d;
+    }catch(_){
+      return readOwnProfileCache();
+    }finally{
+      profileLoadPromise=null;
+    }
+  })();
+  return profileLoadPromise;
+}
+
+window.skaysaLoadOwnProfileOnce=()=>refreshOwn(false);
+window.skaysaReloadOwnProfile=async()=>{
+  profileLoadedThisStart=false;
+  return refreshOwn(true);
+};
+window.addEventListener('skaysa-profile-changed',e=>{
+  applyProfileChanged(e?.detail||{});
+});
 function ensureChip(){const bar=document.querySelector('#homeScreen .topbar');if(!bar||bar.querySelector('.q308profileChip'))return;const chip=document.createElement('button');chip.type='button';chip.className='q308profileChip';chip.setAttribute('aria-label',tx('profile'));chip.innerHTML='<span class="q308miniAvatar"></span><span class="q308miniInfo"><span class="q308miniNameLine"><span class="q308miniName"></span><span class="q308miniVerified"></span></span><span class="q308miniPhone"></span></span>';const settings=bar.querySelector('#settingsBtn');if(settings)bar.insertBefore(chip,settings);else bar.appendChild(chip);chip.onclick=openProfile;refreshChip()}
 
 const back=document.createElement('div');back.className='q308back';back.innerHTML=`<div class="q308sheet"><div class="q308handle"></div><div class="q308head"><div class="q308bigAvatar"></div><div class="q308headText"><div class="q308titleLine"><div class="q308title"></div><span class="q308sheetVerified"></span></div><div class="q308phone"></div></div></div><div class="q308qrBox"><div class="q308qrLabel"></div><img class="q308qr" alt="QR"><div class="q308qrHint"></div></div><div class="q308actions"><button class="q308edit"></button><button class="q308close"></button></div></div>`;document.body.appendChild(back);
 back.onclick=e=>{if(e.target===back)closeProfile()};back.querySelector('.q308close').onclick=closeProfile;back.querySelector('.q308edit').onclick=()=>{closeProfile();const b=document.getElementById('settingsBtn');if(b){b.style.display='';b.click();setTimeout(()=>{b.style.display=''},50)}};
 function qrForPhone(p){if(!p)return'';try{if(window.QevynoDevice?.getOrCreateQr){const q=String(QevynoDevice.getOrCreateQr(p)||'');if(q)return q}}catch(_){}try{if(window.QevynoDevice?.makeQr)return String(QevynoDevice.makeQr('https://sliqado.org/Qevyno/add/?phone='+encodeURIComponent(p))||'')}catch(_){}return''}
 function refreshSheet(){back.querySelector('.q308title').textContent=own.name||own.phone;const sv=back.querySelector('.q308sheetVerified');if(sv)sv.innerHTML=own.verified?verifiedHtml():'';back.querySelector('.q308phone').textContent=own.phone;applyAvatar(back.querySelector('.q308bigAvatar'));back.querySelector('.q308qrLabel').textContent=tx('qr');back.querySelector('.q308qrHint').textContent=tx('qrHint');back.querySelector('.q308edit').textContent=tx('edit');back.querySelector('.q308close').textContent=tx('close');const q=qrForPhone(own.phone);if(q)back.querySelector('.q308qr').src=q}
-function openProfile(){refreshSheet();back.classList.add('on');refreshOwn()}
+function openProfile(){hydrateOwnProfileCache();refreshSheet();back.classList.add('on')}
 function closeProfile(){back.classList.remove('on')}
 
 function decorateHelp(){document.querySelectorAll('.q299helpRow').forEach(row=>{const a=row.querySelector('.q26avatar,.q299avatar,[class*="avatar"]');if(!a||a.classList.contains('q308helpLogo'))return;a.classList.add('q308helpLogo');a.style.backgroundImage='none';a.innerHTML=QLOGO;});}
@@ -149,5 +274,5 @@ function decorateGifLabels(){document.querySelectorAll('.q307draft').forEach(d=>
 function setVersion(){document.querySelectorAll('.small').forEach(el=>{if(/(?:Qevyno|SliqChat)\s+(?:v)?2\./i.test(el.textContent||''))el.textContent=`SliqChat v${VERSION} • Android 8+`})}
 let scheduled=false;function decorate(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;ensureChip();decorateHelp();decorateGifLabels();refreshChip();setVersion()})}
 new MutationObserver(decorate).observe(document.body,{subtree:true,childList:true});
-[0,160,420,900,1800].forEach(ms=>setTimeout(()=>{decorate();if(ms===420)refreshOwn()},ms));window.addEventListener('focus',()=>{decorate();refreshOwn()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){decorate();refreshOwn()}});
+hydrateOwnProfileCache();[0,120,420,900,1800].forEach(ms=>setTimeout(()=>{decorate();if(ms===120)window.skaysaLoadOwnProfileOnce?.()},ms));window.addEventListener('focus',()=>{decorate();hydrateOwnProfileCache()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){decorate();hydrateOwnProfileCache()}});
 })();

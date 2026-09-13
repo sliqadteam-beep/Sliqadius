@@ -107,8 +107,9 @@ function install(){
       const img=pendingImage;
       pendingImage='';
       if(img)window.__skaysaOwnAvatarPreview=img;
+      if(img)window.__skaysaOwnAvatarPreview=img;
       if(img){
-        setTimeout(async()=>{try{await api('/api/profile-picture','POST',{image:img});window.dispatchEvent(new Event('focus'))}catch(_){}},120);
+        setTimeout(async()=>{try{const r=await api('/api/profile-picture','POST',{image:img});if(r&&r.ok)window.dispatchEvent(new CustomEvent('skaysa-profile-changed',{detail:{...r,avatarData:img}}))}catch(_){}},120);
       }
       return r;
     };

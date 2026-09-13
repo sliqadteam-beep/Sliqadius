@@ -1,7 +1,7 @@
 {
-  "versionCode": 52,
-  "versionName": "2.9.40",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.40.apk",
-  "notes": "Fixes the missing own profile picture with a robust avatar loader and fallback initials. New chats and group member fields now accept normal local phone numbers without requiring +country code. Previous group, delete, translation and reaction improvements remain included.",
-  "notes_de": "Behebt das fehlende eigene Profilbild mit robustem Bild-Loader und Initialen-Fallback. Neue Chats und Gruppenmitglieder akzeptieren jetzt normale lokale Telefonnummern ohne +Laendervorwahl. Die bisherigen Gruppen-, Loesch-, Uebersetzungs- und Reaktionsverbesserungen bleiben enthalten."
+  "versionCode": 53,
+  "versionName": "2.9.41",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.41.apk",
+  "notes": "Own profile is now loaded from the server exactly once per app start, while a compact cached profile and avatar are shown immediately. Profile-picture changes and removals update the cache instantly. Previous local-number, group, delete, translation and reaction fixes remain included.",
+  "notes_de": "Das eigene Profil wird jetzt pro App-Start genau einmal vom Server geladen; Profil und optimiertes Profilbild erscheinen sofort aus dem Cache. Aendern oder Entfernen des Profilbilds aktualisiert den Cache sofort. Die bisherigen Telefonnummern-, Gruppen-, Loesch-, Uebersetzungs- und Reaktionsfixes bleiben enthalten."
 }
