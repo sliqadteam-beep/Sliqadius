@@ -1,7 +1,7 @@
 {
-  "versionCode": 42,
-  "versionName": "2.9.30",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.30.apk",
-  "notes": "Native startup loading hotfix. The WebView is no longer kept invisible, preventing a permanent grey screen. A native white Skaysa loading overlay covers the legacy base interface and always dismisses safely.",
-  "notes_de": "Nativer Start-Ladescreen-Hotfix. Die WebView wird nicht mehr unsichtbar festgehalten, wodurch der graue Bildschirm behoben ist. Ein nativer weisser Skaysa-Ladescreen verdeckt die alte Basisoberflaeche und wird immer sicher entfernt."
+  "versionCode": 43,
+  "versionName": "2.9.31",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.31.apk",
+  "notes": "Grey-screen root fix: prevents the late UI MutationObserver from triggering itself endlessly and loads Android core scripts separately so one optional feature cannot blank the whole app.",
+  "notes_de": "Graubildschirm-Ursachenfix: Der spaete UI-MutationObserver kann sich nicht mehr endlos selbst ausloesen. Android laedt Kernskripte einzeln, damit ein optionales Feature nicht mehr die komplette App leer machen kann."
 }

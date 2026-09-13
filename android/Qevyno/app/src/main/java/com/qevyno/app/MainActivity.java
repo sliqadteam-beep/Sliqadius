@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
         );
 
         webView = new WebView(this);
-        webView.setBackgroundColor(Color.rgb(247, 250, 252));
+        webView.setBackgroundColor(Color.WHITE);
         webView.setVisibility(View.VISIBLE);
 
         WebSettings s = webView.getSettings();
@@ -90,23 +90,24 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                StringBuilder bundle = new StringBuilder();
-                appendAsset(bundle, "auth23.js");
-                appendAsset(bundle, "ui26.js");
-                appendAsset(bundle, "ui27.js");
-                appendAsset(bundle, "ui28.js");
-                appendAsset(bundle, "startup292.js");
-                appendAsset(bundle, "qr293.js");
-                appendAsset(bundle, "i18n294.js");
-                appendAsset(bundle, "features295.js");
-                appendAsset(bundle, "features296.js");
-                appendAsset(bundle, "features297.js");
-                appendAsset(bundle, "features298.js");
-                appendAsset(bundle, "features299.js");
-                appendAsset(bundle, "features300.js");
-                appendAsset(bundle, "features301.js");
-                appendAsset(bundle, "features314.js");
-                runScript(view, bundle.toString(), () -> showWhenSkaysaReady(view, 0));
+                String[] assets = new String[] {
+                    "auth23.js",
+                    "ui26.js",
+                    "ui27.js",
+                    "ui28.js",
+                    "qr293.js",
+                    "i18n294.js",
+                    "features295.js",
+                    "features296.js",
+                    "features297.js",
+                    "features298.js",
+                    "features299.js",
+                    "features300.js",
+                    "features301.js",
+                    "features314.js",
+                    "startup292.js"
+                };
+                runAssetsSequentially(view, assets, 0, () -> showWhenSkaysaReady(view, 0));
             }
         });
 
@@ -347,6 +348,37 @@ public class MainActivity extends Activity {
             }
             view.postDelayed(() -> showWhenSkaysaReady(view, attempt + 1), 70L);
         });
+    }
+    private void runAssetsSequentially(WebView view, String[] assets, int index, Runnable done) {
+        if (view == null) {
+            if (done != null) done.run();
+            return;
+        }
+        if (assets == null || index >= assets.length) {
+            if (done != null) done.run();
+            return;
+        }
+
+        String script = readAsset(assets[index]);
+        if (script == null || script.trim().isEmpty()) {
+            runAssetsSequentially(view, assets, index + 1, done);
+            return;
+        }
+
+        final boolean[] continued = new boolean[]{false};
+        Runnable next = () -> {
+            if (continued[0]) return;
+            continued[0] = true;
+            runAssetsSequentially(view, assets, index + 1, done);
+        };
+
+        try {
+            view.evaluateJavascript(script, ignored -> next.run());
+            // A broken optional feature must never block the complete app startup.
+            view.postDelayed(next, 700L);
+        } catch (Exception ignored) {
+            next.run();
+        }
     }
     private void runScript(WebView view, String script, Runnable done) {
         if (script == null || script.isEmpty()) {

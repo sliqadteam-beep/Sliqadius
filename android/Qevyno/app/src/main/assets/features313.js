@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.9.29';
+const VERSION='2.9.31';
 
 function lang(){
   try{
@@ -152,8 +152,32 @@ function ready(){
   }));
 }
 
-const mo=new MutationObserver(()=>{ensureStyle();stabilizeSearch();translateLateUi()});
-mo.observe(document.documentElement,{subtree:true,childList:true});
+let q313RefreshQueued=false;
+let q313Watching=false;
+function q313Observe(){
+  try{
+    mo.disconnect();
+    mo.observe(document.documentElement,{subtree:true,childList:true});
+    q313Watching=true;
+  }catch(_){}
+}
+function q313Refresh(){
+  if(q313RefreshQueued)return;
+  q313RefreshQueued=true;
+  requestAnimationFrame(()=>{
+    q313RefreshQueued=false;
+    try{mo.disconnect()}catch(_){}
+    q313Watching=false;
+    try{
+      ensureStyle();
+      stabilizeSearch();
+      translateLateUi();
+    }catch(_){}
+    q313Observe();
+  });
+}
+const mo=new MutationObserver(q313Refresh);
+q313Observe();
 [0,80,220,500,1000,1800].forEach(ms=>setTimeout(ready,ms));
 window.addEventListener('focus',ready);
 window.addEventListener('pageshow',ready);
