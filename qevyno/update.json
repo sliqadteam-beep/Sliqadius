@@ -1,7 +1,7 @@
 {
-  "versionCode": 59,
-  "versionName": "2.9.47",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.47.apk",
-  "notes": "Clean UI update. Removes the built-in Help contact and old history/flicker layers, gives the chat list and conversation screen a calmer modern layout, and keeps opened chats open until the user explicitly goes back.",
-  "notes_de": "Clean-UI-Update. Entfernt den eingebauten Hilfe-Kontakt sowie alte History-/Flicker-Layer, gibt Chatliste und Chatansicht ein ruhigeres modernes Layout und laesst geoeffnete Chats offen, bis der Nutzer selbst zurueckgeht."
+  "versionCode": 60,
+  "versionName": "2.9.48",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.48.apk",
+  "notes": "Phone numbers are no longer modified with an automatically detected country prefix. Users must enter the full international phone number themselves.",
+  "notes_de": "Telefonnummern bekommen keine automatisch erkannte Laendervorwahl mehr. Die vollstaendige internationale Telefonnummer muss selbst eingegeben werden."
 }

@@ -22,7 +22,7 @@
   box.innerHTML=`<div style="width:100%;max-width:520px;margin:auto">
     <div class="logo">Skaysa<span class="dot">.</span></div><div class="tag">Private messaging through the Skaysa server.</div>
     <span id="cf" hidden></span><span id="cd" hidden>+1</span>
-    <div class="qv on" id="vp"><div class="qt">Enter your phone number</div><div class="qs">Enter only your normal phone number. Skaysa handles the country automatically.</div><div class="qr"><input class="field" id="pi" inputmode="tel" autocomplete="tel-national" placeholder="Phone number"><button class="qa" id="pn" aria-label="Continue">→</button></div><div class="qck" id="ck">Checking number…</div><div class="error" id="pe"></div><div class="qPhoneOnlyHint">No country prefix is needed.</div></div>
+    <div class="qv on" id="vp"><div class="qt">Enter your phone number</div><div class="qs">Enter your full phone number including the country code.</div><div class="qr"><input class="field" id="pi" inputmode="tel" autocomplete="tel-national" placeholder="Phone number, e.g. +49..."><button class="qa" id="pn" aria-label="Continue">→</button></div><div class="qck" id="ck">Checking number…</div><div class="error" id="pe"></div><div class="qPhoneOnlyHint">Country code is required, for example +49. Skaysa will never add it automatically.</div></div>
     <div class="qv" id="vn"><div class="dots"><i class="dotx on"></i><i class="dotx on"></i><i class="dotx"></i></div><div class="qt">What's your name?</div><div class="qs">This is the name other Skaysa users will see.</div><input class="field" id="ni" maxlength="32" autocomplete="name" placeholder="Your name"><button class="primary" id="nn">Continue →</button><div class="error" id="ne"></div><button class="qb" id="nb">‹ Change phone number</button></div>
     <div class="qv" id="vc"><div class="dots"><i class="dotx on"></i><i class="dotx on"></i><i class="dotx on"></i></div><div class="qt">Create a password</div><div class="qs">Use at least 6 characters.</div><input class="field" id="np" type="password" autocomplete="new-password" placeholder="Password"><button class="primary" id="cr">Create account</button><div class="error" id="ce"></div><button class="qb" id="cb">‹ Back</button></div>
     <div class="qv" id="vl"><div class="qt">Welcome back</div><div class="qs" id="ll"></div><input class="field" id="lp" type="password" autocomplete="current-password" placeholder="Password"><button class="primary" id="li">Log in</button><div class="error" id="le"></div><button class="qb" id="lb">‹ Change phone number</button></div>
@@ -53,16 +53,17 @@
 
   function fullPhone(raw){
     let p=String(raw||'').trim();
-    if(p.startsWith('+')||p.startsWith('00'))return normalizePhone(p);
-    p=p.replace(/\D/g,'').replace(/^0+/,'');
-    return p?byIso(countryIso)[2]+p:'';
+    /* Never add or infer a country prefix.
+       Only remove visual separators the user typed. */
+    p=p.replace(/[\s().-]/g,'');
+    if(p.startsWith('+')){
+      return '+'+p.slice(1).replace(/\D/g,'');
+    }
+    return p.replace(/\D/g,'');
   }
 
   function localPhone(full){
-    full=normalizePhone(full||'');
-    const dial=byIso(countryIso)[2];
-    if(full.startsWith(dial))return full.slice(dial.length);
-    return full.replace(/^\+/,'');
+    return String(full||'').trim();
   }
   window.qevynoLocalPhone=localPhone;
   window.qevynoFullPhone=fullPhone;
