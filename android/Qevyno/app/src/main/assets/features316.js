@@ -3,7 +3,7 @@
 if(window.__skaysa316Installed)return;
 window.__skaysa316Installed=true;
 
-const VERSION='2.9.43';
+const VERSION='2.9.47';
 const SCROLL_KEY='skaysa_chat_scroll_v1';
 const LAST_CHAT_KEY='skaysa_last_chat_meta_v1';
 const META_KEY='qevyno_local_conversations_v2';
@@ -194,7 +194,6 @@ function installOpenChat(){
     let result;
     try{
       result=prior.call(this,phone,name,online,false);
-      routeChat(phone,push!==false);
       const box=D('messages');
       if(box)box.classList.add('q316cached');
       requestAnimationFrame(()=>{
@@ -218,7 +217,6 @@ function installHome(){
   const wrapped=async function(){
     saveScroll(currentPhone());
     const r=await prior.apply(this,arguments);
-    routeHome();
     return r;
   };
   wrapped.__sk316=true;
@@ -308,16 +306,13 @@ window.skaysaHandleBack=function(){
   }
   if(D('chatScreen')?.classList.contains('active')){
     saveScroll(currentPhone());
-    try{
-      if(history.state?.skaysa==='chat'){history.back();return true}
-    }catch(_){}
     try{window.home&&window.home()}catch(_){}
     return true;
   }
   return false;
 };
 
-window.addEventListener('popstate',e=>{
+window.addEventListener('skaysa_disabled_popstate_2947',e=>{
   try{
     const st=e.state||{};
     if(st.skaysa==='chat'&&validPhone(st.phone)){
@@ -363,16 +358,13 @@ function install(){
   decorateRows();
   bindComposer();
   bindMessageScroll();
+  try{if(location.hash){history.replaceState(null,'',location.href.replace(/#.*$/,''));window.skaysa2947HistoryClean=true}}catch(_){}
 
   const back=D('backBtn');
   if(back&&!back.__sk316){
     back.__sk316=true;
     back.onclick=()=>window.skaysaHandleBack();
   }
-
-  try{
-    if(!history.state||!history.state.skaysa)routeHome();
-  }catch(_){}
 }
 
 setTimeout(install,950);

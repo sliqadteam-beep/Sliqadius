@@ -1,7 +1,7 @@
 {
-  "versionCode": 58,
-  "versionName": "2.9.46",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.46.apk",
-  "notes": "Second renderer root fix. features295 no longer wipes and rebuilds the complete conversation list. The redundant 2.2 second home render loop was removed, persistent Help/group rows survive polling, and chat rows always use the current openChat handler.",
-  "notes_de": "Zweiter Renderer-Root-Fix. features295 loescht und baut die komplette Chatliste nicht mehr neu auf. Die redundante 2,2-Sekunden-Home-Render-Schleife wurde entfernt, Hilfe-/Gruppen-Zeilen bleiben beim Polling bestehen und Chat-Zeilen verwenden immer den aktuellen openChat-Handler."
+  "versionCode": 59,
+  "versionName": "2.9.47",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.47.apk",
+  "notes": "Removes the built-in Skaysa Help contact and fixes chats closing immediately after opening. Browser history/popstate chat routing was removed; chats now stay open until the user explicitly goes back.",
+  "notes_de": "Entfernt den eingebauten Skaysa-Hilfe-Kontakt und behebt, dass sich Chats direkt nach dem Oeffnen wieder schliessen. Die Browser-History/Popstate-Chatnavigation wurde entfernt; Chats bleiben offen, bis der Nutzer selbst zurueckgeht."
 }

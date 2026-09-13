@@ -101,14 +101,12 @@ public class MainActivity extends Activity {
                     "features296.js",
                     "features297.js",
                     "features298.js",
-                    "features299.js",
                     "features300.js",
                     "features301.js",
                     "features314.js",
                     "startup292.js",
                     "features315.js",
-                    "features316.js",
-                    "features317.js"
+                    "features316.js"
                 };
                 runAssetsSequentially(view, assets, 0, () -> showWhenSkaysaReady(view, 0));
             }
