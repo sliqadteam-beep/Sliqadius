@@ -1,7 +1,7 @@
 {
-  "versionCode": 56,
-  "versionName": "2.9.44",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.44.apk",
-  "notes": "Fixes conversation-list flicker and makes chat row taps deterministic. Identical conversation polling results no longer rebuild the whole list, and the built-in Skaysa Help row is stabilized before paint.",
-  "notes_de": "Behebt das Flackern der Chatliste und macht das Oeffnen normaler Chats per Tippen zuverlaessig. Identische Polling-Ergebnisse bauen die Liste nicht mehr komplett neu auf; Skaysa Hilfe wird vor dem Anzeigen stabilisiert."
+  "versionCode": 57,
+  "versionName": "2.9.45",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.45.apk",
+  "notes": "Root fix for conversation-list flicker. The core renderer no longer clears the complete people list every 3.5 seconds. Skaysa Help and group rows persist, identical server results are skipped, and chat taps always call the newest openChat implementation.",
+  "notes_de": "Root-Fix fuer das Flackern der Chatliste. Der eigentliche Renderer loescht nicht mehr alle 3,5 Sekunden die komplette Liste. Skaysa Hilfe und Gruppen bleiben bestehen, identische Serverdaten werden nicht neu gerendert und Chat-Taps verwenden immer die aktuelle openChat-Funktion."
 }

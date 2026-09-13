@@ -93,7 +93,7 @@ function signature(list){
   ]);
   return JSON.stringify([search,pins,rows]);
 }
-function installStableRenderer(){
+function installStableRenderer(){/* 2.9.45: core ui26 owns stable rendering now */
   const prior=window.renderConversations;
   if(typeof prior!=='function'||prior.__sk317)return;
   const wrapped=function(list){

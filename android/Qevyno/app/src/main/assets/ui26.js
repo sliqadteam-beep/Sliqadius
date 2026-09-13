@@ -116,7 +116,32 @@
     const q=state.filter.trim().toLowerCase();
     let items=(list||[]).filter(u=>!q||String(u.display_name||'').toLowerCase().includes(q)||String(u.phone||'').toLowerCase().includes(q)||String(u.last_message||'').toLowerCase().includes(q));
     items.sort((a,b)=>(state.pins.has(b.phone)?1:0)-(state.pins.has(a.phone)?1:0)||Number(b.last_at||0)-Number(a.last_at||0));
-    const box=D('people');box.innerHTML='';
+    const box=D('people');
+    const renderSig=JSON.stringify([
+      q,
+      items.map(u=>[
+        String(u.phone||''),
+        String(u.display_name||''),
+        !!u.online,
+        !!u.verified,
+        String(u.avatar_url||''),
+        String(u.last_message||''),
+        Number(u.last_at||0),
+        Number(u.unread||0),
+        state.pins.has(u.phone)
+      ])
+    ]);
+    const normalRows=box.querySelectorAll(':scope > .q26row:not(.q299helpRow):not(.q306groupRow)').length;
+    if(box.dataset.q2645sig===renderSig && normalRows===items.length)return;
+    box.dataset.q2645sig=renderSig;
+
+    /* Keep persistent special rows (Skaysa Help + groups) alive.
+       Only the normal 1:1 chat rows/section labels are replaced. */
+    box.querySelectorAll(
+      ':scope > .q26section,'+
+      ':scope > .q26row:not(.q299helpRow):not(.q306groupRow),'+
+      ':scope > .q26empty'
+    ).forEach(el=>el.remove());
     if(!items.length){
       box.innerHTML=`<div class="q26empty"><div class="q26emptyIcon">💬</div><b>${q?'No matching chats':'No chats yet'}</b><p>${q?'Try another search.':'Tap + to start a private chat using an exact phone number.'}</p></div>`;return;
     }
@@ -126,8 +151,8 @@
       const row=document.createElement('div');row.className='q26row';row.tabIndex=0;
       const name=u.display_name||u.phone||'Unknown';row.dataset.phone=String(u.phone||'');
       row.innerHTML=`<div class="q26avatar ${u.online?'online':''}">${esc2(initials(name))}</div><div class="q26info"><div class="q26nameLine"><div class="q26name">${esc2(name)}</div>${state.pins.has(u.phone)?'<span class="q26pinMark">◆</span>':''}</div><div class="q26preview">${esc2(u.last_message||u.phone||'')}</div></div><button class="q26pin ${state.pins.has(u.phone)?'active':''}" aria-label="Pin chat">◆</button><div class="q26right"><div class="q26time">${esc2(fmtTime(u.last_at))}</div>${u.unread?`<div class="q26badge">${Math.min(99,Number(u.unread)||0)}</div>`:''}</div>`;
-      row.onclick=e=>{if(e.target.closest('.q26pin'))return;openChat(u.phone,name,!!u.online,true)};
-      row.onkeydown=e=>{if(e.key==='Enter')openChat(u.phone,name,!!u.online,true)};
+      row.onclick=e=>{if(e.target.closest('.q26pin'))return;window.openChat(u.phone,name,!!u.online,true)};
+      row.onkeydown=e=>{if(e.key==='Enter')window.openChat(u.phone,name,!!u.online,true)};
       row.querySelector('.q26pin').onclick=e=>{e.stopPropagation();togglePin(u.phone);};
       box.appendChild(row);
     }
@@ -143,7 +168,7 @@
     D('findBtn').disabled=true;D('findBtn').textContent='Searching…';
     const r=await api('/api/find?phone='+encodeURIComponent(phone));
     D('findBtn').disabled=false;D('findBtn').textContent='Find Skaysa user';
-    if(r&&r.ok){closeNewChat();openChat(r.user.phone,r.user.display_name||r.user.phone,!!r.user.online,true)}
+    if(r&&r.ok){closeNewChat();window.openChat(r.user.phone,r.user.display_name||r.user.phone,!!r.user.online,true)}
     else{const map={not_found:'No Skaysa account exists for that number.',self:'That is your own number.',server_unreachable:'Skaysa server is unreachable.'};D('findError').textContent=map[r&&r.error]||(r&&r.error)||'Could not find that account.';}
   };
 
