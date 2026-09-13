@@ -1,7 +1,7 @@
 {
-  "versionCode": 46,
-  "versionName": "2.9.34",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.34.apk",
-  "notes": "Session restore now runs silently in the background. Skaysa also gets a new memorable S-ribbon + spark logo across the launcher, app UI, notification icon and website.",
-  "notes_de": "Session-Restore laeuft jetzt unsichtbar im Hintergrund. Skaysa bekommt ausserdem ein neues einpraegsames S-Ribbon-plus-Spark-Logo fuer Launcher, App-UI, Benachrichtigung und Website."
+  "versionCode": 47,
+  "versionName": "2.9.35",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.35.apk",
+  "notes": "Logo polish and chat-overview UI adjustment: the Skaysa S mark has smoother proportions, subtle depth and a cyan signature spark. The profile chip is positioned slightly lower.",
+  "notes_de": "Logo-Polish und Chat-Uebersicht: Das Skaysa-S hat sauberere Proportionen, dezente Tiefe und einen tuerkisen Signature-Spark. Der Profil-Chip sitzt etwas weiter unten."
 }

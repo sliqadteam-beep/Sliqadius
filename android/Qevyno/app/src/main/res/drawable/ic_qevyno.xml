@@ -5,34 +5,48 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
     <path android:pathData="M16,4H92A12,12 0,0 1,104 16V92A12,12 0,0 1,92 104H16A12,12 0,0 1,4 92V16A12,12 0,0 1,16 4Z">
         <aapt:attr name="android:fillColor">
             <gradient android:type="linear"
-                android:startX="10" android:startY="8"
-                android:endX="98" android:endY="102">
-                <item android:offset="0" android:color="#C7E7FF"/>
-                <item android:offset="0.52" android:color="#7DBAF2"/>
-                <item android:offset="1" android:color="#577ED9"/>
+                android:startX="8" android:startY="6"
+                android:endX="101" android:endY="104">
+                <item android:offset="0" android:color="#D8F1FF"/>
+                <item android:offset="0.48" android:color="#78B8F3"/>
+                <item android:offset="1" android:color="#4D70D2"/>
             </gradient>
         </aapt:attr>
     </path>
 
-    <!-- subtle sky highlight -->
+    <!-- soft sky highlight -->
     <path
-        android:fillColor="#20FFFFFF"
-        android:pathData="M4,16A12,12 0,0 1,16 4H59C45,20 28,34 4,45Z"/>
+        android:fillColor="#22FFFFFF"
+        android:pathData="M4,16A12,12 0,0 1,16 4H62C47,20 28,36 4,47Z"/>
 
-    <!-- memorable Skaysa S-ribbon -->
+    <!-- subtle depth behind the S -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#2E5FA5"
+        android:strokeAlpha="0.22"
+        android:strokeWidth="15"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M77,30C69,22 57,19 46,22C35,25 29,32 30,40C31,48 39,52 51,55L61,58C72,61 79,66 78,75C77,83 68,89 56,90C44,91 33,87 25,80"/>
+
+    <!-- clean Skaysa S -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="10"
+        android:strokeWidth="9"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M77,29C69,21 57,19 46,22C35,25 29,32 30,40C31,48 39,52 51,55L61,58C71,61 78,66 77,74C76,82 67,88 56,89C44,90 33,86 25,79"/>
+        android:pathData="M77,30C69,22 57,19 46,22C35,25 29,32 30,40C31,48 39,52 51,55L61,58C72,61 79,66 78,75C77,83 68,89 56,90C44,91 33,87 25,80"/>
 
-    <!-- small Skaysa spark -->
+    <!-- signature sky-spark -->
+    <path
+        android:fillColor="#B9FFF7"
+        android:pathData="M85,16L88,22L94,25L88,28L85,34L82,28L76,25L82,22Z"/>
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M84,17L87,23L93,26L87,29L84,35L81,29L75,26L81,23Z"/>
+        android:pathData="M85,21A4,4 0,1 0,85 29A4,4 0,1 0,85 21"/>
 </vector>

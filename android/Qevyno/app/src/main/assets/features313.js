@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.9.34';
+const VERSION='2.9.35';
 
 function lang(){
   try{
@@ -56,7 +56,7 @@ body,#app,#root,#homeScreen,.screen,.page,.page-wrap,.app-shell{max-width:none!i
 #homeScreen .q26new{width:58px!important;height:58px!important;border-radius:21px!important;box-shadow:0 10px 24px rgba(83,137,193,.16)!important}
 
 .q308profileChip,.q308profileCard,.q308miniProfile,.profileChip{border:1px solid #e3ebf1!important;border-radius:22px!important;box-shadow:0 6px 18px rgba(18,33,53,.045)!important;background:#fbfdff!important}
-.q308profileChip{margin-top:16px!important;padding:8px 10px!important}
+.q308profileChip{margin-top:24px!important;padding:8px 10px!important}
 #people{width:100%!important;max-width:none!important;padding:4px 16px 120px!important;box-sizing:border-box!important;overflow-anchor:none!important}
 #people>.q299helpRow,#people>.q306groupRow,#people>.q26row,#people>.q304row,#people>.q308chatRow,#people>.chatRow,#people>.conversation{margin:0 0 10px!important;border:1px solid #e5edf3!important;border-radius:22px!important;background:#fff!important;box-shadow:0 5px 17px rgba(18,33,53,.035)!important;transform:none!important}
 #people>.q299helpRow:active,#people>.q306groupRow:active,#people>.q26row:active{background:#f5f9fc!important;transform:none!important}

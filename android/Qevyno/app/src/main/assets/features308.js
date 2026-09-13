@@ -32,17 +32,20 @@ function verifiedHtml(){return '<span class="q308verified" aria-label="Verifizie
 
 const QLOGO=`<svg viewBox="0 0 108 108" aria-hidden="true" focusable="false">
 <defs>
-<linearGradient id="sk34g" x1="10" y1="8" x2="98" y2="102" gradientUnits="userSpaceOnUse">
-<stop offset="0" stop-color="#C7E7FF"/>
-<stop offset=".52" stop-color="#7DBAF2"/>
-<stop offset="1" stop-color="#577ED9"/>
+<linearGradient id="sk35g" x1="8" y1="6" x2="101" y2="104" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#D8F1FF"/>
+<stop offset=".48" stop-color="#78B8F3"/>
+<stop offset="1" stop-color="#4D70D2"/>
 </linearGradient>
 </defs>
-<path fill="url(#sk34g)" d="M16 4h76a12 12 0 0 1 12 12v76a12 12 0 0 1-12 12H16A12 12 0 0 1 4 92V16A12 12 0 0 1 16 4Z"/>
-<path fill="#20FFFFFF" d="M4 16A12 12 0 0 1 16 4h43C45 20 28 34 4 45Z"/>
-<path d="M77 29C69 21 57 19 46 22C35 25 29 32 30 40C31 48 39 52 51 55L61 58C71 61 78 66 77 74C76 82 67 88 56 89C44 90 33 86 25 79"
- fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-<path fill="#fff" d="M84 17L87 23L93 26L87 29L84 35L81 29L75 26L81 23Z"/>
+<path fill="url(#sk35g)" d="M16 4h76a12 12 0 0 1 12 12v76a12 12 0 0 1-12 12H16A12 12 0 0 1 4 92V16A12 12 0 0 1 16 4Z"/>
+<path fill="#22FFFFFF" d="M4 16A12 12 0 0 1 16 4h46C47 20 28 36 4 47Z"/>
+<path d="M77 30C69 22 57 19 46 22C35 25 29 32 30 40C31 48 39 52 51 55L61 58C72 61 79 66 78 75C77 83 68 89 56 90C44 91 33 87 25 80"
+ fill="none" stroke="#2E5FA5" stroke-opacity=".22" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M77 30C69 22 57 19 46 22C35 25 29 32 30 40C31 48 39 52 51 55L61 58C72 61 79 66 78 75C77 83 68 89 56 90C44 91 33 87 25 80"
+ fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path fill="#B9FFF7" d="M85 16L88 22L94 25L88 28L85 34L82 28L76 25L82 22Z"/>
+<circle cx="85" cy="25" r="4" fill="#fff"/>
 </svg>`;
 
 const style=document.createElement('style');style.id='sliqchat308style';style.textContent=`
