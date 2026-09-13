@@ -1,7 +1,7 @@
 {
-  "versionCode": 55,
-  "versionName": "2.9.43",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.43.apk",
-  "notes": "Chat Core update: faster and safer chat opening, cached messages first, per-chat scroll restore, better back navigation, grouped GET requests with one safe retry, improved touch targets, group opening cleanup and double-send protection.",
-  "notes_de": "Chat-Core-Update: Chats oeffnen schneller und robuster, lokale Nachrichten erscheinen sofort, Scrollposition pro Chat, bessere Zurueck-Navigation, zusammengelegte GET-Anfragen mit einem sicheren Retry, bessere Touch-Ziele, verbessertes Gruppen-Oeffnen und Schutz vor Doppelsenden."
+  "versionCode": 56,
+  "versionName": "2.9.44",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.44.apk",
+  "notes": "Fixes conversation-list flicker and makes chat row taps deterministic. Identical conversation polling results no longer rebuild the whole list, and the built-in Skaysa Help row is stabilized before paint.",
+  "notes_de": "Behebt das Flackern der Chatliste und macht das Oeffnen normaler Chats per Tippen zuverlaessig. Identische Polling-Ergebnisse bauen die Liste nicht mehr komplett neu auf; Skaysa Hilfe wird vor dem Anzeigen stabilisiert."
 }
