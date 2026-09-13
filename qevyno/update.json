@@ -1,7 +1,7 @@
 {
-  "versionCode": 60,
-  "versionName": "2.9.48",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.48.apk",
-  "notes": "Phone numbers are no longer modified with an automatically detected country prefix. Users must enter the full international phone number themselves.",
-  "notes_de": "Telefonnummern bekommen keine automatisch erkannte Laendervorwahl mehr. Die vollstaendige internationale Telefonnummer muss selbst eingegeben werden."
+  "versionCode": 61,
+  "versionName": "2.9.49",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.49.apk",
+  "notes": "Fix pack: robust retry/fallback for contact profile pictures, restores the photo/video + button and media picker, improves chat color contrast, and permanently clears stale sent drafts from the composer. Automatic country-prefix insertion remains disabled.",
+  "notes_de": "Fix-Paket: robuster Retry/Fallback fuer Profilbilder anderer Kontakte, Bild/Video-Plus-Button und Medienauswahl wieder aktiviert, besserer Farbkontrast im Chat und alte gesendete Entwuerfe werden dauerhaft aus der Sendebox entfernt. Automatische Laendervorwahl bleibt deaktiviert."
 }

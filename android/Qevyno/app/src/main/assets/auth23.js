@@ -53,12 +53,11 @@
 
   function fullPhone(raw){
     let p=String(raw||'').trim();
-    /* Never add or infer a country prefix.
-       Only remove visual separators the user typed. */
+    /* Never add or infer a country prefix. */
     p=p.replace(/[\s().-]/g,'');
-    if(p.startsWith('+')){
-      return '+'+p.slice(1).replace(/\D/g,'');
-    }
+    if(p.startsWith('+')) return '+'+p.slice(1).replace(/\D/g,'');
+    return p.replace(/\D/g,'');
+  }
     return p.replace(/\D/g,'');
   }
 
