@@ -11,7 +11,41 @@
   const draftKey=phone=>'qevyno_draft_'+phone;
   const esc2=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const initials=s=>{const p=String(s||'?').trim().split(/\s+/).filter(Boolean);return ((p[0]?.[0]||'?')+(p.length>1?(p[p.length-1]?.[0]||''):'')).toUpperCase().slice(0,2)};
-  const fmtTime=t=>{if(!t)return'';const d=new Date(Number(t)*1000);if(Number.isNaN(d.getTime()))return'';const now=new Date(),same=d.toDateString()===now.toDateString();if(same)return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});const y=new Date(now);y.setDate(now.getDate()-1);if(d.toDateString()===y.toDateString())return'Yesterday';return d.toLocaleDateString([],{day:'2-digit',month:'2-digit'})};
+  const fmtTime=t=>{
+    if(!t)return'';
+    const n=Number(t);
+    if(!Number.isFinite(n)||n<=0)return'';
+
+    const d=new Date(n>100000000000?n:n*1000);
+    if(Number.isNaN(d.getTime()))return'';
+
+    let l='en';
+    try{
+      l=String(localStorage.getItem('qevyno_ui_lang')||navigator.language||'en')
+        .toLowerCase().split(/[-_]/)[0];
+      if(l==='ua')l='uk';
+    }catch(_){}
+
+    const now=new Date();
+    if(d.toDateString()===now.toDateString()){
+      return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    }
+
+    const y=new Date(now);
+    y.setDate(now.getDate()-1);
+    if(d.toDateString()===y.toDateString()){
+      const yesterday={
+        de:'Gestern',en:'Yesterday',es:'Ayer',fr:'Hier',it:'Ieri',
+        pt:'Ontem',nl:'Gisteren',pl:'Wczoraj',tr:'Dün',
+        uk:'Учора',ru:'Вчера',ja:'昨日',ko:'어제',zh:'昨天',ar:'أمس'
+      };
+      return yesterday[l]||yesterday.en;
+    }
+
+    return d.toLocaleDateString(undefined,{
+      day:'2-digit',month:'2-digit',year:'2-digit'
+    });
+  };
   const dayLabel=t=>{const d=new Date(Number(t)*1000),n=new Date(),y=new Date(n);y.setDate(n.getDate()-1);if(d.toDateString()===n.toDateString())return'Today';if(d.toDateString()===y.toDateString())return'Yesterday';return d.toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'})};
 
   const style=document.createElement('style');

@@ -23,6 +23,33 @@ function lang(){let l='en';try{l=String(localStorage.getItem('qevyno_ui_lang')||
 function tx(k){return (T[lang()]||T.en)[k]||T.en[k]||k}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function now(){return Math.floor(Date.now()/1000)}
+function q306ListStamp(t){
+  const n=Number(t||0);
+  if(!Number.isFinite(n)||n<=0)return'';
+
+  const d=new Date(n>100000000000?n:n*1000);
+  if(Number.isNaN(d.getTime()))return'';
+
+  const current=new Date();
+  if(d.toDateString()===current.toDateString()){
+    return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  }
+
+  const y=new Date(current);
+  y.setDate(current.getDate()-1);
+  if(d.toDateString()===y.toDateString()){
+    const yesterday={
+      de:'Gestern',en:'Yesterday',es:'Ayer',fr:'Hier',it:'Ieri',
+      pt:'Ontem',nl:'Gisteren',pl:'Wczoraj',tr:'Dün',
+      uk:'Учора',ru:'Вчера',ja:'昨日',ko:'어제',zh:'昨天',ar:'أمس'
+    };
+    return yesterday[lang()]||yesterday.en;
+  }
+
+  return d.toLocaleDateString(undefined,{
+    day:'2-digit',month:'2-digit',year:'2-digit'
+  });
+}
 function uuid(){try{return crypto.randomUUID().replace(/-/g,'_')}catch(_){return 'g_'+Date.now()+'_'+Math.random().toString(36).slice(2,12)}}
 function mePhone(){try{return String((typeof window.mePhone!=='undefined'&&window.mePhone)||localStorage.getItem('qevyno_phone')||'')}catch(_){return''}}
 function meName(){try{return String((typeof window.meName!=='undefined'&&window.meName)||localStorage.getItem('qevyno_name')||mePhone())}catch(_){return mePhone()}}
@@ -83,7 +110,7 @@ function injectGroups(){
  const sec=document.createElement('div');sec.className='q306groupSection';sec.innerHTML=`<span>${esc(tx('groups'))}</span><span style="margin-left:auto">${filtered.length}</span>`;
  const help=people.querySelector('.q299helpRow');if(help)help.insertAdjacentElement('afterend',sec);else people.prepend(sec);
  let anchor=sec;
- for(const g of filtered){const last=groupLast(g),row=document.createElement('div');row.className='q26row q306groupRow';row.dataset.groupId=g.id;const unread=Math.max(0,Number(g.unread||0));row.innerHTML=`<div class="q306groupAvatar">${esc(initials(g.name))}</div><div class="q26info"><div class="q26nameLine"><div class="q26name">${esc(g.name)}</div>${unread?`<div class="q306unread">${Math.min(99,unread)}</div>`:''}</div><div class="q306groupMeta">${g.members.length} ${esc(g.members.length===1?tx('member'):tx('membersN'))}</div><div class="q306groupLast">${esc(last?((last.sender_phone===mePhone()?tx('you'):last.sender_name||displayMemberName(last.sender_phone))+': '+last.text):tx('noGroupMessages'))}</div></div><div class="q26right"><div class="q26time">${last?new Date(Number(last.sent_at||0)*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''}</div></div>`;row.onclick=()=>openGroup(g.id);anchor.insertAdjacentElement('afterend',row);anchor=row}
+ for(const g of filtered){const last=groupLast(g),row=document.createElement('div');row.className='q26row q306groupRow';row.dataset.groupId=g.id;const unread=Math.max(0,Number(g.unread||0));row.innerHTML=`<div class="q306groupAvatar">${esc(initials(g.name))}</div><div class="q26info"><div class="q26nameLine"><div class="q26name">${esc(g.name)}</div>${unread?`<div class="q306unread">${Math.min(99,unread)}</div>`:''}</div><div class="q306groupMeta">${g.members.length} ${esc(g.members.length===1?tx('member'):tx('membersN'))}</div><div class="q306groupLast">${esc(last?((last.sender_phone===mePhone()?tx('you'):last.sender_name||displayMemberName(last.sender_phone))+': '+last.text):tx('noGroupMessages'))}</div></div><div class="q26right"><div class="q26time">${q306ListStamp(last?.sent_at||g.updated_at)}</div></div>`;row.onclick=()=>openGroup(g.id);anchor.insertAdjacentElement('afterend',row);anchor=row}
 }
 let listPending=false;function refreshList(){if(listPending)return;listPending=true;requestAnimationFrame(()=>{listPending=false;fixSearch();decorateNormalRows();injectGroups()})}
 const people=document.getElementById('people');if(people)new MutationObserver(refreshList).observe(people,{subtree:true,childList:true});

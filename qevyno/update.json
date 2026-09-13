@@ -1,7 +1,7 @@
 {
-  "versionCode": 48,
-  "versionName": "2.9.36",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.36.apk",
-  "notes": "Shorter search and smarter profile chip: German search now simply says Suchen. Accounts without the purple verified badge get a compact avatar-only profile control, while verified accounts keep the wider badge layout.",
-  "notes_de": "Kuerzere Suche und intelligenter Profil-Chip: Im deutschen Suchfeld steht nur noch Suchen. Accounts ohne lila Verifiziert-Haken bekommen einen kompakten Avatar-Bereich; verifizierte Accounts behalten die breitere Ansicht mit Haken."
+  "versionCode": 49,
+  "versionName": "2.9.37",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.37.apk",
+  "notes": "WhatsApp-style chat-list timestamps: today shows the time, yesterday shows a localized Yesterday label, and older chats show a short date such as 08.09.26. Works for private chats and groups.",
+  "notes_de": "WhatsApp-artige Zeitstempel in der Chat-Liste: Heute steht die Uhrzeit, gestern steht Gestern und aeltere Chats zeigen ein Datum wie 08.09.26. Funktioniert fuer private Chats und Gruppen."
 }

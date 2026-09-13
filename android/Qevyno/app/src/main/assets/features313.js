@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.9.36';
+const VERSION='2.9.37';
 
 function lang(){
   try{
@@ -83,6 +83,23 @@ body,#app,#root,#homeScreen,.screen,.page,.page-wrap,.app-shell{max-width:none!i
 #homeScreen .q308profileChip.q313verifiedProfile{
   width:auto!important;
   min-width:0!important;
+}
+/* q313WhatsappTimestamp */
+#people>.q26row>.q26right,
+#people>.q306groupRow>.q26right{
+  align-self:stretch!important;
+  justify-content:flex-start!important;
+  min-width:64px!important;
+  padding-top:4px!important;
+  margin-left:4px!important;
+}
+#people .q26time{
+  font-size:11.5px!important;
+  line-height:1.2!important;
+  color:#86959f!important;
+  white-space:nowrap!important;
+  font-weight:500!important;
+  text-align:right!important;
 }
 button,input,textarea,select{-webkit-tap-highlight-color:transparent}
 @media(max-width:380px){#homeScreen .q26headline{font-size:34px!important}#homeScreen .q26searchWrap{padding-left:12px!important;padding-right:12px!important}}
