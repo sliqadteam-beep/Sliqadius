@@ -15,6 +15,12 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.view.View;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -41,6 +47,8 @@ public class MainActivity extends Activity {
     private static final int REQUEST_PROFILE_PICTURE = 5201;
     private static final int REQUEST_NOTIFICATIONS = 7301;
     private WebView webView;
+    private FrameLayout rootView;
+    private View loadingOverlay;
     private MediaBridge mediaBridge;
     private String pendingAddPhone = "";
     private String pendingShareText = "";
@@ -61,7 +69,7 @@ public class MainActivity extends Activity {
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.rgb(247, 250, 252));
-        webView.setVisibility(View.INVISIBLE);
+        webView.setVisibility(View.VISIBLE);
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
@@ -102,7 +110,27 @@ public class MainActivity extends Activity {
             }
         });
 
-        setContentView(webView);
+        rootView = new FrameLayout(this);
+        rootView.setBackgroundColor(Color.WHITE);
+
+        FrameLayout.LayoutParams webParams = new FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        rootView.addView(webView, webParams);
+
+        loadingOverlay = createNativeLoadingOverlay();
+        FrameLayout.LayoutParams loadingParams = new FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        rootView.addView(loadingOverlay, loadingParams);
+
+        setContentView(rootView);
+
+        // Safety net: never allow the loading screen to become a permanent blank/grey screen.
+        rootView.postDelayed(this::hideNativeLoading, 5000L);
+
         webView.loadUrl("file:///android_asset/index.html");
     }
 
@@ -237,12 +265,84 @@ public class MainActivity extends Activity {
         if (script != null && !script.isEmpty()) bundle.append('\n').append(script).append('\n');
     }
 
+    private View createNativeLoadingOverlay() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setGravity(Gravity.CENTER);
+        box.setBackgroundColor(Color.WHITE);
+        box.setPadding(28, 28, 28, 28);
+
+        ProgressBar spinner = new ProgressBar(this);
+        LinearLayout.LayoutParams spinnerParams = new LinearLayout.LayoutParams(58, 58);
+        box.addView(spinner, spinnerParams);
+
+        TextView title = new TextView(this);
+        title.setText(nativeLoadingText());
+        title.setTextColor(Color.rgb(92, 112, 128));
+        title.setTextSize(14f);
+        title.setGravity(Gravity.CENTER);
+        title.setPadding(0, 18, 0, 0);
+
+        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        box.addView(title, textParams);
+        return box;
+    }
+
+    private String nativeLoadingText() {
+        String l = Locale.getDefault().getLanguage().toLowerCase(Locale.ROOT);
+        switch (l) {
+            case "de": return "Skaysa wird geladen…";
+            case "es": return "Cargando Skaysa…";
+            case "fr": return "Chargement de Skaysa…";
+            case "it": return "Caricamento di Skaysa…";
+            case "pt": return "A carregar Skaysa…";
+            case "nl": return "Skaysa wordt geladen…";
+            case "pl": return "Ładowanie Skaysa…";
+            case "tr": return "Skaysa yükleniyor…";
+            case "uk": return "Skaysa завантажується…";
+            case "ru": return "Загрузка Skaysa…";
+            case "ja": return "Skaysaを読み込み中…";
+            case "ko": return "Skaysa 불러오는 중…";
+            case "zh": return "正在加载 Skaysa…";
+            case "ar": return "جارٍ تحميل Skaysa…";
+            default: return "Loading Skaysa…";
+        }
+    }
+
+    private void hideNativeLoading() {
+        runOnUiThread(() -> {
+            if (rootView == null || loadingOverlay == null) return;
+            final View overlay = loadingOverlay;
+            loadingOverlay = null;
+            overlay.animate()
+                .alpha(0f)
+                .setDuration(150L)
+                .withEndAction(() -> {
+                    try {
+                        if (overlay.getParent() == rootView) rootView.removeView(overlay);
+                    } catch (Exception ignored) {}
+                })
+                .start();
+        });
+    }
+
     private void showWhenSkaysaReady(WebView view, int attempt) {
-        if (view == null) return;
+        if (view == null) {
+            hideNativeLoading();
+            return;
+        }
         view.evaluateJavascript("(window.__skaysaReady===true)", value -> {
             boolean ready = "true".equals(String.valueOf(value));
-            if (ready || attempt >= 45) {
-                view.setVisibility(View.VISIBLE);
+            if (ready) {
+                hideNativeLoading();
+                return;
+            }
+            if (attempt >= 55) {
+                // Hard fallback: show the app instead of ever leaving a blank screen.
+                hideNativeLoading();
                 return;
             }
             view.postDelayed(() -> showWhenSkaysaReady(view, attempt + 1), 70L);

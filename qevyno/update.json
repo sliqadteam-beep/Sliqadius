@@ -1,7 +1,7 @@
 {
-  "versionCode": 41,
-  "versionName": "2.9.29",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.29.apk",
-  "notes": "Signup profile-picture step, no legacy UI flash at startup, and messenger-style message notifications with sender name plus message text.",
-  "notes_de": "Profilbild-Schritt bei der Registrierung, kein Aufblitzen der alten UI beim Start und Messenger-Benachrichtigungen mit Absendername plus Nachrichtentext."
+  "versionCode": 42,
+  "versionName": "2.9.30",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.30.apk",
+  "notes": "Native startup loading hotfix. The WebView is no longer kept invisible, preventing a permanent grey screen. A native white Skaysa loading overlay covers the legacy base interface and always dismisses safely.",
+  "notes_de": "Nativer Start-Ladescreen-Hotfix. Die WebView wird nicht mehr unsichtbar festgehalten, wodurch der graue Bildschirm behoben ist. Ein nativer weisser Skaysa-Ladescreen verdeckt die alte Basisoberflaeche und wird immer sicher entfernt."
 }
