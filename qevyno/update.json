@@ -1,7 +1,7 @@
 {
-  "versionCode": 53,
-  "versionName": "2.9.41",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.41.apk",
-  "notes": "Own profile is now loaded from the server exactly once per app start, while a compact cached profile and avatar are shown immediately. Profile-picture changes and removals update the cache instantly. Previous local-number, group, delete, translation and reaction fixes remain included.",
-  "notes_de": "Das eigene Profil wird jetzt pro App-Start genau einmal vom Server geladen; Profil und optimiertes Profilbild erscheinen sofort aus dem Cache. Aendern oder Entfernen des Profilbilds aktualisiert den Cache sofort. Die bisherigen Telefonnummern-, Gruppen-, Loesch-, Uebersetzungs- und Reaktionsfixes bleiben enthalten."
+  "versionCode": 55,
+  "versionName": "2.9.43",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.43.apk",
+  "notes": "Chat Core update: faster and safer chat opening, cached messages first, per-chat scroll restore, better back navigation, grouped GET requests with one safe retry, improved touch targets, group opening cleanup and double-send protection.",
+  "notes_de": "Chat-Core-Update: Chats oeffnen schneller und robuster, lokale Nachrichten erscheinen sofort, Scrollposition pro Chat, bessere Zurueck-Navigation, zusammengelegte GET-Anfragen mit einem sicheren Retry, bessere Touch-Ziele, verbessertes Gruppen-Oeffnen und Schutz vor Doppelsenden."
 }

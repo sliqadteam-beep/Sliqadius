@@ -106,7 +106,8 @@ public class MainActivity extends Activity {
                     "features301.js",
                     "features314.js",
                     "startup292.js",
-                    "features315.js"
+                    "features315.js",
+                    "features316.js"
                 };
                 runAssetsSequentially(view, assets, 0, () -> showWhenSkaysaReady(view, 0));
             }
@@ -658,10 +659,31 @@ public class MainActivity extends Activity {
         if (mediaBridge != null) mediaBridge.shutdown();
         super.onDestroy();
     }
+    private void skaysaNativeBackFallback() {
+        try {
+            if (webView != null && webView.canGoBack()) webView.goBack();
+            else super.onBackPressed();
+        } catch (Exception ignored) {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) webView.goBack();
-        else super.onBackPressed();
+        if (webView == null) {
+            super.onBackPressed();
+            return;
+        }
+        try {
+            webView.evaluateJavascript(
+                "(function(){try{return !!(window.skaysaHandleBack&&window.skaysaHandleBack())}catch(e){return false}})()",
+                value -> {
+                    if ("true".equals(String.valueOf(value))) return;
+                    skaysaNativeBackFallback();
+                }
+            );
+        } catch (Exception ignored) {
+            skaysaNativeBackFallback();
+        }
     }
 }
