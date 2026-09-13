@@ -1,7 +1,7 @@
 {
-  "versionCode": 36,
-  "versionName": "2.9.24",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.24.apk",
-  "notes": "Full UI polish: no side borders anymore, a better and more stable search, cleaner cards and calmer chat rendering. The in-app top logo stays removed. Existing groups, media, GIF, profile, QR, verified and notification features remain included.",
-  "notes_de": "Volles UI-Polishing: keine Seitenraender mehr, bessere und stabilere Suche, sauberere Karten und ruhigere Chatliste. Das Logo oben in der App bleibt entfernt. Gruppen, Medien, GIFs, Profil, QR, Verifizierung und Benachrichtigungen bleiben enthalten."
+  "versionCode": 37,
+  "versionName": "2.9.25",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.25.apk",
+  "notes": "Critical startup fix: Skaysa feature layers now load correctly instead of falling back to the old Qevyno interface. Search, full-width UI, groups, media, GIF, profile, QR, verified badge and notifications remain included.",
+  "notes_de": "Kritischer Startup-Fix: Die Skaysa-Feature-Layer werden jetzt korrekt geladen, statt auf die alte Qevyno-Oberflaeche zurueckzufallen. Suche, Vollbild-UI, Gruppen, Medien, GIFs, Profil, QR, Verifizierung und Benachrichtigungen bleiben enthalten."
 }
