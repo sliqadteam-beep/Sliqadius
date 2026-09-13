@@ -1,7 +1,7 @@
 {
-  "versionCode": 57,
-  "versionName": "2.9.45",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.45.apk",
-  "notes": "Root fix for conversation-list flicker. The core renderer no longer clears the complete people list every 3.5 seconds. Skaysa Help and group rows persist, identical server results are skipped, and chat taps always call the newest openChat implementation.",
-  "notes_de": "Root-Fix fuer das Flackern der Chatliste. Der eigentliche Renderer loescht nicht mehr alle 3,5 Sekunden die komplette Liste. Skaysa Hilfe und Gruppen bleiben bestehen, identische Serverdaten werden nicht neu gerendert und Chat-Taps verwenden immer die aktuelle openChat-Funktion."
+  "versionCode": 58,
+  "versionName": "2.9.46",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.46.apk",
+  "notes": "Second renderer root fix. features295 no longer wipes and rebuilds the complete conversation list. The redundant 2.2 second home render loop was removed, persistent Help/group rows survive polling, and chat rows always use the current openChat handler.",
+  "notes_de": "Zweiter Renderer-Root-Fix. features295 loescht und baut die komplette Chatliste nicht mehr neu auf. Die redundante 2,2-Sekunden-Home-Render-Schleife wurde entfernt, Hilfe-/Gruppen-Zeilen bleiben beim Polling bestehen und Chat-Zeilen verwenden immer den aktuellen openChat-Handler."
 }

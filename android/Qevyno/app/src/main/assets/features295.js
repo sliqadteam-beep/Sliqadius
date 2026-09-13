@@ -74,10 +74,33 @@
     const pins=new Set(JSON.parse(localStorage.getItem('qevyno_pins')||'[]'));
     let items=all.filter(u=>!search||String(u.display_name||'').toLowerCase().includes(search)||u.phone.includes(search)||String(u.last_message||'').toLowerCase().includes(search));
     items.sort((a,b)=>(pins.has(b.phone)?1:0)-(pins.has(a.phone)?1:0)||Number(b.last_at||0)-Number(a.last_at||0));
-    box.innerHTML='';
-    if(!items.length){box.innerHTML=`<div class="q26empty"><b>${search?'No matching chats':'No chats yet'}</b><p>${search?'Try another search.':'Tap + to start a private chat.'}</p></div>`;return;}
+    const renderSig=JSON.stringify([
+      search,
+      items.map(u=>[
+        String(u.phone||''),
+        String(u.display_name||''),
+        !!u.online,
+        !!u.verified,
+        String(u.avatar_url||''),
+        String(u.last_message||''),
+        Number(u.last_at||0),
+        Number(u.unread||0),
+        pins.has(u.phone)
+      ])
+    ]);
+    const normalRows=box.querySelectorAll(':scope > .q26row:not(.q299helpRow):not(.q306groupRow)').length;
+    if(box.dataset.q29546sig===renderSig && normalRows===items.length)return;
+    box.dataset.q29546sig=renderSig;
+
+    /* Never delete persistent special rows. */
+    box.querySelectorAll(
+      ':scope > .q26section,'+
+      ':scope > .q26row:not(.q299helpRow):not(.q306groupRow),'+
+      ':scope > .q26empty'
+    ).forEach(el=>el.remove());
+    if(!items.length){box.insertAdjacentHTML('beforeend',`<div class="q26empty"><b>${search?'No matching chats':'No chats yet'}</b><p>${search?'Try another search.':'Tap + to start a private chat.'}</p></div>`);return;}
     const addGroup=(title,arr)=>{if(!arr.length)return;const l=document.createElement('div');l.className='q26section';l.innerHTML=`<span>${title}</span><span class="count">${arr.length}</span>`;box.appendChild(l);arr.forEach(addRow)};
-    const addRow=u=>{const row=document.createElement('div');row.className='q26row';row.dataset.phone=u.phone;row.tabIndex=0;const name=u.display_name||u.phone;row.innerHTML=`${avatarHtml(u)}<div class="q26info"><div class="q26nameLine"><div class="q26name">${esc(name)}</div>${badge(u.phone,u.verified)}${pins.has(u.phone)?'<span class="q26pinMark">◆</span>':''}</div><div class="q26preview">${esc(u.last_message||u.phone)}</div></div><button class="q26pin ${pins.has(u.phone)?'active':''}" aria-label="Pin">◆</button><div class="q26right"><div class="q26time">${u.last_at?new Date(Number(u.last_at)*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''}</div>${u.unread?`<div class="q26badge">${Math.min(99,Number(u.unread)||0)}</div>`:''}</div>`;row.onclick=e=>{if(e.target.closest('.q26pin'))return;openChat(u.phone,name,!!u.online,true);setTimeout(()=>decorateChat(u),20)};row.querySelector('.q26pin').onclick=e=>{e.stopPropagation();pins.has(u.phone)?pins.delete(u.phone):pins.add(u.phone);localStorage.setItem('qevyno_pins',JSON.stringify([...pins]));renderLocalConversations()};box.appendChild(row)};
+    const addRow=u=>{const row=document.createElement('div');row.className='q26row';row.dataset.phone=u.phone;row.tabIndex=0;const name=u.display_name||u.phone;row.innerHTML=`${avatarHtml(u)}<div class="q26info"><div class="q26nameLine"><div class="q26name">${esc(name)}</div>${badge(u.phone,u.verified)}${pins.has(u.phone)?'<span class="q26pinMark">◆</span>':''}</div><div class="q26preview">${esc(u.last_message||u.phone)}</div></div><button class="q26pin ${pins.has(u.phone)?'active':''}" aria-label="Pin">◆</button><div class="q26right"><div class="q26time">${u.last_at?new Date(Number(u.last_at)*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''}</div>${u.unread?`<div class="q26badge">${Math.min(99,Number(u.unread)||0)}</div>`:''}</div>`;row.onclick=e=>{if(e.target.closest('.q26pin'))return;window.openChat(u.phone,name,!!u.online,true);setTimeout(()=>decorateChat(u),20)};row.querySelector('.q26pin').onclick=e=>{e.stopPropagation();pins.has(u.phone)?pins.delete(u.phone):pins.add(u.phone);localStorage.setItem('qevyno_pins',JSON.stringify([...pins]));renderLocalConversations()};box.appendChild(row)};
     addGroup('Pinned',items.filter(x=>pins.has(x.phone)));addGroup('Recent chats',items.filter(x=>!pins.has(x.phone)));
   }
 
@@ -139,7 +162,7 @@
   const sendBtn=D('sendBtn');if(sendBtn)sendBtn.onclick=window.send;const msgBox=D('messageBox');if(msgBox)msgBox.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();window.send()}};
   const search=D('chatSearch');if(search)search.oninput=renderLocalConversations;
 
-  const oldFind=window.findPerson;window.findPerson=async function(){const inp=D('findPhone');const phone=String(inp?.value||'').trim().replace(/[\s().-]/g,'').replace(/^00/,'+');if(!/^\+[1-9]\d{7,14}$/.test(phone)){if(D('findError'))D('findError').textContent='Enter the full international number.';return}const r=await api('/api/find?phone='+encodeURIComponent(phone));if(r&&r.ok&&r.user){const u=r.user;touchMeta(u.phone,{display_name:u.display_name||u.phone,online:!!u.online,verified:verified(u.phone,u.verified),avatar_url:u.avatar_url||null});openChat(u.phone,u.display_name||u.phone,!!u.online,true);setTimeout(()=>decorateChat(getMeta(u.phone)),20)}else if(typeof oldFind==='function')oldFind()};if(D('findBtn'))D('findBtn').onclick=window.findPerson;
+  const oldFind=window.findPerson;window.findPerson=async function(){const inp=D('findPhone');const phone=String(inp?.value||'').trim().replace(/[\s().-]/g,'').replace(/^00/,'+');if(!/^\+[1-9]\d{7,14}$/.test(phone)){if(D('findError'))D('findError').textContent='Enter the full international number.';return}const r=await api('/api/find?phone='+encodeURIComponent(phone));if(r&&r.ok&&r.user){const u=r.user;touchMeta(u.phone,{display_name:u.display_name||u.phone,online:!!u.online,verified:verified(u.phone,u.verified),avatar_url:u.avatar_url||null});window.openChat(u.phone,u.display_name||u.phone,!!u.online,true);setTimeout(()=>decorateChat(getMeta(u.phone)),20)}else if(typeof oldFind==='function')oldFind()};if(D('findBtn'))D('findBtn').onclick=window.findPerson;
 
   const oldRefresh=window.refreshPresence;window.refreshPresence=async function(){if(!peer)return;const r=await api('/api/find?phone='+encodeURIComponent(peer.phone));if(r&&r.ok){const u=r.user;peer.name=u.display_name||peer.name;touchMeta(u.phone,{display_name:u.display_name||u.phone,online:!!u.online,verified:verified(u.phone,u.verified),avatar_url:u.avatar_url||null});if(D('chatPresence'))D('chatPresence').textContent=u.phone+' • '+(u.online?'Online':'Offline');decorateChat(getMeta(u.phone))}else if(typeof oldRefresh==='function')return oldRefresh()};
 
@@ -176,6 +199,6 @@
   const oldSave=window.saveSession;if(typeof oldSave==='function')window.saveSession=function(d){oldSave(d);ownMeta={...ownMeta,...d,verified:verified(d&&d.phone,d&&d.verified)};setTimeout(()=>{loadOwn();if(window.qevynoRefreshOwnQr)window.qevynoRefreshOwnQr()},150)};
 
   try{if(pollHome){clearInterval(pollHome);pollHome=setInterval(window.loadConversations,2500)}if(pollChat){clearInterval(pollChat);pollChat=setInterval(window.loadMessages,1500)}}catch(e){}
-  setInterval(()=>{if(token)syncEvents().then(()=>{if(peer)renderLocalMessages(loadChat(peer.phone));else renderLocalConversations()})},2200);
+  setInterval(()=>{if(token&&peer)syncEvents().then(()=>renderLocalMessages(loadChat(peer.phone)))},2200);
   setTimeout(()=>{if(token){loadOwn();window.loadConversations()}document.querySelectorAll('.small').forEach(el=>{if(/Qevyno\s+2\./i.test(el.textContent||''))el.textContent='Qevyno 2.9.5 • Android 8+';});},350);
 })();
