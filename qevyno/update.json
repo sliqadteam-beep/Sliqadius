@@ -1,7 +1,7 @@
 {
-  "versionCode": 34,
-  "versionName": "2.9.22",
+  "versionCode": 35,
+  "versionName": "2.9.23",
   "apkUrl": "https://sliqado.org/Qevyno/Qevyno.apk",
-  "notes": "Group creation now only allows contacts you already added. Verified accounts show exactly one purple badge, and the badge can be tapped anywhere to explain verification. All Skaysa media, GIF, profile, QR, group and notification features remain included.",
-  "notes_de": "Beim Erstellen einer Gruppe können jetzt nur bereits hinzugefügte Kontakte ausgewählt werden. Verifizierte Accounts zeigen genau einen lila Haken; der Haken kann überall angetippt werden und erklärt die Verifizierung. Alle Skaysa-Funktionen für Medien, GIFs, Profil, QR, Gruppen und Benachrichtigungen bleiben enthalten."
+  "notes": "Search now works across chats, phone numbers, last messages and groups. The search field has been redesigned, the chat list is calmer, and the in-app Skaysa wordmark/logo at the top has been removed. Existing group, media, GIF, profile, QR, verified and notification features remain.",
+  "notes_de": "Die Suche funktioniert jetzt für Chats, Telefonnummern, letzte Nachrichten und Gruppen. Das Suchfeld wurde neu gestaltet, die Chatliste ist ruhiger und das Skaysa-Logo/Wordmark oben in der App wurde entfernt. Gruppen, Medien, GIFs, Profil, QR, Verifizierung und Benachrichtigungen bleiben erhalten."
 }
