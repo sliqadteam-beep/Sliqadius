@@ -169,23 +169,7 @@ public class NotificationService extends Service {
     private String tr(String key) {
         String l = language();
         if ("status".equals(key)) {
-            switch (l) {
-                case "de": return "Skaysa-Benachrichtigungszugriff aktiv";
-                case "es": return "Acceso a notificaciones de Skaysa activo";
-                case "fr": return "Accès aux notifications Skaysa actif";
-                case "it": return "Accesso alle notifiche Skaysa attivo";
-                case "pt": return "Acesso às notificações Skaysa ativo";
-                case "nl": return "Skaysa-meldingstoegang actief";
-                case "pl": return "Dostęp do powiadomień Skaysa aktywny";
-                case "tr": return "Skaysa bildirim erişimi etkin";
-                case "uk": return "Доступ Skaysa до сповіщень активний";
-                case "ru": return "Доступ Skaysa к уведомлениям активен";
-                case "ja": return "Skaysaの通知アクセスが有効です";
-                case "ko": return "Skaysa 알림 접근이 활성화됨";
-                case "zh": return "Skaysa 通知访问已启用";
-                case "ar": return "وصول Skaysa إلى الإشعارات مفعّل";
-                default: return "Skaysa notification access active";
-            }
+            return "";
         }
         if ("statusChannel".equals(key)) {
             return "de".equals(l) ? "Skaysa Hintergrund-Benachrichtigungen" : "Skaysa background notifications";
@@ -278,6 +262,9 @@ public class NotificationService extends Service {
         );
         status.setDescription(tr("statusDesc"));
         status.setShowBadge(false);
+        status.enableVibration(false);
+        status.setSound(null, null);
+        status.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         nm.createNotificationChannel(status);
 
         NotificationChannel messages = new NotificationChannel(
@@ -298,10 +285,13 @@ public class NotificationService extends Service {
             : new Notification.Builder(this);
         return b.setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("Skaysa")
-            .setContentText(tr("status"))
+            .setContentText("")
             .setContentIntent(pi)
-            .setOngoing(true)
+            .setOngoing(false)
             .setCategory(Notification.CATEGORY_SERVICE)
+            .setOnlyAlertOnce(true)
+            .setLocalOnly(true)
+            .setVisibility(Notification.VISIBILITY_SECRET)
             .setShowWhen(false)
             .build();
     }

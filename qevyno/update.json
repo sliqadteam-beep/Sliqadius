@@ -1,7 +1,7 @@
 {
-  "versionCode": 44,
-  "versionName": "2.9.32",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.32.apk",
-  "notes": "Fast startup: the native and JavaScript loading screens dismiss much sooner while still covering the legacy base UI during initialization.",
-  "notes_de": "Schneller Start: Der native und der JavaScript-Ladescreen verschwinden deutlich schneller, verdecken aber weiterhin die alte Basisoberflaeche waehrend der Initialisierung."
+  "versionCode": 45,
+  "versionName": "2.9.33",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.33.apk",
+  "notes": "Notification and profile UI polish: the foreground service status no longer says notification access active, is silent and dismissible on newer Android versions, and the profile chip is positioned lower.",
+  "notes_de": "Benachrichtigungs- und Profil-Polish: Die Hintergrund-Statusmeldung zeigt nicht mehr Benachrichtigungszugriff aktiv, ist still und auf neueren Android-Versionen wegwischbar. Das Profil oben rechts sitzt weiter unten."
 }
