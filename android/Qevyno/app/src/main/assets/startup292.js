@@ -76,3 +76,23 @@
   }catch(e){}
   setTimeout(()=>{try{blocker.remove()}catch(e){}},1800);
 })();
+
+;(()=>{try{
+  function __q313load(){
+    try{
+      if(document.getElementById('qevyno313loader')) return;
+      const s=document.createElement('script');
+      s.id='qevyno313loader';
+      s.src='file:///android_asset/features313.js';
+      s.async=false;
+      document.head.appendChild(s);
+    }catch(e){}
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',__q313load,{once:true});
+  }else{
+    __q313load();
+  }
+  setTimeout(__q313load,0);
+  setTimeout(__q313load,350);
+})();}catch(e){}

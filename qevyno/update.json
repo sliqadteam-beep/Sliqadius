@@ -1,7 +1,7 @@
 {
-  "versionCode": 35,
-  "versionName": "2.9.23",
+  "versionCode": 36,
+  "versionName": "2.9.24",
   "apkUrl": "https://sliqado.org/Qevyno/Qevyno.apk",
-  "notes": "Search now works across chats, phone numbers, last messages and groups. The search field has been redesigned, the chat list is calmer, and the in-app Skaysa wordmark/logo at the top has been removed. Existing group, media, GIF, profile, QR, verified and notification features remain.",
-  "notes_de": "Die Suche funktioniert jetzt für Chats, Telefonnummern, letzte Nachrichten und Gruppen. Das Suchfeld wurde neu gestaltet, die Chatliste ist ruhiger und das Skaysa-Logo/Wordmark oben in der App wurde entfernt. Gruppen, Medien, GIFs, Profil, QR, Verifizierung und Benachrichtigungen bleiben erhalten."
+  "notes": "Full UI polish: no side borders anymore, a better and more stable search, cleaner cards and calmer chat rendering. The in-app top logo stays removed. Existing groups, media, GIF, profile, QR, verified and notification features remain included.",
+  "notes_de": "Volles UI-Polishing: keine Seitenraender mehr, bessere und stabilere Suche, sauberere Karten und ruhigere Chatliste. Das Logo oben in der App bleibt entfernt. Gruppen, Medien, GIFs, Profil, QR, Verifizierung und Benachrichtigungen bleiben enthalten."
 }
