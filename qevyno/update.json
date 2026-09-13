@@ -2,6 +2,6 @@
   "versionCode": 59,
   "versionName": "2.9.47",
   "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.47.apk",
-  "notes": "Removes the built-in Skaysa Help contact and fixes chats closing immediately after opening. Browser history/popstate chat routing was removed; chats now stay open until the user explicitly goes back.",
-  "notes_de": "Entfernt den eingebauten Skaysa-Hilfe-Kontakt und behebt, dass sich Chats direkt nach dem Oeffnen wieder schliessen. Die Browser-History/Popstate-Chatnavigation wurde entfernt; Chats bleiben offen, bis der Nutzer selbst zurueckgeht."
+  "notes": "Clean UI update. Removes the built-in Help contact and old history/flicker layers, gives the chat list and conversation screen a calmer modern layout, and keeps opened chats open until the user explicitly goes back.",
+  "notes_de": "Clean-UI-Update. Entfernt den eingebauten Hilfe-Kontakt sowie alte History-/Flicker-Layer, gibt Chatliste und Chatansicht ein ruhigeres modernes Layout und laesst geoeffnete Chats offen, bis der Nutzer selbst zurueckgeht."
 }
