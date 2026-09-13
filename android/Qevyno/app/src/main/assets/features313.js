@@ -1,319 +1,68 @@
 (()=>{
 "use strict";
-const VERSION='2.9.24';
+const VERSION='2.9.26';
 const SEARCH_SELECTOR='#chatSearch';
 const PEOPLE_SELECTOR='#people';
-const ROW_SELECTORS=[
-  '.q299helpRow',
-  '.q306groupRow',
-  '.q26row',
-  '.q304row',
-  '.q308chatRow',
-  '.chatRow',
-  '.conversation',
-  '.person',
-  '#people > div'
-];
+const ROW_SELECTORS=['.q299helpRow','.q306groupRow','.q26row','.q304row','.q308chatRow','.chatRow','.conversation','.person','#people > div'];
 
-function lang(){
-  try{
-    return String(localStorage.getItem('qevyno_ui_lang')||document.documentElement.lang||navigator.language||'en')
-      .toLowerCase().split(/[-_]/)[0];
-  }catch(_){return 'en'}
-}
-const TXT={
-  de:{
-    placeholder:'Chats, Nummern und Gruppen suchen',
-    empty:'Keine Treffer',
-    emptySub:'Versuche einen anderen Namen, eine Nummer oder einen Text aus der letzten Nachricht.',
-    clear:'Suche leeren'
-  },
-  en:{
-    placeholder:'Search chats, numbers and groups',
-    empty:'No results',
-    emptySub:'Try another name, phone number, group or text from the last message.',
-    clear:'Clear search'
-  }
-};
+function lang(){try{return String(localStorage.getItem('qevyno_ui_lang')||document.documentElement.lang||navigator.language||'en').toLowerCase().split(/[-_]/)[0]}catch(_){return'en'}}
+const TXT={de:{placeholder:'Chats, Nummern und Gruppen suchen',empty:'Keine Treffer',emptySub:'Versuche einen anderen Namen, eine Nummer, Gruppe oder letzte Nachricht.'},en:{placeholder:'Search chats, numbers and groups',empty:'No results',emptySub:'Try another name, phone number, group or last message.'}};
 function t(k){const d=TXT[lang()]||TXT.en;return d[k]||TXT.en[k]||k}
 
-let styleEl=null;
+let styleEl;
 function ensureStyle(){
-  if(styleEl) return;
-  styleEl=document.createElement('style');
-  styleEl.id='q313style';
-  styleEl.textContent=`
-html,body{overflow-x:hidden!important;background:#f7fafc!important}
-body,#app,#root,#homeScreen,.screen,.page,.page-wrap,.app-shell{
-  max-width:none!important;width:100%!important;margin:0!important;min-width:0!important;
-}
-#homeScreen,.homeScreen,.chats-page{
-  padding-left:0!important;padding-right:0!important;
-}
-#homeScreen .content,#homeScreen .inner,.page-content,#peopleWrap,#people{
-  max-width:none!important;width:100%!important;
-}
-#homeScreen .topbar,.topbar{
-  padding:12px 16px 0 16px!important;
-}
-#homeScreen .topbar .brand,.topbar .brand,.topbar .logo,.app-brand,.appLogo,.appWordmark{
-  display:none!important;
-}
-#homeScreen h1,.page h1,.section-title{
-  letter-spacing:-.03em!important;
-}
-#people{
-  padding:10px 16px 120px!important;
-  box-sizing:border-box!important;
-}
-#people > .q313emptyState{display:none}
-.q313rowShow{display:flex!important}
+ if(styleEl)return;
+ styleEl=document.createElement('style');styleEl.id='q313style';styleEl.textContent=`
+html,body{overflow-x:hidden!important;background:#fff!important}
+body,#app,#root,#homeScreen,.screen,.page,.page-wrap,.app-shell{max-width:none!important;width:100%!important;margin:0!important;min-width:0!important}
+#homeScreen,.homeScreen,.chats-page{padding-left:0!important;padding-right:0!important}
+#homeScreen .topbar,.topbar{padding:10px 16px 0!important}
+#homeScreen .topbar .brand,.topbar .brand,.topbar .logo,.app-brand,.appLogo,.appWordmark{display:none!important}
+#homeScreen .q26hero{padding:8px 18px 10px!important}
+#homeScreen .q26headline{font-size:38px!important;line-height:1.02!important;letter-spacing:-1.7px!important;margin:0!important}
+
+/* ONE search surface only. The existing .q26search is the container. */
+#homeScreen .q26searchWrap{padding:6px 16px 14px!important;gap:10px!important}
+#homeScreen .q26search{height:58px!important;border-radius:22px!important;background:#f7fafc!important;border:1px solid #dbe6ee!important;box-shadow:none!important;padding:0 15px!important;display:flex!important;align-items:center!important;overflow:hidden!important}
+#homeScreen .q26search:focus-within{background:#fff!important;border-color:#8ABFF4!important;box-shadow:0 0 0 4px rgba(138,191,244,.16)!important}
+#homeScreen .q26search>span:first-child{width:25px!important;height:25px!important;min-width:25px!important;margin-right:11px!important;display:grid!important;place-items:center!important;color:#718797!important}
+#homeScreen .q26search>span:first-child svg{width:21px!important;height:21px!important}
+#chatSearch{height:100%!important;min-height:0!important;width:100%!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:none!important;font-size:16px!important;line-height:1.2!important;color:#17212b!important;appearance:none!important;-webkit-appearance:none!important}
+#chatSearch::placeholder{color:#95a4ae!important;opacity:1!important}
+.q313searchIcon,.q313clear{display:none!important}
+.q313searchWrap{margin:0!important;position:static!important}
+#homeScreen .q26new{width:58px!important;height:58px!important;border-radius:21px!important;box-shadow:0 10px 24px rgba(83,137,193,.16)!important}
+
+/* Cleaner profile and list */
+.q308profileChip,.q308profileCard,.q308miniProfile,.profileChip{border:1px solid #e3ebf1!important;border-radius:22px!important;box-shadow:0 6px 18px rgba(18,33,53,.045)!important;background:#fbfdff!important}
+.q308profileChip{padding:8px 10px!important}
+#people{width:100%!important;max-width:none!important;padding:4px 16px 120px!important;box-sizing:border-box!important;overflow-anchor:none!important}
+#people>.q299helpRow,#people>.q306groupRow,#people>.q26row,#people>.q304row,#people>.q308chatRow,#people>.chatRow,#people>.conversation{margin:0 0 10px!important;border:1px solid #e5edf3!important;border-radius:22px!important;background:#fff!important;box-shadow:0 5px 17px rgba(18,33,53,.035)!important;transform:none!important}
+#people>.q299helpRow:active,#people>.q306groupRow:active,#people>.q26row:active{background:#f5f9fc!important;transform:none!important}
 .q313hidden{display:none!important}
-.q313surface,
-#people > div,
-.q299helpRow,
-.q306groupRow,
-.q26row,
-.q304row,
-.q308chatRow,
-.chatRow,
-.conversation{
-  box-sizing:border-box!important;
-  border:1px solid #e7edf3!important;
-  border-radius:24px!important;
-  background:#ffffff!important;
-  box-shadow:0 8px 22px rgba(18,33,53,.045)!important;
-}
-.q299helpRow,.q306groupRow,.q26row,.q304row,.q308chatRow,.chatRow,.conversation,
-#people > div{
-  margin:0 0 12px 0!important;
-  padding:18px 16px!important;
-}
-#chatSearch,
-${SEARCH_SELECTOR}{
-  width:100%!important;
-  height:62px!important;
-  border-radius:24px!important;
-  border:1.5px solid #dfe8f1!important;
-  background:#fbfdff!important;
-  box-shadow:0 6px 16px rgba(18,33,53,.035)!important;
-  padding:0 52px 0 56px!important;
-  font-size:18px!important;
-  line-height:1!important;
-  color:#17212b!important;
-  outline:none!important;
-}
-#chatSearch::placeholder{color:#8b9aaa!important}
-.q313searchWrap{
-  position:relative!important;
-  margin:0 16px 16px!important;
-}
-.q313searchIcon{
-  position:absolute!important;
-  left:18px!important;
-  top:50%!important;
-  transform:translateY(-50%)!important;
-  width:24px!important;height:24px!important;
-  color:#7f91a1!important;
-  pointer-events:none!important;
-}
-.q313clear{
-  position:absolute!important;
-  right:14px!important;
-  top:50%!important;
-  transform:translateY(-50%)!important;
-  width:34px!important;height:34px!important;
-  border:none!important;
-  border-radius:50%!important;
-  background:#eef4f9!important;
-  color:#4d6478!important;
-  display:none!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-size:18px!important;
-  font-weight:900!important;
-}
-.q313clear.on{display:flex!important}
-.q313emptyState{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  text-align:center;
-  padding:26px 18px!important;
-  border:1px dashed #d9e4ee!important;
-  border-radius:24px!important;
-  background:#fbfdff!important;
-  color:#6f8291!important;
-}
-.q313emptyTitle{font-size:18px;font-weight:900;color:#17212b}
-.q313emptySub{font-size:13px;line-height:1.45}
-.q308profileChip,.q308profileCard,.q308miniProfile,.profileChip{
-  border:1px solid #e5edf3!important;
-  border-radius:22px!important;
-  box-shadow:0 8px 22px rgba(18,33,53,.045)!important;
-}
-.q308profileChip{
-  padding:10px 12px!important;
-}
-.q308profileChip img,.q308profileCard img,.profileChip img{
-  border-radius:16px!important;
-}
-.fab,.qfab,#fab,.composeFab,.newChatFab{
-  box-shadow:0 16px 30px rgba(67,152,228,.28)!important;
-  border-radius:28px!important;
-}
-button,input,textarea,select,.q308profileChip,.q299helpRow,.q306groupRow,#people > div{
-  transition:box-shadow .16s ease,border-color .16s ease,background .16s ease,transform .16s ease!important;
-}
-button:active,.fab:active,#fab:active{transform:scale(.985)!important}
+.q313emptyState{display:none;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;margin:4px 0;padding:24px 18px!important;border:1px dashed #d7e3ec!important;border-radius:22px!important;background:#f9fbfd!important;color:#738692!important}
+.q313emptyTitle{font-size:16px;font-weight:850;color:#17212b}.q313emptySub{font-size:12.5px;line-height:1.45}
+.fab,.qfab,#fab,.composeFab,.newChatFab{box-shadow:0 14px 28px rgba(67,152,228,.24)!important;border-radius:27px!important}
+button,input,textarea,select{-webkit-tap-highlight-color:transparent}
+@media(max-width:380px){#homeScreen .q26headline{font-size:34px!important}#homeScreen .q26searchWrap{padding-left:12px!important;padding-right:12px!important}}
 `;
-  document.head.appendChild(styleEl);
+ document.head.appendChild(styleEl);
 }
-
-function getSearchInput(){
-  return document.querySelector(SEARCH_SELECTOR);
+function input(){return document.querySelector(SEARCH_SELECTOR)}
+function people(){return document.querySelector(PEOPLE_SELECTOR)}
+function cleanupOldSearch(){
+ const i=input();if(!i)return;
+ i.placeholder=t('placeholder');
+ const p=i.parentElement;if(p)p.classList.remove('q313searchWrap');
+ document.querySelectorAll('.q313searchIcon,.q313clear').forEach(x=>x.remove());
 }
-function getPeople(){
-  return document.querySelector(PEOPLE_SELECTOR);
-}
-function ensureSearchWrap(){
-  const input=getSearchInput();
-  if(!input || input.dataset.q313wired==='1') return;
-  input.dataset.q313wired='1';
-  input.setAttribute('placeholder',t('placeholder'));
-  const parent=input.parentElement;
-  if(!parent) return;
-  if(!parent.classList.contains('q313searchWrap')) parent.classList.add('q313searchWrap');
-  if(!parent.querySelector('.q313searchIcon')){
-    const icon=document.createElement('div');
-    icon.className='q313searchIcon';
-    icon.innerHTML='\
-      <svg viewBox="0 0 24 24" fill="none" width="24" height="24" aria-hidden="true">\
-        <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2"></circle>\
-        <path d="M16 16L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>\
-      </svg>';
-    parent.appendChild(icon);
-  }
-  let clearBtn=parent.querySelector('.q313clear');
-  if(!clearBtn){
-    clearBtn=document.createElement('button');
-    clearBtn.type='button';
-    clearBtn.className='q313clear';
-    clearBtn.setAttribute('aria-label',t('clear'));
-    clearBtn.textContent='×';
-    clearBtn.addEventListener('click',()=>{
-      input.value='';
-      input.dispatchEvent(new Event('input',{bubbles:true}));
-      input.focus();
-    });
-    parent.appendChild(clearBtn);
-  }
-  const debounced=debounce(()=>runSearch(input.value||''),70);
-  input.addEventListener('input',()=>{
-    clearBtn.classList.toggle('on', !!String(input.value||'').trim());
-    debounced();
-  });
-  input.addEventListener('focus',()=>clearBtn.classList.toggle('on', !!String(input.value||'').trim()));
-  clearBtn.classList.toggle('on', !!String(input.value||'').trim());
-}
-
-function textOf(el){
-  return String(el?.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
-}
-function isSearchableRow(el){
-  if(!el || !(el instanceof HTMLElement)) return false;
-  if(el.classList.contains('q313emptyState')) return false;
-  const txt=textOf(el);
-  if(!txt) return false;
-  if(el.matches('.q306groupSection,.section-header,.heading,.titleOnly')) return false;
-  const style=getComputedStyle(el);
-  if(style.display==='none') return false;
-  return true;
-}
-function allRows(){
-  const people=getPeople();
-  if(!people) return [];
-  const found=[];
-  const seen=new Set();
-  for(const sel of ROW_SELECTORS){
-    people.querySelectorAll(sel).forEach(el=>{
-      if(!seen.has(el) && isSearchableRow(el)){
-        seen.add(el); found.push(el);
-      }
-    });
-  }
-  if(!found.length){
-    [...people.children].forEach(el=>{
-      if(!seen.has(el) && isSearchableRow(el)){
-        seen.add(el); found.push(el);
-      }
-    });
-  }
-  return found;
-}
-
-function ensureEmptyState(){
-  const people=getPeople();
-  if(!people) return null;
-  let box=people.querySelector('.q313emptyState');
-  if(!box){
-    box=document.createElement('div');
-    box.className='q313emptyState';
-    box.innerHTML=`<div class="q313emptyTitle">${escapeHtml(t('empty'))}</div><div class="q313emptySub">${escapeHtml(t('emptySub'))}</div>`;
-    people.appendChild(box);
-  }else{
-    const title=box.querySelector('.q313emptyTitle');
-    const sub=box.querySelector('.q313emptySub');
-    if(title) title.textContent=t('empty');
-    if(sub) sub.textContent=t('emptySub');
-  }
-  return box;
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-}
-function runSearch(query){
-  const people=getPeople();
-  const input=getSearchInput();
-  if(input) input.setAttribute('placeholder',t('placeholder'));
-  if(!people) return;
-  const q=String(query||'').trim().toLowerCase();
-  const rows=allRows();
-  let visible=0;
-  rows.forEach(row=>{
-    const match=!q || textOf(row).includes(q);
-    row.classList.toggle('q313hidden', !match);
-    if(match) visible++;
-  });
-  const empty=ensureEmptyState();
-  if(empty) empty.style.display = visible===0 ? 'flex' : 'none';
-}
-
-function debounce(fn,wait){
-  let t=0;
-  return function(...args){
-    clearTimeout(t);
-    t=setTimeout(()=>fn.apply(this,args),wait);
-  }
-}
-
-let scheduled=false;
-function refresh(){
-  if(scheduled) return;
-  scheduled=true;
-  requestAnimationFrame(()=>{
-    scheduled=false;
-    ensureStyle();
-    ensureSearchWrap();
-    runSearch(getSearchInput()?.value||'');
-  });
-}
-
+function textOf(el){return String(el?.textContent||'').replace(/\s+/g,' ').trim().toLowerCase()}
+function isRow(el){if(!el||!(el instanceof HTMLElement)||el.classList.contains('q313emptyState'))return false;if(el.matches('.q306groupSection,.q26section,.section-header,.heading,.titleOnly'))return false;return !!textOf(el)}
+function rows(){const p=people();if(!p)return[];const found=[],seen=new Set();for(const sel of ROW_SELECTORS)p.querySelectorAll(sel).forEach(el=>{if(!seen.has(el)&&isRow(el)){seen.add(el);found.push(el)}});return found.length?found:[...p.children].filter(isRow)}
+function ensureEmpty(){const p=people();if(!p)return null;let e=p.querySelector('.q313emptyState');if(!e){e=document.createElement('div');e.className='q313emptyState';e.innerHTML=`<div class="q313emptyTitle">${t('empty')}</div><div class="q313emptySub">${t('emptySub')}</div>`;p.appendChild(e)}return e}
+function runSearch(){const i=input(),p=people();if(!i||!p)return;const q=String(i.value||'').trim().toLowerCase(),list=rows();let n=0;for(const r of list){const show=!q||textOf(r).includes(q);r.classList.toggle('q313hidden',!show);if(show)n++}const e=ensureEmpty();if(e)e.style.display=(q&&n===0)?'flex':'none'}
+function bind(){const i=input();if(!i||i.dataset.q313fixed==='1')return;i.dataset.q313fixed='1';i.addEventListener('input',runSearch);i.addEventListener('search',runSearch)}
+let pending=false;function refresh(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;ensureStyle();cleanupOldSearch();bind();runSearch()})}
 new MutationObserver(refresh).observe(document.documentElement,{subtree:true,childList:true});
-window.addEventListener('focus',refresh);
-window.addEventListener('pageshow',refresh);
-[0,120,450,1200].forEach(ms=>setTimeout(refresh,ms));
+window.addEventListener('focus',refresh);window.addEventListener('pageshow',refresh);[0,80,250,700,1600].forEach(ms=>setTimeout(refresh,ms));
 })();
