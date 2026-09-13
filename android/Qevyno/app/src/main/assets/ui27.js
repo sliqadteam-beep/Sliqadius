@@ -38,9 +38,10 @@
     if(path.startsWith('/api/messages'))return ['Loading messages…','Syncing the latest messages.'];
     return [method==='POST'?'Saving…':'Loading…','Giving the server a moment to respond.'];
   };
-  const isCritical=(path,method)=>path.startsWith('/api/account-status')||path==='/api/login'||path==='/api/register'||path==='/api/send'||path.startsWith('/api/find')||path==='/api/me';
+  const isCritical=(path,method)=>path.startsWith('/api/account-status')||path==='/api/login'||path==='/api/register'||path==='/api/send'||path.startsWith('/api/find');
 
   function beginLoad(path,method){
+    if(path==='/api/me')return false;
     active++;
     const [title,sub]=textFor(path,method);
     if(isCritical(path,method)){
@@ -52,6 +53,7 @@
       clearTimeout(pillTimer);
       pillTimer=setTimeout(()=>{D('q27pillText').textContent=title.replace('…','');pill.classList.add('on');},900);
     }
+    return true;
   }
   function endLoad(){
     active=Math.max(0,active-1);
@@ -69,7 +71,7 @@
   api=async function(path,method='GET',body=null,auth=true){
     const started=Date.now();
     const maxAttempts=2;
-    beginLoad(path,method);
+    const loadUi=beginLoad(path,method);
     try{
       for(let attempt=1;attempt<=maxAttempts;attempt++){
         const ctl=new AbortController();
@@ -107,7 +109,7 @@
       const elapsed=Date.now()-started;
       if(elapsed<9000)await sleep(9000-elapsed);
       return {ok:false,error:'server_unreachable'};
-    }finally{endLoad();}
+    }finally{if(loadUi!==false)endLoad();}
   };
 
   // Better feedback when the app comes back from the background.

@@ -1,7 +1,7 @@
 {
-  "versionCode": 45,
-  "versionName": "2.9.33",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.33.apk",
-  "notes": "Notification and profile UI polish: the foreground service status no longer says notification access active, is silent and dismissible on newer Android versions, and the profile chip is positioned lower.",
-  "notes_de": "Benachrichtigungs- und Profil-Polish: Die Hintergrund-Statusmeldung zeigt nicht mehr Benachrichtigungszugriff aktiv, ist still und auf neueren Android-Versionen wegwischbar. Das Profil oben rechts sitzt weiter unten."
+  "versionCode": 46,
+  "versionName": "2.9.34",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.34.apk",
+  "notes": "Session restore now runs silently in the background. Skaysa also gets a new memorable S-ribbon + spark logo across the launcher, app UI, notification icon and website.",
+  "notes_de": "Session-Restore laeuft jetzt unsichtbar im Hintergrund. Skaysa bekommt ausserdem ein neues einpraegsames S-Ribbon-plus-Spark-Logo fuer Launcher, App-UI, Benachrichtigung und Website."
 }

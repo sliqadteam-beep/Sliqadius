@@ -7,21 +7,32 @@
     android:viewportHeight="108">
     <path android:pathData="M16,4H92A12,12 0,0 1,104 16V92A12,12 0,0 1,92 104H16A12,12 0,0 1,4 92V16A12,12 0,0 1,16 4Z">
         <aapt:attr name="android:fillColor">
-            <gradient android:type="linear" android:startX="8" android:startY="7" android:endX="100" android:endY="103">
-                <item android:offset="0" android:color="#B7DEFF"/>
-                <item android:offset="0.48" android:color="#8ABFF4"/>
-                <item android:offset="1" android:color="#5F86DE"/>
+            <gradient android:type="linear"
+                android:startX="10" android:startY="8"
+                android:endX="98" android:endY="102">
+                <item android:offset="0" android:color="#C7E7FF"/>
+                <item android:offset="0.52" android:color="#7DBAF2"/>
+                <item android:offset="1" android:color="#577ED9"/>
             </gradient>
         </aapt:attr>
     </path>
-    <path android:fillColor="#25FFFFFF" android:pathData="M4,16A12,12 0,0 1,16 4H51C39,21 25,34 4,44Z"/>
-    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="7" android:strokeLineCap="round"
-        android:pathData="M27,72C32,52 42,39 56,34C69,29 79,34 87,46"/>
-    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="7" android:strokeLineCap="round"
-        android:pathData="M27,72C41,81 59,82 73,73C82,67 87,58 87,46"/>
-    <path android:fillColor="#00000000" android:strokeColor="#EFFFFFFF" android:strokeWidth="5" android:strokeLineCap="round"
-        android:pathData="M37,61C48,51 64,50 77,60"/>
-    <path android:fillColor="#FFFFFFFF" android:pathData="M27,66A6,6 0,1 0,27 78A6,6 0,1 0,27 66"/>
-    <path android:fillColor="#FFFFFFFF" android:pathData="M56,28A6,6 0,1 0,56 40A6,6 0,1 0,56 28"/>
-    <path android:fillColor="#FFFFFFFF" android:pathData="M87,40A6,6 0,1 0,87 52A6,6 0,1 0,87 40"/>
+
+    <!-- subtle sky highlight -->
+    <path
+        android:fillColor="#20FFFFFF"
+        android:pathData="M4,16A12,12 0,0 1,16 4H59C45,20 28,34 4,45Z"/>
+
+    <!-- memorable Skaysa S-ribbon -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="10"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M77,29C69,21 57,19 46,22C35,25 29,32 30,40C31,48 39,52 51,55L61,58C71,61 78,66 77,74C76,82 67,88 56,89C44,90 33,86 25,79"/>
+
+    <!-- small Skaysa spark -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M84,17L87,23L93,26L87,29L84,35L81,29L75,26L81,23Z"/>
 </vector>

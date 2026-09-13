@@ -31,15 +31,18 @@ function isVerifiedPhone(p){return String(p||'').replace(/[\s().-]/g,'')===VERIF
 function verifiedHtml(){return '<span class="q308verified" aria-label="Verifiziert" title="Verifiziert">✓</span>'}
 
 const QLOGO=`<svg viewBox="0 0 108 108" aria-hidden="true" focusable="false">
-<defs><linearGradient id="sklg" x1="8" y1="7" x2="100" y2="103" gradientUnits="userSpaceOnUse">
-<stop offset="0" stop-color="#B7DEFF"/><stop offset=".48" stop-color="#8ABFF4"/><stop offset="1" stop-color="#5F86DE"/>
-</linearGradient></defs>
-<path fill="url(#sklg)" d="M16 4h76a12 12 0 0 1 12 12v76a12 12 0 0 1-12 12H16A12 12 0 0 1 4 92V16A12 12 0 0 1 16 4Z"/>
-<path fill="#25FFFFFF" d="M4 16A12 12 0 0 1 16 4h35C39 21 25 34 4 44Z"/>
-<path d="M27 72C32 52 42 39 56 34C69 29 79 34 87 46" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
-<path d="M27 72C41 81 59 82 73 73C82 67 87 58 87 46" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
-<path d="M37 61C48 51 64 50 77 60" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".92"/>
-<circle cx="27" cy="72" r="6" fill="#fff"/><circle cx="56" cy="34" r="6" fill="#fff"/><circle cx="87" cy="46" r="6" fill="#fff"/>
+<defs>
+<linearGradient id="sk34g" x1="10" y1="8" x2="98" y2="102" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#C7E7FF"/>
+<stop offset=".52" stop-color="#7DBAF2"/>
+<stop offset="1" stop-color="#577ED9"/>
+</linearGradient>
+</defs>
+<path fill="url(#sk34g)" d="M16 4h76a12 12 0 0 1 12 12v76a12 12 0 0 1-12 12H16A12 12 0 0 1 4 92V16A12 12 0 0 1 16 4Z"/>
+<path fill="#20FFFFFF" d="M4 16A12 12 0 0 1 16 4h43C45 20 28 34 4 45Z"/>
+<path d="M77 29C69 21 57 19 46 22C35 25 29 32 30 40C31 48 39 52 51 55L61 58C71 61 78 66 77 74C76 82 67 88 56 89C44 90 33 86 25 79"
+ fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path fill="#fff" d="M84 17L87 23L93 26L87 29L84 35L81 29L75 26L81 23Z"/>
 </svg>`;
 
 const style=document.createElement('style');style.id='sliqchat308style';style.textContent=`
