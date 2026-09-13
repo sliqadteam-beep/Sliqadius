@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='2.9.18';
-const BRAND='SliqChat';
+const BRAND='Skaysa';
 const META_KEY='qevyno_local_conversations_v2';
 const PENDING_SHARE_KEY='qevyno_pending_share_v1';
 const HELP_NUMBER='0000000000';

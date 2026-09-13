@@ -1,11 +1,27 @@
 (()=>{
 'use strict';
-const VERSION='2.9.22';
+const VERSION='2.9.38';
 const META_KEY='qevyno_local_conversations_v2';
 const HELP='0000000000';
 const BADGES='.q295verified,.q308verified,.q309verified,.q311verified';
 function lang(){try{return String(localStorage.getItem('qevyno_ui_lang')||document.documentElement.lang||navigator.language||'en').toLowerCase().split(/[-_]/)[0]}catch(_){return'en'}}
-const T={de:{verifiedTitle:'Verifiziert',verifiedText:'Dieser Account wurde von Skaysa bestätigt.',contacts:'Bereits hinzugefügte Kontakte',empty:'Noch keine Kontakte. Füge zuerst über + → Neuer Kontakt jemanden hinzu.',add:'Hinzufügen',added:'Hinzugefügt',adding:'Wird hinzugefügt…'},en:{verifiedTitle:'Verified',verifiedText:'This account was verified by Skaysa.',contacts:'Already added contacts',empty:'No contacts yet. First add someone with + → New contact.',add:'Add',added:'Added',adding:'Adding…'},es:{verifiedTitle:'Verificado',verifiedText:'Esta cuenta ha sido verificada por Skaysa.',contacts:'Contactos ya añadidos',empty:'Aún no hay contactos. Añade primero a alguien con + → Nuevo contacto.',add:'Añadir',added:'Añadido',adding:'Añadiendo…'},fr:{verifiedTitle:'Vérifié',verifiedText:'Ce compte a été vérifié par Skaysa.',contacts:'Contacts déjà ajoutés',empty:'Aucun contact. Ajoute d’abord quelqu’un avec + → Nouveau contact.',add:'Ajouter',added:'Ajouté',adding:'Ajout…'},it:{verifiedTitle:'Verificato',verifiedText:'Questo account è stato verificato da Skaysa.',contacts:'Contatti già aggiunti',empty:'Nessun contatto. Aggiungi prima qualcuno con + → Nuovo contatto.',add:'Aggiungi',added:'Aggiunto',adding:'Aggiunta…'},pt:{verifiedTitle:'Verificado',verifiedText:'Esta conta foi verificada pela Skaysa.',contacts:'Contactos já adicionados',empty:'Ainda não há contactos. Adiciona primeiro alguém em + → Novo contacto.',add:'Adicionar',added:'Adicionado',adding:'A adicionar…'},nl:{verifiedTitle:'Geverifieerd',verifiedText:'Dit account is door Skaysa geverifieerd.',contacts:'Al toegevoegde contacten',empty:'Nog geen contacten. Voeg eerst iemand toe via + → Nieuw contact.',add:'Toevoegen',added:'Toegevoegd',adding:'Toevoegen…'}};
+const T={
+en:{verifiedTitle:'Verified',verifiedText:'This account was verified by Skaysa.',contacts:'Already added contacts',empty:'No contacts yet. First add someone with + → New contact.',add:'Add',added:'Added',adding:'Adding…'},
+de:{verifiedTitle:'Verifiziert',verifiedText:'Dieser Account wurde von Skaysa bestätigt.',contacts:'Bereits hinzugefügte Kontakte',empty:'Noch keine Kontakte. Füge zuerst über + → Neuer Kontakt jemanden hinzu.',add:'Hinzufügen',added:'Hinzugefügt',adding:'Wird hinzugefügt…'},
+es:{verifiedTitle:'Verificado',verifiedText:'Esta cuenta ha sido verificada por Skaysa.',contacts:'Contactos ya añadidos',empty:'Aún no hay contactos. Añade primero a alguien con + → Nuevo contacto.',add:'Añadir',added:'Añadido',adding:'Añadiendo…'},
+fr:{verifiedTitle:'Vérifié',verifiedText:'Ce compte a été vérifié par Skaysa.',contacts:'Contacts déjà ajoutés',empty:'Aucun contact. Ajoute d’abord quelqu’un avec + → Nouveau contact.',add:'Ajouter',added:'Ajouté',adding:'Ajout…'},
+it:{verifiedTitle:'Verificato',verifiedText:'Questo account è stato verificato da Skaysa.',contacts:'Contatti già aggiunti',empty:'Nessun contatto. Aggiungi prima qualcuno con + → Nuovo contatto.',add:'Aggiungi',added:'Aggiunto',adding:'Aggiunta…'},
+pt:{verifiedTitle:'Verificado',verifiedText:'Esta conta foi verificada pela Skaysa.',contacts:'Contactos já adicionados',empty:'Ainda não há contactos. Adiciona primeiro alguém em + → Novo contacto.',add:'Adicionar',added:'Adicionado',adding:'A adicionar…'},
+nl:{verifiedTitle:'Geverifieerd',verifiedText:'Dit account is door Skaysa geverifieerd.',contacts:'Al toegevoegde contacten',empty:'Nog geen contacten. Voeg eerst iemand toe via + → Nieuw contact.',add:'Toevoegen',added:'Toegevoegd',adding:'Toevoegen…'},
+pl:{verifiedTitle:'Zweryfikowano',verifiedText:'To konto zostało zweryfikowane przez Skaysa.',contacts:'Dodane kontakty',empty:'Brak kontaktów. Najpierw dodaj kogoś przez + → Nowy kontakt.',add:'Dodaj',added:'Dodano',adding:'Dodawanie…'},
+tr:{verifiedTitle:'Doğrulandı',verifiedText:'Bu hesap Skaysa tarafından doğrulandı.',contacts:'Eklenmiş kişiler',empty:'Henüz kişi yok. Önce + → Yeni kişi ile birini ekle.',add:'Ekle',added:'Eklendi',adding:'Ekleniyor…'},
+uk:{verifiedTitle:'Підтверджено',verifiedText:'Цей обліковий запис підтверджено Skaysa.',contacts:'Вже додані контакти',empty:'Контактів ще немає. Спочатку додай когось через + → Новий контакт.',add:'Додати',added:'Додано',adding:'Додається…'},
+ru:{verifiedTitle:'Подтверждено',verifiedText:'Этот аккаунт подтверждён Skaysa.',contacts:'Уже добавленные контакты',empty:'Контактов пока нет. Сначала добавьте кого-нибудь через + → Новый контакт.',add:'Добавить',added:'Добавлено',adding:'Добавление…'},
+ja:{verifiedTitle:'認証済み',verifiedText:'このアカウントはSkaysaによって認証されています。',contacts:'追加済みの連絡先',empty:'連絡先がありません。まず + → 新しい連絡先 から追加してください。',add:'追加',added:'追加済み',adding:'追加中…'},
+ko:{verifiedTitle:'인증됨',verifiedText:'이 계정은 Skaysa에서 인증되었습니다.',contacts:'이미 추가된 연락처',empty:'아직 연락처가 없습니다. 먼저 + → 새 연락처에서 추가하세요.',add:'추가',added:'추가됨',adding:'추가 중…'},
+zh:{verifiedTitle:'已验证',verifiedText:'此账号已由 Skaysa 验证。',contacts:'已添加的联系人',empty:'还没有联系人。请先通过 + → 新联系人 添加。',add:'添加',added:'已添加',adding:'正在添加…'},
+ar:{verifiedTitle:'تم التحقق',verifiedText:'تم التحقق من هذا الحساب بواسطة Skaysa.',contacts:'جهات الاتصال المضافة',empty:'لا توجد جهات اتصال بعد. أضف شخصاً أولاً عبر + ← جهة اتصال جديدة.',add:'إضافة',added:'تمت الإضافة',adding:'جارٍ الإضافة…'}
+};
 function tx(k){const d=T[lang()]||T.en;return d[k]||T.en[k]||k}
 function norm(v){return String(v||'').trim().replace(/[\s().-]/g,'').replace(/^00/,'+')}
 function valid(v){return /^\+[1-9]\d{7,14}$/.test(norm(v))}

@@ -71,7 +71,7 @@
 
   // Replace the old home and chat surfaces while keeping API-compatible IDs.
   D('homeScreen').innerHTML=`<div class="q26home">
-    <div class="topbar"><div class="brand">Qevyno<span class="dot">.</span></div><div class="spacer"></div><button class="iconbtn" id="settingsBtn" aria-label="Settings">⚙</button></div>
+    <div class="topbar"><div class="brand">Skaysa<span class="dot">.</span></div><div class="spacer"></div><button class="iconbtn" id="settingsBtn" aria-label="Settings">⚙</button></div>
     <div class="q26hero"><div class="q26heroTop"><div><div class="q26eyebrow" id="hello">Welcome back</div><div class="q26headline">Messages</div></div><div class="spacer"></div><div class="q26me" id="meAvatar">Q</div></div><div class="q26server" id="serverChip"><i></i><span>Official server</span></div></div>
     <div class="q26searchWrap"><label class="q26search"><span>⌕</span><input id="chatSearch" placeholder="Search chats" autocomplete="off"></label><button class="q26new" id="newChatBtn" aria-label="New chat">＋</button></div>
     <div class="people q26people" id="people"></div>
@@ -81,11 +81,11 @@
   D('chatScreen').innerHTML=`<div class="topbar"><button class="iconbtn" id="backBtn">‹</button><div class="q26chatTop"><div class="q26chatAvatar" id="chatAvatar">?</div><div class="chatTitle"><div class="chatName" id="chatName"></div><div class="chatPresence" id="chatPresence"></div></div></div><button class="iconbtn q26infoBtn" id="chatInfoBtn">ⓘ</button></div><div class="messages" id="messages"></div><button class="q26scroll" id="scrollBottom">↓</button><div class="composer"><div class="q26composeBox"><textarea rows="1" id="messageBox" maxlength="4000" placeholder="Message"></textarea><span class="q26chars" id="charCount">0</span></div><button class="send" id="sendBtn" aria-label="Send">➤</button></div></section>`;
 
   const oldSheet=D('sheetBack');
-  oldSheet.innerHTML=`<div class="sheet"><div class="q26handle"></div><div class="q26sheetHead"><h2>Settings</h2><button class="q26sheetClose" id="closeSheetBtn">×</button></div><div class="q26profile"><div class="q26avatar" id="settingsAvatar">Q</div><div><b id="settingsName">Qevyno</b><small id="accountInfo"></small></div></div><div class="q26settingTitle">Connection</div><div class="q26setting"><div class="q26settingIcon">↗</div><div class="q26settingText"><b>Official server</b><span id="serverSettingText">qevyno.sliqado.org</span></div><button class="q26sheetClose" id="checkServerBtn">↻</button></div><div class="q26settingTitle">Appearance</div><div class="q26setting"><div class="q26settingIcon">☰</div><div class="q26settingText"><b>Compact messages</b><span>Fit more messages on screen</span></div><button class="q26switch" id="compactToggle"></button></div><div class="q26setting"><div class="q26settingIcon">◌</div><div class="q26settingText"><b>Reduce animations</b><span>Use simpler transitions</span></div><button class="q26switch" id="motionToggle"></button></div><div class="q26settingTitle">Local data</div><button class="q26sheetBtn" id="clearLocalBtn">Clear drafts & pinned chats</button><button class="q26sheetBtn q26danger" id="logoutBtn">Log out</button><div class="small" style="margin:14px 4px 2px">Qevyno 2.6.0 • Android 8+ • HTTPS transport</div></div>`;
+  oldSheet.innerHTML=`<div class="sheet"><div class="q26handle"></div><div class="q26sheetHead"><h2>Settings</h2><button class="q26sheetClose" id="closeSheetBtn">×</button></div><div class="q26profile"><div class="q26avatar" id="settingsAvatar">Q</div><div><b id="settingsName">Skaysa</b><small id="accountInfo"></small></div></div><div class="q26settingTitle">Connection</div><div class="q26setting"><div class="q26settingIcon">↗</div><div class="q26settingText"><b>Official server</b><span id="serverSettingText">qevyno.sliqado.org</span></div><button class="q26sheetClose" id="checkServerBtn">↻</button></div><div class="q26settingTitle">Appearance</div><div class="q26setting"><div class="q26settingIcon">☰</div><div class="q26settingText"><b>Compact messages</b><span>Fit more messages on screen</span></div><button class="q26switch" id="compactToggle"></button></div><div class="q26setting"><div class="q26settingIcon">◌</div><div class="q26settingText"><b>Reduce animations</b><span>Use simpler transitions</span></div><button class="q26switch" id="motionToggle"></button></div><div class="q26settingTitle">Local data</div><button class="q26sheetBtn" id="clearLocalBtn">Clear drafts & pinned chats</button><button class="q26sheetBtn q26danger" id="logoutBtn">Log out</button><div class="small" style="margin:14px 4px 2px">Skaysa 2.6.0 • Android 8+ • HTTPS transport</div></div>`;
 
   const newSheet=document.createElement('div');
   newSheet.className='sheetBack';newSheet.id='newChatSheet';
-  newSheet.innerHTML=`<div class="sheet"><div class="q26handle"></div><div class="q26sheetHead"><h2>New chat</h2><button class="q26sheetClose" id="closeNewChat">×</button></div><p class="q26newChatDesc">Enter the exact international phone number. Qevyno never shows a public phone-number directory.</p><input class="field" id="findPhone" inputmode="tel" autocomplete="tel" placeholder="+49 176 12345678"><div class="error" id="findError"></div><button class="q26sheetBtn primaryish" id="findBtn">Find Qevyno user</button></div>`;
+  newSheet.innerHTML=`<div class="sheet"><div class="q26handle"></div><div class="q26sheetHead"><h2>New chat</h2><button class="q26sheetClose" id="closeNewChat">×</button></div><p class="q26newChatDesc">Enter the exact international phone number. Skaysa never shows a public phone-number directory.</p><input class="field" id="findPhone" inputmode="tel" autocomplete="tel" placeholder="+49 176 12345678"><div class="error" id="findError"></div><button class="q26sheetBtn primaryish" id="findBtn">Find Skaysa user</button></div>`;
   document.body.appendChild(newSheet);
 
   const infoSheet=document.createElement('div');
@@ -124,7 +124,7 @@
     const addGroup=(title,arr)=>{if(!arr.length)return;const label=document.createElement('div');label.className='q26section';label.innerHTML=`<span>${title}</span><span class="count">${arr.length}</span>`;box.appendChild(label);arr.forEach(addRow)};
     function addRow(u){
       const row=document.createElement('div');row.className='q26row';row.tabIndex=0;
-      const name=u.display_name||u.phone||'Unknown';
+      const name=u.display_name||u.phone||'Unknown';row.dataset.phone=String(u.phone||'');
       row.innerHTML=`<div class="q26avatar ${u.online?'online':''}">${esc2(initials(name))}</div><div class="q26info"><div class="q26nameLine"><div class="q26name">${esc2(name)}</div>${state.pins.has(u.phone)?'<span class="q26pinMark">◆</span>':''}</div><div class="q26preview">${esc2(u.last_message||u.phone||'')}</div></div><button class="q26pin ${state.pins.has(u.phone)?'active':''}" aria-label="Pin chat">◆</button><div class="q26right"><div class="q26time">${esc2(fmtTime(u.last_at))}</div>${u.unread?`<div class="q26badge">${Math.min(99,Number(u.unread)||0)}</div>`:''}</div>`;
       row.onclick=e=>{if(e.target.closest('.q26pin'))return;openChat(u.phone,name,!!u.online,true)};
       row.onkeydown=e=>{if(e.key==='Enter')openChat(u.phone,name,!!u.online,true)};
@@ -142,9 +142,9 @@
     if(!/^\+[1-9]\d{7,14}$/.test(phone)){D('findError').textContent='Enter the full international number, e.g. +49…';return;}
     D('findBtn').disabled=true;D('findBtn').textContent='Searching…';
     const r=await api('/api/find?phone='+encodeURIComponent(phone));
-    D('findBtn').disabled=false;D('findBtn').textContent='Find Qevyno user';
+    D('findBtn').disabled=false;D('findBtn').textContent='Find Skaysa user';
     if(r&&r.ok){closeNewChat();openChat(r.user.phone,r.user.display_name||r.user.phone,!!r.user.online,true)}
-    else{const map={not_found:'No Qevyno account exists for that number.',self:'That is your own number.',server_unreachable:'Qevyno server is unreachable.'};D('findError').textContent=map[r&&r.error]||(r&&r.error)||'Could not find that account.';}
+    else{const map={not_found:'No Skaysa account exists for that number.',self:'That is your own number.',server_unreachable:'Skaysa server is unreachable.'};D('findError').textContent=map[r&&r.error]||(r&&r.error)||'Could not find that account.';}
   };
 
   window.openChat=function(phone,name,online,push){
@@ -179,11 +179,11 @@
   function openChatInfo(){if(!peer)return;updateInfoSheet();infoSheet.classList.add('open')}
   function closeChatInfo(){infoSheet.classList.remove('open')}
 
-  window.openSettings=function(){D('settingsName').textContent=meName||'Qevyno';D('accountInfo').textContent=mePhone||'';D('settingsAvatar').textContent=initials(meName||mePhone||'Q');oldSheet.classList.add('open');applyPrefs();checkServer(true)};
+  window.openSettings=function(){D('settingsName').textContent=meName||'Skaysa';D('accountInfo').textContent=mePhone||'';D('settingsAvatar').textContent=initials(meName||mePhone||'Q');oldSheet.classList.add('open');applyPrefs();checkServer(true)};
   window.closeSettings=function(){oldSheet.classList.remove('open')};
   async function checkServer(inSettings){
     const r=await api('/health?_='+Date.now(),'GET',null,false);const ok=!!(r&&r.ok);const chip=D('serverChip');if(chip){chip.classList.toggle('bad',!ok);chip.querySelector('span').textContent=ok?`Server online • v${r.version||'?'}`:'Server unavailable'}
-    if(inSettings&&D('serverSettingText')){D('serverSettingText').textContent=ok?`Online • Qevyno ${r.version||''}`:'Server unavailable';D('serverSettingText').classList.toggle('q26statusGood',ok)}return ok;
+    if(inSettings&&D('serverSettingText')){D('serverSettingText').textContent=ok?`Online • Skaysa ${r.version||''}`:'Server unavailable';D('serverSettingText').classList.toggle('q26statusGood',ok)}return ok;
   }
 
   function updateCharCount(){const n=D('messageBox').value.length;D('charCount').textContent=n;D('charCount').classList.toggle('show',n>=3500)}

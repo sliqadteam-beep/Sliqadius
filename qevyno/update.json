@@ -1,7 +1,7 @@
 {
-  "versionCode": 49,
-  "versionName": "2.9.37",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.37.apk",
-  "notes": "WhatsApp-style chat-list timestamps: today shows the time, yesterday shows a localized Yesterday label, and older chats show a short date such as 08.09.26. Works for private chats and groups.",
-  "notes_de": "WhatsApp-artige Zeitstempel in der Chat-Liste: Heute steht die Uhrzeit, gestern steht Gestern und aeltere Chats zeigen ein Datum wie 08.09.26. Funktioniert fuer private Chats und Gruppen."
+  "versionCode": 50,
+  "versionName": "2.9.38",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.38.apk",
+  "notes": "Group pictures, long-press chat deletion with confirmation, complete translation polish across all 15 Skaysa languages, and message reactions in private chats and groups. FCM is intentionally not included.",
+  "notes_de": "Gruppenbilder, Chat-Loeschen per Langdruck mit Sicherheitsabfrage, vervollstaendigte Uebersetzungen fuer alle 15 Skaysa-Sprachen und Nachrichten-Reaktionen in privaten Chats und Gruppen. FCM ist bewusst nicht enthalten."
 }

@@ -20,10 +20,10 @@
   const box=document.querySelector('#authScreen .auth');
   if(!box)return;
   box.innerHTML=`<div style="width:100%;max-width:520px;margin:auto">
-    <div class="logo">Qevyno<span class="dot">.</span></div><div class="tag">Private messaging through the Qevyno server.</div>
+    <div class="logo">Skaysa<span class="dot">.</span></div><div class="tag">Private messaging through the Skaysa server.</div>
     <span id="cf" hidden></span><span id="cd" hidden>+1</span>
-    <div class="qv on" id="vp"><div class="qt">Enter your phone number</div><div class="qs">Enter only your normal phone number. Qevyno handles the country automatically.</div><div class="qr"><input class="field" id="pi" inputmode="tel" autocomplete="tel-national" placeholder="Phone number"><button class="qa" id="pn" aria-label="Continue">→</button></div><div class="qck" id="ck">Checking number…</div><div class="error" id="pe"></div><div class="qPhoneOnlyHint">No country prefix is needed.</div></div>
-    <div class="qv" id="vn"><div class="dots"><i class="dotx on"></i><i class="dotx on"></i><i class="dotx"></i></div><div class="qt">What's your name?</div><div class="qs">This is the name other Qevyno users will see.</div><input class="field" id="ni" maxlength="32" autocomplete="name" placeholder="Your name"><button class="primary" id="nn">Continue →</button><div class="error" id="ne"></div><button class="qb" id="nb">‹ Change phone number</button></div>
+    <div class="qv on" id="vp"><div class="qt">Enter your phone number</div><div class="qs">Enter only your normal phone number. Skaysa handles the country automatically.</div><div class="qr"><input class="field" id="pi" inputmode="tel" autocomplete="tel-national" placeholder="Phone number"><button class="qa" id="pn" aria-label="Continue">→</button></div><div class="qck" id="ck">Checking number…</div><div class="error" id="pe"></div><div class="qPhoneOnlyHint">No country prefix is needed.</div></div>
+    <div class="qv" id="vn"><div class="dots"><i class="dotx on"></i><i class="dotx on"></i><i class="dotx"></i></div><div class="qt">What's your name?</div><div class="qs">This is the name other Skaysa users will see.</div><input class="field" id="ni" maxlength="32" autocomplete="name" placeholder="Your name"><button class="primary" id="nn">Continue →</button><div class="error" id="ne"></div><button class="qb" id="nb">‹ Change phone number</button></div>
     <div class="qv" id="vc"><div class="dots"><i class="dotx on"></i><i class="dotx on"></i><i class="dotx on"></i></div><div class="qt">Create a password</div><div class="qs">Use at least 6 characters.</div><input class="field" id="np" type="password" autocomplete="new-password" placeholder="Password"><button class="primary" id="cr">Create account</button><div class="error" id="ce"></div><button class="qb" id="cb">‹ Back</button></div>
     <div class="qv" id="vl"><div class="qt">Welcome back</div><div class="qs" id="ll"></div><input class="field" id="lp" type="password" autocomplete="current-password" placeholder="Password"><button class="primary" id="li">Log in</button><div class="error" id="le"></div><button class="qb" id="lb">‹ Change phone number</button></div>
   </div>`;
@@ -42,7 +42,7 @@
 
   function autoCountry(){
     let iso='';
-    try{if(window.QevynoDevice&&QevynoDevice.getCountryIso)iso=QevynoDevice.getCountryIso()||'';}catch(e){}
+    try{if(window.SkaysaDevice&&SkaysaDevice.getCountryIso)iso=SkaysaDevice.getCountryIso()||'';}catch(e){}
     if(!iso){
       const lang=(navigator.languages&&navigator.languages[0])||navigator.language||'';
       const m=lang.match(/[-_]([A-Za-z]{2})$/);
@@ -89,7 +89,7 @@
     }
     pendingPhone=phone;
     if(r.exists){
-      D('ll').textContent=localPhone(phone)+' already has a Qevyno account. Enter your password.';
+      D('ll').textContent=localPhone(phone)+' already has a Skaysa account. Enter your password.';
       view('vl');setTimeout(()=>D('lp').focus(),60);
     }else{
       view('vn');setTimeout(()=>D('ni').focus(),60);
@@ -105,7 +105,7 @@
     const r=await api('/api/register','POST',{phone:pendingPhone,password,display_name:name},false);
     if(r&&r.ok){saveSession(r);home();return;}
     if(r&&r.error==='phone_taken'){
-      D('ll').textContent=localPhone(pendingPhone)+' already has a Qevyno account. Enter your password.';
+      D('ll').textContent=localPhone(pendingPhone)+' already has a Skaysa account. Enter your password.';
       view('vl');return;
     }
     D('ce').textContent=(r&&r.error)||'Could not create account.';
@@ -131,6 +131,6 @@
   D('lp').onkeydown=e=>{if(e.key==='Enter')login();};
   D('lb').onclick=()=>view('vp');
   window.auth=()=>{stopPolls();peer=null;show('authScreen');reset();};
-  try{document.querySelector('.sheet .small:last-child').textContent='Qevyno 2.9.7 • Android 8+';}catch(e){}
+  try{document.querySelector('.sheet .small:last-child').textContent='Skaysa 2.9.7 • Android 8+';}catch(e){}
   if(!token&&D('authScreen').classList.contains('active'))reset();else autoCountry();
 })();

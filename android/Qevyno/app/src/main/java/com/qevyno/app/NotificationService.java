@@ -243,8 +243,22 @@ public class NotificationService extends Service {
         return key;
     }
 
+    private String reactionPreview(String text) {
+        try {
+            final String prefix = "[[SKAYSA_REACTION_V1:";
+            if (text == null || !text.startsWith(prefix) || !text.endsWith("]]")) return "💬";
+            String raw = text.substring(prefix.length(), text.length() - 2);
+            byte[] bytes = android.util.Base64.decode(raw, android.util.Base64.URL_SAFE | android.util.Base64.NO_WRAP | android.util.Base64.NO_PADDING);
+            JSONObject o = new JSONObject(new String(bytes, StandardCharsets.UTF_8));
+            String emoji = o.optString("emoji", "").trim();
+            return emoji.isEmpty() ? "💬" : emoji;
+        } catch (Exception ignored) {
+            return "💬";
+        }
+    }
     private String cleanPreview(String text) {
         text = text == null ? "" : text.trim();
+        if (text.startsWith("[[SKAYSA_REACTION_V1:")) return reactionPreview(text);
         if (text.startsWith("[[SLIQCHAT_GROUP_V1:")) return tr("group");
         if (text.startsWith("[[SLIQCHAT_MEDIA_V1:")) return tr("media");
         if (text.isEmpty()) return tr("new");
