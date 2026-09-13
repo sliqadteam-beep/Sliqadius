@@ -1,6 +1,33 @@
 (()=>{
-  // Load feature layers in strict order. Each layer hands over to the next one
-  // on both success and failure so one optional layer cannot stop the app.
+  // Cover the legacy base UI before Android makes the WebView visible.
+  try{
+    if(!document.getElementById('skaysaBoot')){
+      const style=document.createElement('style');
+      style.id='skaysaBootStyle';
+      style.textContent=`
+#skaysaBoot{position:fixed;inset:0;z-index:2147483647;background:#fff;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity .18s ease;pointer-events:all}
+#skaysaBoot.hide{opacity:0;pointer-events:none}
+#skaysaBoot .skaysaBootInner{display:flex;flex-direction:column;align-items:center;gap:16px;color:#17212b;font:600 14px/1.3 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+#skaysaBoot .skaysaBootSpinner{width:34px;height:34px;border-radius:50%;border:4px solid #e7f1f9;border-top-color:#8ABFF4;animation:skaysaSpin .72s linear infinite}
+#skaysaBoot .skaysaBootText{color:#71828d;font-size:13px;letter-spacing:.01em}
+@keyframes skaysaSpin{to{transform:rotate(360deg)}}
+`;
+      document.head.appendChild(style);
+      const boot=document.createElement('div');
+      boot.id='skaysaBoot';
+      const isDe=String(navigator.language||'').toLowerCase().startsWith('de');
+      boot.innerHTML='<div class="skaysaBootInner"><div class="skaysaBootSpinner" aria-hidden="true"></div><div class="skaysaBootText">'+(isDe?'Skaysa wird geladen…':'Loading Skaysa…')+'</div></div>';
+      document.body.appendChild(boot);
+      window.skaysaHideBoot=()=>{
+        const b=document.getElementById('skaysaBoot');
+        if(!b)return;
+        b.classList.add('hide');
+        setTimeout(()=>{try{b.remove();document.getElementById('skaysaBootStyle')?.remove()}catch(_){ }},220);
+      };
+      setTimeout(()=>{try{window.skaysaHideBoot&&window.skaysaHideBoot()}catch(_){ }},2600);
+    }
+  }catch(e){}
+
   function load313(){
     try{
       if(document.getElementById('qevyno313loader'))return;
@@ -77,7 +104,6 @@
     }else load304();
   }catch(e){load304()}
 
-  // Fast startup for users with an existing session.
   const hasSavedSession=!!localStorage.getItem('qevyno_token');
   if(!hasSavedSession)return;
   const blocker=document.createElement('style');
