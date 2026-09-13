@@ -1,7 +1,7 @@
 {
-  "versionCode": 37,
-  "versionName": "2.9.25",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.25.apk",
-  "notes": "Critical startup fix: Skaysa feature layers now load correctly instead of falling back to the old Qevyno interface. Search, full-width UI, groups, media, GIF, profile, QR, verified badge and notifications remain included.",
-  "notes_de": "Kritischer Startup-Fix: Die Skaysa-Feature-Layer werden jetzt korrekt geladen, statt auf die alte Qevyno-Oberflaeche zurueckzufallen. Suche, Vollbild-UI, Gruppen, Medien, GIFs, Profil, QR, Verifizierung und Benachrichtigungen bleiben enthalten."
+  "versionCode": 38,
+  "versionName": "2.9.26",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.26.apk",
+  "notes": "Search UI fix: removed the duplicated inner search field and second magnifier. Skaysa now uses one clean search surface, with improved spacing, profile chip and calmer chat cards. Existing groups, media, GIF, profile, QR, verified and notification features remain included.",
+  "notes_de": "Suchleisten-Fix: Das doppelte innere Suchfeld und die zweite Lupe wurden entfernt. Skaysa nutzt jetzt genau ein sauberes Suchfeld, mit besseren Abstaenden, verbessertem Profil-Chip und ruhigeren Chatkarten. Gruppen, Medien, GIFs, Profil, QR, Verifizierung und Benachrichtigungen bleiben enthalten."
 }
