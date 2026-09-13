@@ -1,11 +1,27 @@
 (()=>{
-  // Load feature layers in order. Newer layers run last so older patches cannot
-  // overwrite chat-list, media, profile or visual-polish changes.
+  // Load feature layers in strict order. Each layer hands over to the next one
+  // on both success and failure so one optional layer cannot stop the app.
+  function load313(){
+    try{
+      if(document.getElementById('qevyno313loader'))return;
+      const s=document.createElement('script');
+      s.id='qevyno313loader';
+      s.src='file:///android_asset/features313.js';
+      s.async=false;
+      document.head.appendChild(s);
+    }catch(e){}
+  }
   function load312(){
     try{
-      if(document.getElementById('qevyno312loader'))return;
-      const s=document.createElement('script');s.id='qevyno312loader';s.src='file:///android_asset/features312.js';s.async=false;document.head.appendChild(s);
-    }catch(e){}
+      if(document.getElementById('qevyno312loader')){load313();return;}
+      const s=document.createElement('script');
+      s.id='qevyno312loader';
+      s.src='file:///android_asset/features312.js';
+      s.async=false;
+      s.onload=load313;
+      s.onerror=load313;
+      document.head.appendChild(s);
+    }catch(e){load313()}
   }
   function load311(){
     try{
@@ -64,7 +80,10 @@
   // Fast startup for users with an existing session.
   const hasSavedSession=!!localStorage.getItem('qevyno_token');
   if(!hasSavedSession)return;
-  const blocker=document.createElement('style');blocker.id='qevynoStartupNoLoader';blocker.textContent='.q27load,.q27pill{display:none!important}';document.head.appendChild(blocker);
+  const blocker=document.createElement('style');
+  blocker.id='qevynoStartupNoLoader';
+  blocker.textContent='.q27load,.q27pill{display:none!important}';
+  document.head.appendChild(blocker);
   try{
     if(typeof show==='function')show('homeScreen');
     const hello=document.getElementById('hello');
@@ -76,23 +95,3 @@
   }catch(e){}
   setTimeout(()=>{try{blocker.remove()}catch(e){}},1800);
 })();
-
-;(()=>{try{
-  function __q313load(){
-    try{
-      if(document.getElementById('qevyno313loader')) return;
-      const s=document.createElement('script');
-      s.id='qevyno313loader';
-      s.src='file:///android_asset/features313.js';
-      s.async=false;
-      document.head.appendChild(s);
-    }catch(e){}
-  }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',__q313load,{once:true});
-  }else{
-    __q313load();
-  }
-  setTimeout(__q313load,0);
-  setTimeout(__q313load,350);
-})();}catch(e){}
