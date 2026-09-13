@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.9.35';
+const VERSION='2.9.36';
 
 function lang(){
   try{
@@ -11,7 +11,7 @@ function lang(){
 }
 const LATE={
  en:{search:'Search chats, numbers and groups',none:'No results',noneSub:'Try another name, number or message.',chats:'Chats',verified:'Verified',verifiedText:'This account was verified by Skaysa.',contacts:'Already added contacts',emptyContacts:'No contacts yet. First add someone with + → New contact.',add:'Add',added:'Added',adding:'Adding…',loading:'Loading Skaysa…'},
- de:{search:'Chats, Nummern und Gruppen suchen',none:'Keine Treffer',noneSub:'Versuche einen anderen Namen, eine Nummer oder eine Nachricht.',chats:'Chats',verified:'Verifiziert',verifiedText:'Dieser Account wurde von Skaysa bestätigt.',contacts:'Bereits hinzugefügte Kontakte',emptyContacts:'Noch keine Kontakte. Füge zuerst über + → Neuer Kontakt jemanden hinzu.',add:'Hinzufügen',added:'Hinzugefügt',adding:'Wird hinzugefügt…',loading:'Skaysa wird geladen…'},
+ de:{search:'Suchen',none:'Keine Treffer',noneSub:'Versuche einen anderen Namen, eine Nummer oder eine Nachricht.',chats:'Chats',verified:'Verifiziert',verifiedText:'Dieser Account wurde von Skaysa bestätigt.',contacts:'Bereits hinzugefügte Kontakte',emptyContacts:'Noch keine Kontakte. Füge zuerst über + → Neuer Kontakt jemanden hinzu.',add:'Hinzufügen',added:'Hinzugefügt',adding:'Wird hinzugefügt…',loading:'Skaysa wird geladen…'},
  es:{search:'Buscar chats, números y grupos',none:'Sin resultados',noneSub:'Prueba otro nombre, número o mensaje.',chats:'Chats',verified:'Verificado',verifiedText:'Esta cuenta ha sido verificada por Skaysa.',contacts:'Contactos ya añadidos',emptyContacts:'Aún no hay contactos. Añade primero a alguien con + → Nuevo contacto.',add:'Añadir',added:'Añadido',adding:'Añadiendo…',loading:'Cargando Skaysa…'},
  fr:{search:'Rechercher chats, numéros et groupes',none:'Aucun résultat',noneSub:'Essaie un autre nom, numéro ou message.',chats:'Discussions',verified:'Vérifié',verifiedText:'Ce compte a été vérifié par Skaysa.',contacts:'Contacts déjà ajoutés',emptyContacts:'Aucun contact. Ajoute d’abord quelqu’un avec + → Nouveau contact.',add:'Ajouter',added:'Ajouté',adding:'Ajout…',loading:'Chargement de Skaysa…'},
  it:{search:'Cerca chat, numeri e gruppi',none:'Nessun risultato',noneSub:'Prova un altro nome, numero o messaggio.',chats:'Chat',verified:'Verificato',verifiedText:'Questo account è stato verificato da Skaysa.',contacts:'Contatti già aggiunti',emptyContacts:'Nessun contatto. Aggiungi prima qualcuno con + → Nuovo contatto.',add:'Aggiungi',added:'Aggiunto',adding:'Aggiunta…',loading:'Caricamento di Skaysa…'},
@@ -61,6 +61,29 @@ body,#app,#root,#homeScreen,.screen,.page,.page-wrap,.app-shell{max-width:none!i
 #people>.q299helpRow,#people>.q306groupRow,#people>.q26row,#people>.q304row,#people>.q308chatRow,#people>.chatRow,#people>.conversation{margin:0 0 10px!important;border:1px solid #e5edf3!important;border-radius:22px!important;background:#fff!important;box-shadow:0 5px 17px rgba(18,33,53,.035)!important;transform:none!important}
 #people>.q299helpRow:active,#people>.q306groupRow:active,#people>.q26row:active{background:#f5f9fc!important;transform:none!important}
 .fab,.qfab,#fab,.composeFab,.newChatFab{box-shadow:0 14px 28px rgba(67,152,228,.24)!important;border-radius:27px!important}
+#homeScreen .q308profileChip.q313unverified{
+  width:54px!important;
+  min-width:54px!important;
+  max-width:54px!important;
+  height:54px!important;
+  padding:5px!important;
+  gap:0!important;
+  justify-content:center!important;
+  border-radius:19px!important;
+}
+#homeScreen .q308profileChip.q313unverified .q308miniInfo{
+  display:none!important;
+}
+#homeScreen .q308profileChip.q313unverified .q308miniAvatar{
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+  border-radius:14px!important;
+}
+#homeScreen .q308profileChip.q313verifiedProfile{
+  width:auto!important;
+  min-width:0!important;
+}
 button,input,textarea,select{-webkit-tap-highlight-color:transparent}
 @media(max-width:380px){#homeScreen .q26headline{font-size:34px!important}#homeScreen .q26searchWrap{padding-left:12px!important;padding-right:12px!important}}
 `;
@@ -137,6 +160,15 @@ function translateLateUi(){
   }catch(_){}
 }
 
+function fitProfileChip(){
+  try{
+    const chip=document.querySelector('#homeScreen .q308profileChip');
+    if(!chip)return;
+    const hasBadge=!!chip.querySelector('.q308verified,.q309verified,.q311verified,.q295verified');
+    chip.classList.toggle('q313verifiedProfile',hasBadge);
+    chip.classList.toggle('q313unverified',!hasBadge);
+  }catch(_){}
+}
 function ready(){
   ensureStyle();
   stabilizeSearch();
@@ -176,7 +208,7 @@ function q313Refresh(){
     q313Observe();
   });
 }
-const mo=new MutationObserver(q313Refresh);
+const mo=new MutationObserver(()=>{q313Refresh();fitProfileChip()});
 q313Observe();
 [0,80,220,500,1000,1800].forEach(ms=>setTimeout(ready,ms));
 window.addEventListener('focus',ready);

@@ -8,7 +8,7 @@ const HELP='0000000000';
 
 function lang(){try{return String(localStorage.getItem('qevyno_ui_lang')||document.documentElement.lang||navigator.language||'en').toLowerCase().split(/[-_]/)[0]}catch(_){return'en'}}
 const T={
- de:{search:'Chats, Nummern und Gruppen suchen',clear:'Suche löschen',none:'Keine Treffer',noneSub:'Versuche einen anderen Namen, eine Nummer oder eine Nachricht.',chats:'Chats'},
+ de:{search:'Suchen',clear:'Suche löschen',none:'Keine Treffer',noneSub:'Versuche einen anderen Namen, eine Nummer oder eine Nachricht.',chats:'Chats'},
  en:{search:'Search chats, numbers and groups',clear:'Clear search',none:'No results',noneSub:'Try another name, number or message.',chats:'Chats'},
  es:{search:'Buscar chats, números y grupos',clear:'Borrar búsqueda',none:'Sin resultados',noneSub:'Prueba otro nombre, número o mensaje.',chats:'Chats'},
  fr:{search:'Rechercher chats, numéros et groupes',clear:'Effacer la recherche',none:'Aucun résultat',noneSub:'Essaie un autre nom, numéro ou message.',chats:'Discussions'},
