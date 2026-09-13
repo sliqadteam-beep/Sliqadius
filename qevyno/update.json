@@ -1,7 +1,7 @@
 {
-  "versionCode": 43,
-  "versionName": "2.9.31",
-  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.31.apk",
-  "notes": "Grey-screen root fix: prevents the late UI MutationObserver from triggering itself endlessly and loads Android core scripts separately so one optional feature cannot blank the whole app.",
-  "notes_de": "Graubildschirm-Ursachenfix: Der spaete UI-MutationObserver kann sich nicht mehr endlos selbst ausloesen. Android laedt Kernskripte einzeln, damit ein optionales Feature nicht mehr die komplette App leer machen kann."
+  "versionCode": 44,
+  "versionName": "2.9.32",
+  "apkUrl": "https://sliqado.org/Skaysa/Skaysa-2.9.32.apk",
+  "notes": "Fast startup: the native and JavaScript loading screens dismiss much sooner while still covering the legacy base UI during initialization.",
+  "notes_de": "Schneller Start: Der native und der JavaScript-Ladescreen verschwinden deutlich schneller, verdecken aber weiterhin die alte Basisoberflaeche waehrend der Initialisierung."
 }

@@ -130,7 +130,7 @@ public class MainActivity extends Activity {
         setContentView(rootView);
 
         // Safety net: never allow the loading screen to become a permanent blank/grey screen.
-        rootView.postDelayed(this::hideNativeLoading, 5000L);
+        rootView.postDelayed(this::hideNativeLoading, 1200L);
 
         webView.loadUrl("file:///android_asset/index.html");
     }
@@ -320,7 +320,7 @@ public class MainActivity extends Activity {
             loadingOverlay = null;
             overlay.animate()
                 .alpha(0f)
-                .setDuration(150L)
+                .setDuration(80L)
                 .withEndAction(() -> {
                     try {
                         if (overlay.getParent() == rootView) rootView.removeView(overlay);
@@ -341,12 +341,12 @@ public class MainActivity extends Activity {
                 hideNativeLoading();
                 return;
             }
-            if (attempt >= 55) {
+            if (attempt >= 18) {
                 // Hard fallback: show the app instead of ever leaving a blank screen.
                 hideNativeLoading();
                 return;
             }
-            view.postDelayed(() -> showWhenSkaysaReady(view, attempt + 1), 70L);
+            view.postDelayed(() -> showWhenSkaysaReady(view, attempt + 1), 35L);
         });
     }
     private void runAssetsSequentially(WebView view, String[] assets, int index, Runnable done) {
@@ -375,7 +375,7 @@ public class MainActivity extends Activity {
         try {
             view.evaluateJavascript(script, ignored -> next.run());
             // A broken optional feature must never block the complete app startup.
-            view.postDelayed(next, 700L);
+            view.postDelayed(next, 180L);
         } catch (Exception ignored) {
             next.run();
         }

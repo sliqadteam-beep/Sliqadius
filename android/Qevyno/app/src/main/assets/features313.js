@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.9.31';
+const VERSION='2.9.32';
 
 function lang(){
   try{
@@ -148,7 +148,7 @@ function ready(){
       window.__skaysaReady=true;
       try{window.skaysaHideBoot&&window.skaysaHideBoot()}catch(_){}
       try{window.dispatchEvent(new Event('skaysa-ready'))}catch(_){}
-    },120);
+    },25);
   }));
 }
 
