@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d16">
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+  <meta name="referrer" content="no-referrer">
+  <title>Connect</title>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100svh;display:grid;place-items:center;overflow-x:hidden;background:#070b13;color:#f4f7fb}
+    body::before{content:"";position:fixed;inset:-35%;z-index:-1;background:radial-gradient(circle at 20% 30%,rgba(96,93,255,.23),transparent 28%),radial-gradient(circle at 85% 70%,rgba(38,174,183,.16),transparent 30%);filter:blur(35px);pointer-events:none}
+    main{width:min(100% - 36px,440px);padding:44px 0 36px}
+    .card{border:1px solid rgba(255,255,255,.11);border-radius:30px;background:linear-gradient(155deg,rgba(27,35,53,.95),rgba(12,17,29,.96));box-shadow:0 28px 88px rgba(0,0,0,.43);padding:36px 28px}
+    .logo{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;background:linear-gradient(135deg,#7477ff,#469db7);box-shadow:0 12px 36px #575eff39}
+    .eyebrow{font-size:.69rem;letter-spacing:.23em;font-weight:800;text-transform:uppercase;color:#a2add0;margin:26px 0 12px}
+    h1{font-size:clamp(1.9rem,7vw,2.45rem);letter-spacing:-.05em;line-height:1.08;margin:0 0 12px}
+    .intro{color:#aab3c5;line-height:1.55;font-size:.95rem;margin:0 0 30px}
+    .links{display:grid;gap:13px}
+    a.link{display:flex;align-items:center;gap:15px;padding:18px 17px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.047);color:inherit;border-radius:18px;text-decoration:none;transition:transform .18s,border-color .18s,background .18s}
+    a.link:not(.disabled):hover,a.link:not(.disabled):focus-visible{transform:translateY(-2px);background:rgba(255,255,255,.10);border-color:rgba(167,170,255,.6);outline:none}
+    .ico{flex:none;width:46px;height:46px;border-radius:14px;background:rgba(127,141,255,.15);display:grid;place-items:center}
+    .label{display:grid;gap:4px;flex:1;min-width:0}
+    .label strong{font-size:1rem}
+    .label small{font-size:.79rem;color:#9aa7bd}
+    .arrow{color:#a4b0ca}
+    a.disabled{opacity:.51;cursor:not-allowed}
+    .foot{font-size:.77rem;text-align:center;color:#8995aa;margin:23px 0 0}
+    @media(max-width:370px){.card{padding:27px 19px}.intro{font-size:.9rem}}
+    @media(prefers-reduced-motion:reduce){a.link{transition:none}}
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card" aria-label="Kontakt">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="34" height="34" fill="none" stroke="white" stroke-width="2.6" stroke-linecap="round"><path d="M15 13v14m7-19c9 6 9 18 0 24M28 4c12 9 12 23 0 32M9 18v4"/></svg>
+      </div>
+      <p class="eyebrow">NFC · Connect</p>
+      <h1>Hey, schön dich<br>zu sehen.</h1>
+      <p class="intro">Wähle einfach aus, wie du mit mir in Kontakt bleiben möchtest.</p>
+      <nav class="links" aria-label="Kontaktmöglichkeiten">
+        <a id="phone-link" class="link disabled" aria-disabled="true" tabindex="-1">
+          <span class="ico" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 3.1 5.2 2 2 0 0 1 5.1 3h3a2 2 0 0 1 2 1.7l.6 3a2 2 0 0 1-.6 1.9L8.2 11a16 16 0 0 0 4.8 4.8l1.4-1.9a2 2 0 0 1 1.9-.6l3 .6a2 2 0 0 1 1.7 2z"/></svg></span>
+          <span class="label"><strong>Telefonnummer</strong><small id="phone-detail">Noch nicht hinterlegt</small></span>
+          <span class="arrow" aria-hidden="true">↗</span>
+        </a>
+        <a id="tiktok-link" class="link disabled" aria-disabled="true" tabindex="-1">
+          <span class="ico" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3v11.4a4.4 4.4 0 1 1-4.4-4.4"/><path d="M15 3c.5 3.4 2.2 5 6 5.3"/></svg></span>
+          <span class="label"><strong>TikTok</strong><small id="tiktok-detail">Noch nicht hinterlegt</small></span>
+          <span class="arrow" aria-hidden="true">↗</span>
+        </a>
+      </nav>
+      <p class="foot">Ein Tag. Zwei Möglichkeiten. ✦</p>
+    </section>
+  </main>
+  <script>
+    // Nur diese beiden Werte bearbeiten, danach auf GitHub committen.
+    // Beispiel: phone: "+491701234567", tiktok: "https://www.tiktok.com/@deinname"
+    const CONTACT = {
+      phone: "",
+      tiktok: ""
+    };
+    function activate(id, detailId, href, description){
+      const link=document.getElementById(id);
+      link.href=href;
+      link.classList.remove("disabled");
+      link.removeAttribute("aria-disabled");
+      link.removeAttribute("tabindex");
+      document.getElementById(detailId).textContent=description;
+    }
+    const phone=(CONTACT.phone||"").trim();
+    const normalizedPhone=phone.replace(/[^\d+]/g,"");
+    if (/^\+?\d{4,15}$/.test(normalizedPhone)) {
+      activate("phone-link","phone-detail","tel:"+normalizedPhone,"Nummer anrufen");
+    }
+    const input=(CONTACT.tiktok||"").trim();
+    let profile="";
+    if (/^@?[A-Za-z0-9_.]{2,24}$/.test(input)) {
+      profile="https://www.tiktok.com/@"+input.replace(/^@/,"");
+    } else {
+      try{
+        const url=new URL(input);
+        if(url.protocol==="https:" && (url.hostname==="tiktok.com" || url.hostname==="www.tiktok.com")) profile=url.href;
+      }catch(e){}
+    }
+    if(profile) {
+      activate("tiktok-link","tiktok-detail",profile,"TikTok-Profil öffnen");
+      document.getElementById("tiktok-link").rel="noopener noreferrer";
+    }
+  </script>
+</body>
+</html>
