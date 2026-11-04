@@ -1,6 +1,6 @@
 # SLQI
 
-Statische, deutschsprachige Clan-Website. HTML und CSS funktionieren ohne Build-Schritt, Paketmanager oder Datenbank.
+Statische, deutschsprachige Clan-Website. HTML, CSS und JavaScript funktionieren ohne Build-Schritt, Paketmanager oder Datenbank.
 
 ## Entwicklung
 
@@ -11,15 +11,23 @@ cd /workspace/Sliqadius
 python3 -m http.server 8001 --bind 127.0.0.1
 ```
 
-Die Seite benötigt keine Zugangsdaten. Inhalte und Gestaltung stehen in `index.html` und `styles.css`. Den eigenen Discord-Link erst ergänzen, wenn die richtige Einladungsadresse vorliegt.
+Die Seite benötigt keine Zugangsdaten. Inhalte und Gestaltung stehen in `index.html`, `styles.css` und `app.js`. Den eigenen Discord-Link erst ergänzen, wenn die richtige Einladungsadresse vorliegt.
 
 ## Hosting
 
-Die Dateien können von einem statischen Webserver ausgeliefert werden. Die bestehende Domain-Zuordnung in `CNAME` wurde beibehalten. Die Einrichtung veröffentlicht die Website nicht automatisch.
+GitHub Pages veröffentlicht den Branch `main` aus dem Repository-Stamm unter `https://sliqado.org/`. Nach einem Push den Lauf „pages build and deployment“ kontrollieren. Die Domain-Zuordnung steht in `CNAME`; `.nojekyll` ermöglicht die direkte Auslieferung der statischen Dateien. Das Veröffentlichen einer Cloud-Umgebung ist ein separater Vorgang und aktualisiert die öffentliche Website nicht.
 
-## Alte Links
+## Hauptadresse und alte Links
 
-Der frühere Pfad `/server/` leitet auf die Clan-Startseite weiter. Der Parameter `?clan=slqi` umgeht dabei eine eventuell noch zwischengespeicherte alte Startseite mit Weiterleitung nach `/server/`. Die Clan-Seite ist weiterhin direkt im Stammverzeichnis verfügbar.
+Die Hauptadresse ist `https://sliqado.org/`. Im Dokument ist diese Adresse als kanonische URL hinterlegt.
+
+`server/index.html` enthält dieselbe Seite wie `index.html`. `url.js` setzt bei alten `/server`-Aufrufen die sichtbare Adresse ohne erneuten Seitenaufruf auf `/`. Dadurch können auch Browser mit einer alten Startseite, die noch nach `/server/` weiterleitet, die Clan-Seite laden. Der alte Parameter `clan` wird ebenfalls aus der Adresse entfernt.
+
+Nach Änderungen an `index.html` die kompatible Kopie aktualisieren:
+
+```bash
+cp index.html server/index.html
+```
 
 ## Vorheriger Projektstand
 
