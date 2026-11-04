@@ -17,6 +17,10 @@ Die Seite benötigt keine Zugangsdaten. Inhalte und Gestaltung stehen in `index.
 
 Die Dateien können von einem statischen Webserver ausgeliefert werden. Die bestehende Domain-Zuordnung in `CNAME` wurde beibehalten. Die Einrichtung veröffentlicht die Website nicht automatisch.
 
+## Alte Links
+
+Der frühere Pfad `/server/` leitet auf die Clan-Startseite weiter. Der Parameter `?clan=slqi` umgeht dabei eine eventuell noch zwischengespeicherte alte Startseite mit Weiterleitung nach `/server/`. Die Clan-Seite ist weiterhin direkt im Stammverzeichnis verfügbar.
+
 ## Vorheriger Projektstand
 
 Die früheren Anwendungen wurden auf Wunsch durch die Clan-Seite ersetzt. Vollständige Sicherungen der ursprünglichen Checkouts einschließlich Git-Metadaten liegen in dieser Cloud-Umgebung unter `/workspace/.onboarding/archives/`. Sie gehören nicht zur ausgelieferten Website.
